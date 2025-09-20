@@ -23,22 +23,25 @@
   <video id="cameraVideo" autoplay playsinline muted></video>
 
   <a-scene embedded renderer="alpha: true; antialias: true" vr-mode-ui="enabled: false">
-    <!-- Camera più alta e inclinata verso il basso -->
-    <a-camera id="camera" position="0 3 3" rotation="0 0 0" look-controls="enabled: false">
+    <!-- Camera più alta e leggermente inclinata -->
+    <a-camera id="camera"
+              position="0 3 3"
+              rotation="0 0 0"
+              look-controls="enabled: false">
     </a-camera>
 
     <!-- Container per i modelli -->
     <a-entity id="modelsContainer"></a-entity>
   </a-scene>
 
-  <!-- Script principale posizionato alla fine del body -->
+  <!-- Script principale -->
   <script src="js/main.js"></script>
 
   <script>
     // Forza VR su GitHub Pages
     document.querySelector('a-scene').addEventListener('loaded', () => {
       const scene = document.querySelector('a-scene');
-      if (scene.enterVR) scene.enterVR();
+      if(scene.enterVR) scene.enterVR();
     });
   </script>
 </body>
