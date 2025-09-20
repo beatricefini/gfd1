@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
   startText.setAttribute('align','center');
   startText.setAttribute('color','#FFFFFF');
   startText.setAttribute('position',{x:0, y:1.8, z:-1});
-  startText.setAttribute('scale',{x:5,y:5,z:5});
+  startText.setAttribute('scale',{x:4,y:4,z:4});
   startText.setAttribute('width','2');
   startText.setAttribute('font','mozillavr');
   container.appendChild(startText);
