@@ -19,6 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let frameEntities = [];
   let sequenceStep = 0;
 
+  // Salvo posizioni e scale originali da Blender
+  const originalTransforms = {};
+
   // --- Pop-up iniziale ---
   marker.addEventListener("targetFound", () => {
     if (started) return;
@@ -80,14 +83,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const piece = document.createElement("a-entity");
     piece.setAttribute("gltf-model", models[currentIndex]);
-    piece.setAttribute("scale", "1 1 1");
-    piece.setAttribute("position", "0 0 0");
+
+    // posizioni e scale da Blender
+    piece.addEventListener("model-loaded", () => {
+      const pos = piece.getAttribute("position");
+      const scale = piece.getAttribute("scale");
+      originalTransforms[currentIndex] = { position: { ...pos }, scale: { ...scale } };
+    });
 
     piece.setAttribute("animation__pop", {
       property: "scale",
       from: "0 0 0",
       to: "1 1 1",
-      dur: 400,
+      dur: 500,
       easing: "easeOutElastic"
     });
 
@@ -98,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(showAllModelsSequentially, 700);
   }
 
-  // --- Pulizia testi ---
   function clearOldTexts() {
     const oldTexts = introContainer.querySelectorAll("a-text");
     oldTexts.forEach((t) => {
@@ -106,47 +113,42 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Reset con animazione ---
-  function resetAllModels(activeIndices = []) {
-    // Nascondi temporaneamente i pezzi non attivi
+  function resetAllModels(callback) {
     frameEntities.forEach((ent, i) => {
-      if (!activeIndices.includes(i)) {
-        ent.setAttribute("visible", "false");
-      }
-    });
+      const orig = originalTransforms[i];
+      if (!orig) return;
 
-    // Anima ritorno dei pezzi zoommati
-    activeIndices.forEach((i) => {
-      const ent = frameEntities[i];
-
-      ent.setAttribute("animation__backpos", {
+      // animazione ritorno
+      ent.setAttribute("animation__pos", {
         property: "position",
-        to: "0 0 0",
+        to: `${orig.position.x} ${orig.position.y} ${orig.position.z}`,
+        dur: 800,
+        easing: "easeInOutQuad"
+      });
+      ent.setAttribute("animation__scale", {
+        property: "scale",
+        to: `${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`,
         dur: 800,
         easing: "easeInOutQuad"
       });
 
-      ent.setAttribute("animation__backscale", {
-        property: "scale",
-        to: "1 1 1",
-        dur: 800,
-        easing: "easeInOutQuad"
-      });
+      ent.setAttribute("visible", "true");
     });
 
-    // Dopo animazione → ripristina tutto
+    camera.setAttribute("animation__cam", {
+      property: "position",
+      to: "0 0 0",
+      dur: 800,
+      easing: "easeInOutQuad"
+    });
+
+    // dopo animazione ricompaiono tutti
     setTimeout(() => {
-      frameEntities.forEach((ent) => {
-        ent.setAttribute("visible", "true");
-        ent.setAttribute("position", "0 0 0");
-        ent.setAttribute("scale", "1 1 1");
-      });
-
-      camera.setAttribute("position", "0 0 0");
-
+      frameEntities.forEach(ent => ent.setAttribute("visible", "true"));
       const tapText = document.getElementById("tapText");
       if (tapText) tapText.setAttribute("visible", "true");
-    }, 850);
+      if (callback) callback();
+    }, 900);
   }
 
   // --- Gestione sequenze ---
@@ -156,16 +158,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     clearOldTexts();
 
+    // 1ª SEQUENZA: piece1 + piece2
     if (sequenceStep === 0) {
-      // Zoom su piece1 e piece2
       frameEntities.forEach((ent, i) => { if (i > 1) ent.setAttribute("visible", "false"); });
 
-      frameEntities[0].setAttribute("position", { x: -0.35, y: 0, z: 0.1 });
-      frameEntities[1].setAttribute("position", { x: 0.05, y: 0.12, z: 0.4 });
-      frameEntities[0].setAttribute("scale", "1.2 1.2 1.2");
-      frameEntities[1].setAttribute("scale", "2.1 2.1 2.1");
+      frameEntities[0].setAttribute("animation__pos", {
+        property: "position",
+        to: "-0.35 0 0.1",
+        dur: 800, easing: "easeInOutQuad"
+      });
+      frameEntities[1].setAttribute("animation__pos", {
+        property: "position",
+        to: "0.05 0.12 0.4",
+        dur: 800, easing: "easeInOutQuad"
+      });
 
-      camera.setAttribute("position", { x: 0, y: 0, z: 0.5 });
+      frameEntities[0].setAttribute("animation__scale", {
+        property: "scale",
+        to: "1.2 1.2 1.2",
+        dur: 800, easing: "easeInOutQuad"
+      });
+      frameEntities[1].setAttribute("animation__scale", {
+        property: "scale",
+        to: "2.1 2.1 2.1",
+        dur: 800, easing: "easeInOutQuad"
+      });
+
+      camera.setAttribute("animation__cam", {
+        property: "position",
+        to: "0 0 0.5",
+        dur: 800, easing: "easeInOutQuad"
+      });
 
       const infoText = document.createElement("a-text");
       infoText.setAttribute("value", "Queste due cornici rappresentano le principali della tua collezione");
@@ -187,23 +210,30 @@ document.addEventListener("DOMContentLoaded", () => {
       infoText.setAttribute("scale", "0.2 0.2 0.2");
       infoText.setAttribute("wrap-count", "30");
       introContainer.appendChild(infoText);
-
       sequenceStep = 2;
 
     } else if (sequenceStep === 2) {
-      resetAllModels([0, 1]);
-      sequenceStep = 3;
+      resetAllModels(() => { sequenceStep = 3; });
 
+    // 2ª SEQUENZA: piece3 + piece4 + piece5
     } else if (sequenceStep === 3) {
-      // Zoom su piece3,4,5
       frameEntities.forEach((ent, i) => { if (i < 2 || i > 4) ent.setAttribute("visible", "false"); });
 
-      frameEntities[2].setAttribute("position", { x: -0.05, y: 0.2, z: 0.35 });
-      frameEntities[3].setAttribute("position", { x: 0.05, y: 0.45, z: 0.35 });
-      frameEntities[4].setAttribute("position", { x: 0.15, y: 0.3, z: 0.35 });
-      [2,3,4].forEach(i => frameEntities[i].setAttribute("scale", "1.2 1.2 1.2"));
+      frameEntities[2].setAttribute("animation__pos", { property: "position", to: "-0.05 0.2 0.35", dur: 800, easing: "easeInOutQuad" });
+      frameEntities[3].setAttribute("animation__pos", { property: "position", to: "0.05 0.45 0.35", dur: 800, easing: "easeInOutQuad" });
+      frameEntities[4].setAttribute("animation__pos", { property: "position", to: "0.15 0.3 0.35", dur: 800, easing: "easeInOutQuad" });
 
-      camera.setAttribute("position", { x: 0, y: 0, z: 0.6 });
+      [2,3,4].forEach(i => frameEntities[i].setAttribute("animation__scale", {
+        property: "scale",
+        to: "1.2 1.2 1.2",
+        dur: 800, easing: "easeInOutQuad"
+      }));
+
+      camera.setAttribute("animation__cam", {
+        property: "position",
+        to: "0 0 0.6",
+        dur: 800, easing: "easeInOutQuad"
+      });
 
       const infoText = document.createElement("a-text");
       infoText.setAttribute("value", "Ecco tre opere complementari");
@@ -225,7 +255,6 @@ document.addEventListener("DOMContentLoaded", () => {
       infoText.setAttribute("scale", "0.2 0.2 0.2");
       infoText.setAttribute("wrap-count", "30");
       introContainer.appendChild(infoText);
-
       sequenceStep = 5;
 
     } else if (sequenceStep === 5) {
@@ -237,21 +266,31 @@ document.addEventListener("DOMContentLoaded", () => {
       infoText.setAttribute("scale", "0.2 0.2 0.2");
       infoText.setAttribute("wrap-count", "30");
       introContainer.appendChild(infoText);
-
       sequenceStep = 6;
 
     } else if (sequenceStep === 6) {
-      resetAllModels([2, 3, 4]);
-      sequenceStep = 7;
+      resetAllModels(() => { sequenceStep = 7; });
 
+    // 3ª SEQUENZA: piece6
     } else if (sequenceStep === 7) {
-      // Zoom su piece6
       frameEntities.forEach((ent, i) => { if (i !== 5) ent.setAttribute("visible", "false"); });
 
-      frameEntities[5].setAttribute("position", { x: 0.3, y: -0.15, z: 0.35 });
-      frameEntities[5].setAttribute("scale", "1.7 1.7 1.7");
+      frameEntities[5].setAttribute("animation__pos", {
+        property: "position",
+        to: "0.3 -0.15 0.35",
+        dur: 800, easing: "easeInOutQuad"
+      });
+      frameEntities[5].setAttribute("animation__scale", {
+        property: "scale",
+        to: "1.7 1.7 1.7",
+        dur: 800, easing: "easeInOutQuad"
+      });
 
-      camera.setAttribute("position", { x: 0, y: 0, z: 0.6 });
+      camera.setAttribute("animation__cam", {
+        property: "position",
+        to: "0 0 0.6",
+        dur: 800, easing: "easeInOutQuad"
+      });
 
       const infoText = document.createElement("a-text");
       infoText.setAttribute("value", "Infine, quest'ultima cornice");
@@ -265,9 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 8;
 
     } else if (sequenceStep === 8) {
-      resetAllModels([5]);
-      sequenceStep = 9;
+      resetAllModels(() => { sequenceStep = 9; });
     }
   }
 });
-
