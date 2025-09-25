@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const marker = document.getElementById("marker");
   const introContainer = document.getElementById("introTexts");
   const modelsContainer = document.getElementById("modelsContainer");
+  const camera = document.querySelector("a-camera");
 
   const models = [
     "#piece1",
@@ -32,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     introText.setAttribute("id", "introText");
     introContainer.appendChild(introText);
 
-    // Testo "Tap to start" sotto l'intro
+    // Testo "Tap to start"
     setTimeout(() => {
       const startText = document.createElement("a-text");
       startText.setAttribute("value", "Tap to start");
@@ -43,13 +44,12 @@ document.addEventListener("DOMContentLoaded", () => {
       startText.setAttribute("wrap-count", "20");
       startText.setAttribute("id", "startText");
       introContainer.appendChild(startText);
-    }, 500); // subito dopo 0,5s
+    }, 500);
   });
 
   // Tap iniziale
   window.addEventListener("click", () => {
     if (!started) {
-      // Rimuovi testi intro
       const introText = document.getElementById("introText");
       const startText = document.getElementById("startText");
       if (introText) introText.setAttribute("visible", "false");
@@ -66,7 +66,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (currentIndex >= models.length) {
       allModelsDisplayed = true;
 
-      // Mostra "Tap the screen" sotto le cornici
       const tapText = document.createElement("a-text");
       tapText.setAttribute("value", "Tap the screen");
       tapText.setAttribute("align", "center");
@@ -115,10 +114,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const p1 = frameEntities[0];
     const p2 = frameEntities[1];
 
-    // Sposta verso la camera (Z positiva)
+    // Sposta i modelli verso la camera e leggermente più grandi
     p1.setAttribute("animation__zoom", {
       property: "position",
-      to: { x: -0.08, y: -0.05, z: 0.2 }, // verso lo schermo
+      to: { x: -0.08, y: -0.05, z: 0.2 },
       dur: 600,
       easing: "easeOutQuad"
     });
@@ -142,6 +141,14 @@ document.addEventListener("DOMContentLoaded", () => {
       easing: "easeOutQuad"
     });
 
+    // Zoom della camera verso i modelli
+    camera.setAttribute("animation__camZoom", {
+      property: "position",
+      to: { x: 0, y: 0, z: 0.5 }, // leggero avvicinamento
+      dur: 600,
+      easing: "easeOutQuad"
+    });
+
     // Testo informativo sotto
     const infoText = document.createElement("a-text");
     infoText.setAttribute("value", "Queste due cornici rappresentano le principali della tua collezione");
@@ -153,8 +160,9 @@ document.addEventListener("DOMContentLoaded", () => {
     infoText.setAttribute("id", "infoText");
     introContainer.appendChild(infoText);
 
-    console.log("✅ Zoom su piece1 e piece2 completato");
+    console.log("✅ Zoom su piece1 e piece2 completato con camera");
   }
 });
+
 
 
