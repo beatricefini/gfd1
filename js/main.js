@@ -10,8 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "#piece3",
     "#piece4",
     "#piece5",
-    "#piece6",
-    "#piece7"
+    "#piece6"
   ];
 
   // Posizioni iniziali delle cornici (griglia)
@@ -22,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { x:  0.2, y: -0.05, z: 0 },
     { x: -0.2, y: -0.2, z: 0 },
     { x:  0.2, y: -0.2, z: 0 },
-    { x:  0,   y: -0.35, z: 0 }, // piece7 centrato in basso
+   
   ];
 
   let started = false;
