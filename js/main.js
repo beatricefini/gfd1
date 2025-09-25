@@ -178,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const scale = p.object3D.scale.clone();
         p.setAttribute("animation__zoom",{
           property:"position",
-          to:{x:pos.x,y:pos.y,z:pos.z+0.15},
+          to:{x:pos.x,y:pos.y,z:pos.z+0.05},
           dur:600,
           easing:"easeOutQuad"
         });
@@ -234,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const scale = p6.object3D.scale.clone();
       p6.setAttribute("animation__zoom",{
         property:"position",
-        to:{x:pos.x,y:pos.y,z:pos.z+0.15},
+        to:{x:pos.x,y:pos.y,z:pos.z+0.05},
         dur:600,
         easing:"easeOutQuad"
       });
