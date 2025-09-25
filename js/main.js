@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modelsContainer.appendChild(piece);
     frameEntities.push(piece);
     currentIndex++;
-    setTimeout(showAllModelsSequentially,800);
+    setTimeout(showAllModelsSequentially,700); // comparsa più veloce
   }
 
   function clearOldTexts(){
@@ -95,27 +95,41 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function resetAllModels(){
+    frameEntities.forEach(p=>{
+      p.setAttribute("visible","true");
+      p.removeAttribute("animation__zoom");
+      p.setAttribute("animation__resetPos",{
+        property:"position",
+        to:{
+          x: p.object3D.position.x,
+          y: p.object3D.position.y,
+          z: p.object3D.position.z
+        },
+        dur:600,
+        easing:"easeOutQuad"
+      });
+      const s = p.object3D.scale.clone();
+      p.setAttribute("animation__resetScale",{
+        property:"scale",
+        to:{x:s.x,y:s.y,z:s.z},
+        dur:600,
+        easing:"easeOutQuad"
+      });
+    });
+
+    const tapText = document.getElementById("tapText");
+    if(tapText) tapText.setAttribute("visible","true");
+  }
+
   function handleSequences(){
     const tapText = document.getElementById("tapText");
     if(tapText) tapText.setAttribute("visible","false");
     clearOldTexts();
 
-    // Mostriamo sempre i modelli e facciamo "zoom" solo sulla Z relativa
-    frameEntities.forEach(ent=>{
-      ent.setAttribute("visible","true");
-      ent.removeAttribute("animation__zoom");
-    });
-
     if(sequenceStep===0){
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Focus su piece1 e piece2");
-      infoText.setAttribute("align","center");
-      infoText.setAttribute("color","#008000");
-      infoText.setAttribute("position","0 -0.4 0");
-      infoText.setAttribute("scale","0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count","30");
-      introContainer.appendChild(infoText);
-
+      // sequenza 1: piece1 e piece2
+      frameEntities.forEach((p,i)=>{p.setAttribute("visible", i<2 ? "true":"false");});
       [frameEntities[0],frameEntities[1]].forEach(p=>{
         const pos = p.object3D.position.clone();
         p.setAttribute("animation__zoom",{
@@ -125,33 +139,97 @@ document.addEventListener("DOMContentLoaded", () => {
           easing:"easeOutQuad"
         });
       });
-
+      const infoText = document.createElement("a-text");
+      infoText.setAttribute("value","Focus su piece1 e piece2");
+      infoText.setAttribute("align","center");
+      infoText.setAttribute("color","#008000");
+      infoText.setAttribute("position","0 -0.4 0");
+      infoText.setAttribute("scale","0.15 0.15 0.15");
+      infoText.setAttribute("wrap-count","30");
+      introContainer.appendChild(infoText);
       sequenceStep=1;
+
     } else if(sequenceStep===1){
       const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Secondo testo per piece1 e piece2");
+      infoText.setAttribute("value","Secondo testo su piece1 e piece2");
       infoText.setAttribute("align","center");
       infoText.setAttribute("color","#008000");
       infoText.setAttribute("position","0 -0.5 0");
       infoText.setAttribute("scale","0.15 0.15 0.15");
       infoText.setAttribute("wrap-count","30");
       introContainer.appendChild(infoText);
-
       sequenceStep=2;
+
     } else if(sequenceStep===2){
-      // ritorno tutte le cornici
-      frameEntities.forEach(p=>{
+      // ritorno a tutte le cornici
+      frameEntities.forEach(p=>p.setAttribute("visible","true"));
+      resetAllModels();
+      sequenceStep=3;
+
+    } else if(sequenceStep===3){
+      // sequenza 2: piece3,4,5
+      frameEntities.forEach((p,i)=>{p.setAttribute("visible",(i>=2&&i<=4)?"true":"false");});
+      [frameEntities[2],frameEntities[3],frameEntities[4]].forEach(p=>{
         const pos = p.object3D.position.clone();
         p.setAttribute("animation__zoom",{
           property:"position",
-          to:{x:pos.x,y:pos.y,z:pos.z},
+          to:{x:pos.x,y:pos.y,z:pos.z+0.15},
           dur:600,
           easing:"easeOutQuad"
         });
       });
-      sequenceStep=3;
+      const infoText = document.createElement("a-text");
+      infoText.setAttribute("value","Focus su piece3,4,5");
+      infoText.setAttribute("align","center");
+      infoText.setAttribute("color","#008000");
+      infoText.setAttribute("position","0 -0.4 0");
+      infoText.setAttribute("scale","0.15 0.15 0.15");
+      infoText.setAttribute("wrap-count","30");
+      introContainer.appendChild(infoText);
+      sequenceStep=4;
+
+    } else if(sequenceStep===4){
+      const infoText = document.createElement("a-text");
+      infoText.setAttribute("value","Secondo testo su piece3,4,5");
+      infoText.setAttribute("align","center");
+      infoText.setAttribute("color","#008000");
+      infoText.setAttribute("position","0 -0.5 0");
+      infoText.setAttribute("scale","0.15 0.15 0.15");
+      infoText.setAttribute("wrap-count","30");
+      introContainer.appendChild(infoText);
+      sequenceStep=5;
+
+    } else if(sequenceStep===5){
+      frameEntities.forEach(p=>p.setAttribute("visible","true"));
+      resetAllModels();
+      sequenceStep=6;
+
+    } else if(sequenceStep===6){
+      // sequenza 3: piece6
+      frameEntities.forEach((p,i)=>{p.setAttribute("visible",i===5?"true":"false");});
+      const p6 = frameEntities[5];
+      const pos = p6.object3D.position.clone();
+      p6.setAttribute("animation__zoom",{
+        property:"position",
+        to:{x:pos.x,y:pos.y,z:pos.z+0.15},
+        dur:600,
+        easing:"easeOutQuad"
+      });
+      const infoText = document.createElement("a-text");
+      infoText.setAttribute("value","Focus su piece6");
+      infoText.setAttribute("align","center");
+      infoText.setAttribute("color","#008000");
+      infoText.setAttribute("position","0 -0.4 0");
+      infoText.setAttribute("scale","0.15 0.15 0.15");
+      infoText.setAttribute("wrap-count","30");
+      introContainer.appendChild(infoText);
+      sequenceStep=7;
+
+    } else if(sequenceStep===7){
+      frameEntities.forEach(p=>p.setAttribute("visible","true"));
+      resetAllModels();
+      sequenceStep=8;
     }
-    // ... aggiungi altre sequenze simili
   }
 });
 
