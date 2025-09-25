@@ -2,7 +2,7 @@
 <html lang="it">
   <head>
     <meta charset="utf-8">
-    <title>AR Project 3 - Test Camera</title>
+    <title>AR Project 3 - Auto Camera</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- A-Frame + MindAR -->
@@ -17,27 +17,11 @@
         height: 100%;
         overflow: hidden;
       }
-      #startButton {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        padding: 1em 2em;
-        font-size: 1.2em;
-        background: #008000;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        z-index: 10;
-      }
     </style>
   </head>
   <body>
-    <button id="startButton">Avvia AR</button>
-
     <a-scene
-      mindar-image="imageTargetSrc: targets/target.mind;"
+      mindar-image="imageTargetSrc: targets/target.mind; autoStart: true;"
       color-space="sRGB"
       renderer="colorManagement: true, physicallyCorrectLights"
       vr-mode-ui="enabled: false"
@@ -50,14 +34,5 @@
         <a-box color="red" depth="0.1" height="0.5" width="0.5" position="0 0 0"></a-box>
       </a-entity>
     </a-scene>
-
-    <script>
-      document.getElementById("startButton").addEventListener("click", () => {
-        document.getElementById("startButton").style.display = "none";
-        const sceneEl = document.querySelector("a-scene");
-        sceneEl.components["mindar-image"].start();
-        console.log("✅ MindAR avviato (camera aperta)");
-      });
-    </script>
   </body>
 </html>
