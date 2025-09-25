@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const marker = document.getElementById("marker");
   const introContainer = document.getElementById("introTexts");
   const modelsContainer = document.getElementById("modelsContainer");
+  const camera = document.querySelector("a-camera");
 
   const models = [
     "#piece1",
@@ -10,6 +11,25 @@ document.addEventListener("DOMContentLoaded", () => {
     "#piece4",
     "#piece5",
     "#piece6"
+  ];
+
+  // Posizioni e scale di Blender
+  const initialPositions = [
+    { x: -0.2, y: 0.1, z: 0 },
+    { x: 0.2, y: 0.1, z: 0 },
+    { x: -0.2, y: -0.05, z: 0 },
+    { x: 0.2, y: -0.05, z: 0 },
+    { x: -0.2, y: -0.2, z: 0 },
+    { x: 0.2, y: -0.2, z: 0 },
+  ];
+
+  const initialScales = [
+    { x: 1, y: 1, z: 1 },
+    { x: 1, y: 1, z: 1 },
+    { x: 1, y: 1, z: 1 },
+    { x: 1, y: 1, z: 1 },
+    { x: 1, y: 1, z: 1 },
+    { x: 1, y: 1, z: 1 },
   ];
 
   let started = false;
@@ -60,6 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Funzione per pop-up sequenziale dei modelli
   function showAllModelsSequentially() {
     if (currentIndex >= models.length) {
       allModelsDisplayed = true;
@@ -79,18 +100,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const piece = document.createElement("a-entity");
     piece.setAttribute("gltf-model", models[currentIndex]);
-    piece.setAttribute("position", "0 0 0"); // Blender position
-    piece.setAttribute("scale", "1 1 1");     // Blender scale
+    piece.setAttribute("position", initialPositions[currentIndex]);
+    piece.setAttribute("scale", { x: 0, y: 0, z: 0 }); // parte da 0 per pop-up
 
-    piece.addEventListener("model-loaded", () => {
-      console.log(`✅ Modello caricato: ${models[currentIndex]}`);
+    piece.setAttribute("animation__pop", {
+      property: "scale",
+      to: initialScales[currentIndex],
+      dur: 400,
+      easing: "easeOutElastic"
     });
 
     modelsContainer.appendChild(piece);
     frameEntities.push(piece);
     currentIndex++;
 
-    setTimeout(showAllModelsSequentially, 800);
+    setTimeout(showAllModelsSequentially, 700); // comparsa rapida
   }
 
   function clearOldTexts() {
@@ -100,16 +124,31 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function resetAllModels() {
+    frameEntities.forEach((ent, i) => {
+      ent.setAttribute("visible", "true");
+      ent.setAttribute("position", initialPositions[i]);
+      ent.setAttribute("scale", initialScales[i]);
+    });
+    const tapText = document.getElementById("tapText");
+    if (tapText) tapText.setAttribute("visible", "true");
+  }
+
+  // Funzione gestione sequenze con zoom sulle cornici isolate
   function handleSequences() {
     const tapText = document.getElementById("tapText");
     if (tapText) tapText.setAttribute("visible", "false");
 
     clearOldTexts();
 
-    // SEQUENZA 1: piece1 e piece2
     if (sequenceStep === 0) {
+      // Zoom piece1 e piece2
       frameEntities.forEach((ent, i) => {
         ent.setAttribute("visible", i <= 1 ? "true" : "false");
+      });
+      [frameEntities[0], frameEntities[1]].forEach((p) => {
+        p.setAttribute("scale", { x: 1.2, y: 1.2, z: 1.2 });
+        p.setAttribute("position", { x: p.object3D.position.x, y: p.object3D.position.y, z: p.object3D.position.z + 0.1 });
       });
 
       const infoText = document.createElement("a-text");
@@ -118,7 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
       infoText.setAttribute("color", "#008000");
       infoText.setAttribute("position", "0 -0.4 0");
       infoText.setAttribute("scale", "0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count", "30");
       introContainer.appendChild(infoText);
 
       sequenceStep = 1;
@@ -130,23 +168,22 @@ document.addEventListener("DOMContentLoaded", () => {
       infoText.setAttribute("color", "#008000");
       infoText.setAttribute("position", "0 -0.5 0");
       infoText.setAttribute("scale", "0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count", "30");
       introContainer.appendChild(infoText);
 
       sequenceStep = 2;
 
     } else if (sequenceStep === 2) {
-      // Torna a tutte le cornici visibili
-      frameEntities.forEach((ent) => ent.setAttribute("visible", "true"));
-      const tapText = document.getElementById("tapText");
-      if (tapText) tapText.setAttribute("visible", "true");
-
+      resetAllModels();
       sequenceStep = 3;
 
-    // SEQUENZA 2: piece3,4,5
     } else if (sequenceStep === 3) {
+      // Zoom piece3,4,5
       frameEntities.forEach((ent, i) => {
         ent.setAttribute("visible", [2,3,4].includes(i) ? "true" : "false");
+      });
+      [frameEntities[2], frameEntities[3], frameEntities[4]].forEach((p) => {
+        p.setAttribute("scale", { x: 1.2, y: 1.2, z: 1.2 });
+        p.setAttribute("position", { x: p.object3D.position.x, y: p.object3D.position.y, z: p.object3D.position.z + 0.1 });
       });
 
       const infoText = document.createElement("a-text");
@@ -155,7 +192,6 @@ document.addEventListener("DOMContentLoaded", () => {
       infoText.setAttribute("color", "#008000");
       infoText.setAttribute("position", "0 -0.4 0");
       infoText.setAttribute("scale", "0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count", "30");
       introContainer.appendChild(infoText);
 
       sequenceStep = 4;
@@ -167,7 +203,6 @@ document.addEventListener("DOMContentLoaded", () => {
       infoText.setAttribute("color", "#008000");
       infoText.setAttribute("position", "0 -0.5 0");
       infoText.setAttribute("scale", "0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count", "30");
       introContainer.appendChild(infoText);
 
       sequenceStep = 5;
@@ -179,24 +214,21 @@ document.addEventListener("DOMContentLoaded", () => {
       infoText.setAttribute("color", "#008000");
       infoText.setAttribute("position", "0 -0.6 0");
       infoText.setAttribute("scale", "0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count", "30");
       introContainer.appendChild(infoText);
 
       sequenceStep = 6;
 
     } else if (sequenceStep === 6) {
-      // Torna a tutte le cornici visibili
-      frameEntities.forEach((ent) => ent.setAttribute("visible", "true"));
-      const tapText = document.getElementById("tapText");
-      if (tapText) tapText.setAttribute("visible", "true");
-
+      resetAllModels();
       sequenceStep = 7;
 
-    // SEQUENZA 3: piece6
     } else if (sequenceStep === 7) {
+      // Zoom piece6
       frameEntities.forEach((ent, i) => {
         ent.setAttribute("visible", i === 5 ? "true" : "false");
       });
+      frameEntities[5].setAttribute("scale", { x: 1.2, y: 1.2, z: 1.2 });
+      frameEntities[5].setAttribute("position", { x: frameEntities[5].object3D.position.x, y: frameEntities[5].object3D.position.y, z: frameEntities[5].object3D.position.z + 0.1 });
 
       const infoText = document.createElement("a-text");
       infoText.setAttribute("value", "Infine, questa cornice conclusiva");
@@ -204,18 +236,14 @@ document.addEventListener("DOMContentLoaded", () => {
       infoText.setAttribute("color", "#008000");
       infoText.setAttribute("position", "0 -0.4 0");
       infoText.setAttribute("scale", "0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count", "30");
       introContainer.appendChild(infoText);
 
       sequenceStep = 8;
 
     } else if (sequenceStep === 8) {
-      // Torna a tutte le cornici visibili
-      frameEntities.forEach((ent) => ent.setAttribute("visible", "true"));
-      const tapText = document.getElementById("tapText");
-      if (tapText) tapText.setAttribute("visible", "true");
-
+      resetAllModels();
       sequenceStep = 9;
     }
   }
 });
+
