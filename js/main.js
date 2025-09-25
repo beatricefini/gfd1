@@ -16,10 +16,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let started = false;
   let currentIndex = 0;
   let allModelsDisplayed = false;
-  let frameEntities = [];
+  const frameEntities = [];
   let sequenceStep = 0;
 
-  // --- Pop-up iniziale ---
+  // salvataggio delle trasformazioni originali (pos, scale) per ogni indice
+  const originalTransforms = {};
+
+  // --- Intro / target found ---
   marker.addEventListener("targetFound", () => {
     if (started) return;
 
@@ -46,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 500);
   });
 
+  // --- Global click handler ---
   window.addEventListener("click", () => {
     if (!started) {
       const introText = document.getElementById("introText");
@@ -60,11 +64,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- Pop-up sequenziale modelli ---
+  // --- Show models one by one (pop) ---
   function showAllModelsSequentially() {
     if (currentIndex >= models.length) {
       allModelsDisplayed = true;
-
       const tapText = document.createElement("a-text");
       tapText.setAttribute("value", "Tap the screen");
       tapText.setAttribute("align", "center");
@@ -74,30 +77,45 @@ document.addEventListener("DOMContentLoaded", () => {
       tapText.setAttribute("wrap-count", "20");
       tapText.setAttribute("id", "tapText");
       introContainer.appendChild(tapText);
-
       return;
     }
 
+    // catturo indice per closure (importante per model-loaded asincrono)
+    const idx = currentIndex;
     const piece = document.createElement("a-entity");
-    piece.setAttribute("gltf-model", models[currentIndex]);
-    piece.setAttribute("scale", "1 1 1"); // scala iniziale
-    piece.setAttribute("position", "0 0 0");
+    piece.setAttribute("gltf-model", models[idx]);
+    // non forziamo pos/scale qui: lasciamo ciò che viene da Blender
+    piece.setAttribute("visible", "false"); // visibile solo dopo model-loaded
 
-    piece.setAttribute("animation__pop", {
-      property: "scale",
-      from: "0 0 0",
-      to: "1 1 1",
-      dur: 400,
-      easing: "easeOutElastic"
+    // quando carica il modello salviamo transform originali e avviamo pop
+    piece.addEventListener("model-loaded", () => {
+      const pos = piece.getAttribute("position");
+      const scale = piece.getAttribute("scale");
+      // salviamo in originalTransforms usando idx catturato
+      originalTransforms[idx] = {
+        position: { x: pos.x, y: pos.y, z: pos.z },
+        scale: { x: scale.x, y: scale.y, z: scale.z }
+      };
+
+      // pop animazione verso la scala originale
+      piece.setAttribute("animation__pop", {
+        property: "scale",
+        from: "0 0 0",
+        to: `${scale.x} ${scale.y} ${scale.z}`,
+        dur: 500,
+        easing: "easeOutElastic"
+      });
+
+      piece.setAttribute("visible", "true");
     });
 
     modelsContainer.appendChild(piece);
     frameEntities.push(piece);
     currentIndex++;
-
-    setTimeout(showAllModelsSequentially, 700);
+    setTimeout(showAllModelsSequentially, 700); // sequenza rapida
   }
 
+  // rimuove i testi temporanei (tranne tapText)
   function clearOldTexts() {
     const oldTexts = introContainer.querySelectorAll("a-text");
     oldTexts.forEach((t) => {
@@ -105,79 +123,111 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function resetAllModels(callback) {
-    frameEntities.forEach((ent) => {
-      ent.setAttribute("visible", "true");
-      ent.setAttribute("animation__resetPos", {
+  /**
+   * resetAllModels(activeIndices, callback)
+   * - anima solo i pezzi in activeIndices tornando alle trasformazioni originali
+   * - quando l'animazione è finita, ripristina visibilità/transform per TUTTE le cornici
+   */
+  function resetAllModels(activeIndices = [], callback) {
+    // se originalTransforms non è ancora pronto per qualche indice, fallback ad un timeout più lungo
+    const dur = 800;
+
+    // 1) nascondo temporaneamente le entità NON attive (per effetto)
+    frameEntities.forEach((ent, i) => {
+      if (!activeIndices.includes(i)) ent.setAttribute("visible", "false");
+    });
+
+    // 2) animo il ritorno delle entità attive usando le trasformazioni salvate
+    activeIndices.forEach((i) => {
+      const ent = frameEntities[i];
+      const orig = originalTransforms[i];
+      if (!ent || !orig) return;
+
+      ent.setAttribute("animation__backpos", {
+        property: "position",
+        to: `${orig.position.x} ${orig.position.y} ${orig.position.z}`,
+        dur: dur,
+        easing: "easeInOutQuad"
+      });
+      ent.setAttribute("animation__backscale", {
+        property: "scale",
+        to: `${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`,
+        dur: dur,
+        easing: "easeInOutQuad"
+      });
+    });
+
+    // 3) dopo la durata, ripristino TUTTE le cornici con i loro valori originali e le rendo visibili
+    setTimeout(() => {
+      frameEntities.forEach((ent, i) => {
+        const orig = originalTransforms[i];
+        if (orig) {
+          ent.setAttribute("position", `${orig.position.x} ${orig.position.y} ${orig.position.z}`);
+          ent.setAttribute("scale", `${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`);
+        }
+        ent.setAttribute("visible", "true");
+      });
+
+      // camera ritorna alla posizione originale (animata)
+      camera.setAttribute("animation__camreset", {
         property: "position",
         to: "0 0 0",
-        dur: 600,
-        easing: "easeOutQuad"
+        dur: dur,
+        easing: "easeInOutQuad"
       });
-      ent.setAttribute("animation__resetScale", {
-        property: "scale",
-        to: "1 1 1",
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-    });
 
-    camera.setAttribute("animation__camReset", {
-      property: "position",
-      to: { x: 0, y: 0, z: 0 },
-      dur: 600,
-      easing: "easeOutQuad"
-    });
-
-    setTimeout(() => {
+      // ri-mostro il tapText
       const tapText = document.getElementById("tapText");
       if (tapText) tapText.setAttribute("visible", "true");
-      if (callback) callback();
-    }, 650); // aspetta fine animazioni
+
+      if (typeof callback === "function") callback();
+    }, dur + 50);
   }
 
-  // --- Gestione sequenze ---
+  // --- Gestione sequenze (con animazioni suave) ---
   function handleSequences() {
     const tapText = document.getElementById("tapText");
     if (tapText) tapText.setAttribute("visible", "false");
 
     clearOldTexts();
 
+    // SEQ 1: piece 0 & 1
     if (sequenceStep === 0) {
-      // Zoom piece1 e piece2
+      // nascondo gli altri
       frameEntities.forEach((ent, i) => { if (i > 1) ent.setAttribute("visible", "false"); });
 
-      frameEntities[0].setAttribute("animation__pos", {
+      // animazione posizione e scala verso valori di zoom (USARE le tue coordinate testate)
+      frameEntities[0].setAttribute("animation__pos_zoom", {
         property: "position",
-        to: { x: -0.35, y: 0, z: 0.1 },
-        dur: 600,
-        easing: "easeOutQuad"
+        to: "-0.35 0 0.1",
+        dur: 800,
+        easing: "easeInOutQuad"
       });
-      frameEntities[1].setAttribute("animation__pos", {
+      frameEntities[1].setAttribute("animation__pos_zoom", {
         property: "position",
-        to: { x: 0.05, y: 0.12, z: 0.4 },
-        dur: 600,
-        easing: "easeOutQuad"
+        to: "0.05 0.12 0.4",
+        dur: 800,
+        easing: "easeInOutQuad"
       });
 
-      frameEntities[0].setAttribute("animation__scale", {
+      frameEntities[0].setAttribute("animation__scale_zoom", {
         property: "scale",
         to: "1.2 1.2 1.2",
-        dur: 600,
-        easing: "easeOutQuad"
+        dur: 800,
+        easing: "easeInOutQuad"
       });
-      frameEntities[1].setAttribute("animation__scale", {
+      frameEntities[1].setAttribute("animation__scale_zoom", {
         property: "scale",
         to: "2.1 2.1 2.1",
-        dur: 600,
-        easing: "easeOutQuad"
+        dur: 800,
+        easing: "easeInOutQuad"
       });
 
-      camera.setAttribute("animation__camZoom", {
+      camera.setAttribute("animation__cam_zoom", {
         property: "position",
-        to: { x: 0, y: 0, z: 0.5 },
-        dur: 600,
-        easing: "easeOutQuad"
+        to: "0 0 0.5",
+        dur: 800,
+        easing: "easeInOutQuad"
       });
 
       const infoText = document.createElement("a-text");
@@ -204,19 +254,24 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 2;
 
     } else if (sequenceStep === 2) {
-      resetAllModels(() => { sequenceStep = 3; });
+      // prima animiamo indietro i pezzi zoommati (0 e 1), poi facciamo riapparire tutto
+      resetAllModels([0, 1], () => { sequenceStep = 3; });
 
+    // SEQ 2: piece 2,3,4
     } else if (sequenceStep === 3) {
-      // Zoom piece3,4,5
       frameEntities.forEach((ent, i) => { if (i < 2 || i > 4) ent.setAttribute("visible", "false"); });
 
-      frameEntities[2].setAttribute("animation__pos", { property: "position", to: { x: -0.05, y: 0.2, z: 0.35 }, dur: 600, easing: "easeOutQuad" });
-      frameEntities[3].setAttribute("animation__pos", { property: "position", to: { x: 0.05, y: 0.45, z: 0.35 }, dur: 600, easing: "easeOutQuad" });
-      frameEntities[4].setAttribute("animation__pos", { property: "position", to: { x: 0.15, y: 0.3, z: 0.35 }, dur: 600, easing: "easeOutQuad" });
+      frameEntities[2].setAttribute("animation__pos_zoom", { property: "position", to: "-0.05 0.2 0.35", dur: 800, easing: "easeInOutQuad" });
+      frameEntities[3].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.45 0.35", dur: 800, easing: "easeInOutQuad" });
+      frameEntities[4].setAttribute("animation__pos_zoom", { property: "position", to: "0.15 0.3 0.35", dur: 800, easing: "easeInOutQuad" });
 
-      [2,3,4].forEach(i => frameEntities[i].setAttribute("animation__scale", { property: "scale", to: "1.2 1.2 1.2", dur: 600, easing: "easeOutQuad" }));
+      [2,3,4].forEach(i => frameEntities[i].setAttribute("animation__scale_zoom", {
+        property: "scale",
+        to: "1.2 1.2 1.2",
+        dur: 800, easing: "easeInOutQuad"
+      }));
 
-      camera.setAttribute("animation__camZoom", { property: "position", to: { x: 0, y: 0, z: 0.6 }, dur: 600, easing: "easeOutQuad" });
+      camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.6", dur: 800, easing: "easeInOutQuad" });
 
       const infoText = document.createElement("a-text");
       infoText.setAttribute("value", "Ecco tre opere complementari");
@@ -238,7 +293,6 @@ document.addEventListener("DOMContentLoaded", () => {
       infoText.setAttribute("scale", "0.2 0.2 0.2");
       infoText.setAttribute("wrap-count", "30");
       introContainer.appendChild(infoText);
-
       sequenceStep = 5;
 
     } else if (sequenceStep === 5) {
@@ -250,20 +304,26 @@ document.addEventListener("DOMContentLoaded", () => {
       infoText.setAttribute("scale", "0.2 0.2 0.2");
       infoText.setAttribute("wrap-count", "30");
       introContainer.appendChild(infoText);
-
       sequenceStep = 6;
 
     } else if (sequenceStep === 6) {
-      resetAllModels(() => { sequenceStep = 7; });
+      resetAllModels([2, 3, 4], () => { sequenceStep = 7; });
 
+    // SEQ 3: piece 5
     } else if (sequenceStep === 7) {
-      // Zoom piece6
       frameEntities.forEach((ent, i) => { if (i !== 5) ent.setAttribute("visible", "false"); });
 
-      frameEntities[5].setAttribute("animation__pos", { property: "position", to: { x: 0.3, y: -0.15, z: 0.35 }, dur: 600, easing: "easeOutQuad" });
-      frameEntities[5].setAttribute("animation__scale", { property: "scale", to: "1.7 1.7 1.7", dur: 600, easing: "easeOutQuad" });
-
-      camera.setAttribute("animation__camZoom", { property: "position", to: { x: 0, y: 0, z: 0.6 }, dur: 600, easing: "easeOutQuad" });
+      frameEntities[5].setAttribute("animation__pos_zoom", {
+        property: "position",
+        to: "0.3 -0.15 0.35",
+        dur: 800, easing: "easeInOutQuad"
+      });
+      frameEntities[5].setAttribute("animation__scale_zoom", {
+        property: "scale",
+        to: "1.7 1.7 1.7",
+        dur: 800, easing: "easeInOutQuad"
+      });
+      camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.6", dur: 800, easing: "easeInOutQuad" });
 
       const infoText = document.createElement("a-text");
       infoText.setAttribute("value", "Infine, quest'ultima cornice");
@@ -277,13 +337,9 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 8;
 
     } else if (sequenceStep === 8) {
-      // Ultimo reset + rimozione tapText
-      resetAllModels(() => {
-        sequenceStep = 9;
-        const tapText = document.getElementById("tapText");
-        if (tapText) tapText.setAttribute("visible", "false");
-      });
+      resetAllModels([5], () => { sequenceStep = 9; });
     }
   }
 });
+
 
