@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const marker = document.getElementById("marker");
   const introContainer = document.getElementById("introTexts");
   const modelsContainer = document.getElementById("modelsContainer");
-  const camera = document.querySelector("a-camera");
 
   const models = [
     "#piece1",
@@ -17,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentIndex = 0;
   let allModelsDisplayed = false;
   let frameEntities = [];
-  let originalTransforms = []; // salviamo posizione e scala originali
   let sequenceStep = 0;
 
   marker.addEventListener("targetFound", () => {
@@ -34,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     introText.setAttribute("id", "introText");
     introContainer.appendChild(introText);
 
-    // Testo "Tap to start" dopo 0.5s
+    // Testo "Tap to start"
     setTimeout(() => {
       const startText = document.createElement("a-text");
       startText.setAttribute("value", "Tap to start");
@@ -50,7 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("click", () => {
     if (!started) {
-      // Spariscono testi introduttivi
       const introText = document.getElementById("introText");
       const startText = document.getElementById("startText");
       if (introText) introText.setAttribute("visible", "false");
@@ -62,15 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
       handleSequences();
     }
   });
-
-  const initialPositions = [
-    { x: -0.2, y: 0.1, z: 0 },
-    { x: 0.2, y: 0.1, z: 0 },
-    { x: -0.2, y: -0.05, z: 0 },
-    { x: 0.2, y: -0.05, z: 0 },
-    { x: -0.2, y: -0.2, z: 0 },
-    { x: 0.2, y: -0.2, z: 0 }
-  ];
 
   function showAllModelsSequentially() {
     if (currentIndex >= models.length) {
@@ -91,24 +79,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const piece = document.createElement("a-entity");
     piece.setAttribute("gltf-model", models[currentIndex]);
-    piece.setAttribute("scale", "0.18 0.18 0.18");
-    piece.setAttribute("position", initialPositions[currentIndex]);
-
-    // Animazione pop
-    piece.setAttribute("animation__pop", {
-      property: "scale",
-      from: "0 0 0",
-      to: "0.18 0.18 0.18",
-      dur: 200,
-      easing: "easeOutElastic"
-    });
+    piece.setAttribute("position", "0 0 0"); // Blender position
+    piece.setAttribute("scale", "1 1 1");     // Blender scale
 
     piece.addEventListener("model-loaded", () => {
-      // Salviamo posizione e scala originali
-      originalTransforms.push({
-        position: piece.getAttribute("position"),
-        scale: piece.getAttribute("scale")
-      });
       console.log(`✅ Modello caricato: ${models[currentIndex]}`);
     });
 
@@ -117,36 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
     currentIndex++;
 
     setTimeout(showAllModelsSequentially, 800);
-  }
-
-  function resetAllModels() {
-    frameEntities.forEach((ent, i) => {
-      ent.setAttribute("visible", "true");
-
-      ent.setAttribute("animation__resetPos", {
-        property: "position",
-        to: originalTransforms[i].position,
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-
-      ent.setAttribute("animation__resetScale", {
-        property: "scale",
-        to: originalTransforms[i].scale,
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-    });
-
-    camera.setAttribute("animation__camReset", {
-      property: "position",
-      to: { x: 0, y: 0, z: 0 },
-      dur: 600,
-      easing: "easeOutQuad"
-    });
-
-    const tapText = document.getElementById("tapText");
-    if (tapText) tapText.setAttribute("visible", "true");
   }
 
   function clearOldTexts() {
@@ -165,39 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // SEQUENZA 1: piece1 e piece2
     if (sequenceStep === 0) {
       frameEntities.forEach((ent, i) => {
-        if (i > 1) ent.setAttribute("visible", "false");
-      });
-
-      const p1 = frameEntities[0];
-      const p2 = frameEntities[1];
-
-      p1.setAttribute("animation__zoom", {
-        property: "position",
-        to: { x: -0.1, y: 0, z: 0.2 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-      p2.setAttribute("animation__zoom", {
-        property: "position",
-        to: { x: 0.1, y: 0, z: 0.2 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-
-      [p1, p2].forEach((p) =>
-        p.setAttribute("animation__scale", {
-          property: "scale",
-          to: { x: 0.22, y: 0.22, z: 0.22 },
-          dur: 600,
-          easing: "easeOutQuad"
-        })
-      );
-
-      camera.setAttribute("animation__camZoom", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0.5 },
-        dur: 600,
-        easing: "easeOutQuad"
+        ent.setAttribute("visible", i <= 1 ? "true" : "false");
       });
 
       const infoText = document.createElement("a-text");
@@ -224,39 +136,17 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 2;
 
     } else if (sequenceStep === 2) {
-      resetAllModels();
+      // Torna a tutte le cornici visibili
+      frameEntities.forEach((ent) => ent.setAttribute("visible", "true"));
+      const tapText = document.getElementById("tapText");
+      if (tapText) tapText.setAttribute("visible", "true");
+
       sequenceStep = 3;
 
     // SEQUENZA 2: piece3,4,5
     } else if (sequenceStep === 3) {
       frameEntities.forEach((ent, i) => {
-        if (![2,3,4].includes(i)) ent.setAttribute("visible", "false");
-      });
-
-      const p3 = frameEntities[2];
-      const p4 = frameEntities[3];
-      const p5 = frameEntities[4];
-
-      [p3, p4, p5].forEach((p, idx) => {
-        p.setAttribute("animation__zoom", {
-          property: "position",
-          to: { x: (idx-1)*0.2, y: 0, z: 0.25 },
-          dur: 600,
-          easing: "easeOutQuad"
-        });
-        p.setAttribute("animation__scale", {
-          property: "scale",
-          to: { x: 0.22, y: 0.22, z: 0.22 },
-          dur: 600,
-          easing: "easeOutQuad"
-        });
-      });
-
-      camera.setAttribute("animation__camZoom", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0.6 },
-        dur: 600,
-        easing: "easeOutQuad"
+        ent.setAttribute("visible", [2,3,4].includes(i) ? "true" : "false");
       });
 
       const infoText = document.createElement("a-text");
@@ -295,36 +185,17 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 6;
 
     } else if (sequenceStep === 6) {
-      resetAllModels();
+      // Torna a tutte le cornici visibili
+      frameEntities.forEach((ent) => ent.setAttribute("visible", "true"));
+      const tapText = document.getElementById("tapText");
+      if (tapText) tapText.setAttribute("visible", "true");
+
       sequenceStep = 7;
 
     // SEQUENZA 3: piece6
     } else if (sequenceStep === 7) {
       frameEntities.forEach((ent, i) => {
-        if (i !== 5) ent.setAttribute("visible", "false");
-      });
-
-      const p6 = frameEntities[5];
-
-      p6.setAttribute("animation__zoom", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0.3 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-
-      p6.setAttribute("animation__scale", {
-        property: "scale",
-        to: { x: 0.25, y: 0.25, z: 0.25 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-
-      camera.setAttribute("animation__camZoom", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0.5 },
-        dur: 600,
-        easing: "easeOutQuad"
+        ent.setAttribute("visible", i === 5 ? "true" : "false");
       });
 
       const infoText = document.createElement("a-text");
@@ -339,7 +210,11 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 8;
 
     } else if (sequenceStep === 8) {
-      resetAllModels();
+      // Torna a tutte le cornici visibili
+      frameEntities.forEach((ent) => ent.setAttribute("visible", "true"));
+      const tapText = document.getElementById("tapText");
+      if (tapText) tapText.setAttribute("visible", "true");
+
       sequenceStep = 9;
     }
   }
