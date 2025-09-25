@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     introText.setAttribute("value", "Benvenuto\nnel tuo piccolo\ncinema personale\nin realtà aumentata");
     introText.setAttribute("align", "center");
     introText.setAttribute("color", "#008000");
-    introText.setAttribute("position", "0 0.05 0"); // più in basso
+    introText.setAttribute("position", "0 0.05 0");
     introText.setAttribute("scale", "0.25 0.25 0.25");
     introText.setAttribute("wrap-count", "20");
     introText.setAttribute("id", "introText");
@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
       startText.setAttribute("value", "Tap to start");
       startText.setAttribute("align", "center");
       startText.setAttribute("color", "#FFD700");
-      startText.setAttribute("position", "0 -0.1 0"); // più in basso
+      startText.setAttribute("position", "0 -0.1 0");
       startText.setAttribute("scale", "0.2 0.2 0.2");
       startText.setAttribute("wrap-count", "20");
       startText.setAttribute("id", "startText");
@@ -63,14 +63,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const piece = document.createElement("a-entity");
     piece.setAttribute("gltf-model", models[currentIndex]);
     piece.setAttribute("scale", "0.18 0.18 0.18");
-    piece.setAttribute("position", "0 -0.05 0"); // più in basso
+    piece.setAttribute("position", "0 -0.05 0");
 
-    // Animazione pop-in più veloce
+    // Animazione pop-in veloce
     piece.setAttribute("animation__pop", {
       property: "scale",
       from: "0 0 0",
       to: "0.18 0.18 0.18",
-      dur: 250, // 🔽 molto più veloce
+      dur: 250,
       easing: "easeOutElastic"
     });
 
@@ -81,9 +81,9 @@ document.addEventListener("DOMContentLoaded", () => {
     modelsContainer.appendChild(piece);
     currentIndex++;
 
-    // Modello successivo dopo 1.5 secondi
+    // Modello successivo dopo 900 ms
     if (currentIndex < models.length) {
-      setTimeout(showAllModelsSequentially, 1500);
+      setTimeout(showAllModelsSequentially, 900);
     }
   }
 });
