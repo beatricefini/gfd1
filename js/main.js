@@ -13,17 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
     "#piece6"
   ];
 
-  // Posizioni iniziali delle cornici (griglia)
-  const initialPositions = [
-    { x: -0.2, y: 0.1, z: 0 },
-    { x:  0.2, y: 0.1, z: 0 },
-    { x: -0.2, y: -0.05, z: 0 },
-    { x:  0.2, y: -0.05, z: 0 },
-    { x: -0.2, y: -0.2, z: 0 },
-    { x:  0.2, y: -0.2, z: 0 },
-   
-  ];
-
   let started = false;
   let currentIndex = 0;
   let allModelsDisplayed = false;
@@ -33,12 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
   marker.addEventListener("targetFound", () => {
     if (started) return;
 
-    // Testo introduttivo
     const introText = document.createElement("a-text");
-    introText.setAttribute(
-      "value",
-      "Benvenuto\nnel tuo piccolo\ncinema personale\nin realtà aumentata"
-    );
+    introText.setAttribute("value", "Benvenuto\nnel tuo piccolo\ncinema personale\nin realtà aumentata");
     introText.setAttribute("align", "center");
     introText.setAttribute("color", "#008000");
     introText.setAttribute("position", "0 0.2 0");
@@ -47,7 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
     introText.setAttribute("id", "introText");
     introContainer.appendChild(introText);
 
-    // Testo "Tap to start"
     setTimeout(() => {
       const startText = document.createElement("a-text");
       startText.setAttribute("value", "Tap to start");
@@ -63,7 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("click", () => {
     if (!started) {
-      // Sparisci testi introduttivi
       const introText = document.getElementById("introText");
       const startText = document.getElementById("startText");
       if (introText) introText.setAttribute("visible", "false");
@@ -79,8 +62,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function showAllModelsSequentially() {
     if (currentIndex >= models.length) {
       allModelsDisplayed = true;
-
-      // Mostra "Tap the screen"
       const tapText = document.createElement("a-text");
       tapText.setAttribute("value", "Tap the screen");
       tapText.setAttribute("align", "center");
@@ -90,15 +71,13 @@ document.addEventListener("DOMContentLoaded", () => {
       tapText.setAttribute("wrap-count", "20");
       tapText.setAttribute("id", "tapText");
       introContainer.appendChild(tapText);
-
       return;
     }
 
     const piece = document.createElement("a-entity");
     piece.setAttribute("gltf-model", models[currentIndex]);
     piece.setAttribute("scale", "0.18 0.18 0.18");
-    piece.setAttribute("position", initialPositions[currentIndex]);
-
+    piece.setAttribute("position", "0 0 0"); // posizione locale, lascia Blender gestire
     piece.setAttribute("animation__pop", {
       property: "scale",
       from: "0 0 0",
@@ -115,28 +94,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function resetAllModels() {
-    frameEntities.forEach((ent, i) => {
+    frameEntities.forEach((ent) => {
       ent.setAttribute("visible", "true");
-      ent.setAttribute("animation__resetPos", {
-        property: "position",
-        to: initialPositions[i],
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-      ent.setAttribute("animation__resetScale", {
-        property: "scale",
-        to: { x: 0.18, y: 0.18, z: 0.18 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
+      ent.setAttribute("scale", "0.18 0.18 0.18"); // solo reset scala
     });
 
-    camera.setAttribute("animation__camReset", {
-      property: "position",
-      to: { x: 0, y: 0, z: 0 },
-      dur: 600,
-      easing: "easeOutQuad"
-    });
+    camera.setAttribute("position", "0 0 0");
 
     const tapText = document.getElementById("tapText");
     if (tapText) tapText.setAttribute("visible", "true");
@@ -156,46 +119,18 @@ document.addEventListener("DOMContentLoaded", () => {
     clearOldTexts();
 
     if (sequenceStep === 0) {
-      // Zoom su piece1 e piece2
       frameEntities.forEach((ent, i) => {
         if (i > 1) ent.setAttribute("visible", "false");
       });
-
       const p1 = frameEntities[0];
       const p2 = frameEntities[1];
 
-      p1.setAttribute("animation__zoom", {
-        property: "position",
-        to: { x: -0.1, y: 0, z: 0.2 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-      p2.setAttribute("animation__zoom", {
-        property: "position",
-        to: { x: 0.1, y: 0, z: 0.2 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
+      p1.setAttribute("position", "-0.1 0 0.2");
+      p2.setAttribute("position", "0.1 0 0.2");
+      p1.setAttribute("scale", "0.22 0.22 0.22");
+      p2.setAttribute("scale", "0.22 0.22 0.22");
 
-      p1.setAttribute("animation__scale", {
-        property: "scale",
-        to: { x: 0.22, y: 0.22, z: 0.22 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-      p2.setAttribute("animation__scale", {
-        property: "scale",
-        to: { x: 0.22, y: 0.22, z: 0.22 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-
-      camera.setAttribute("animation__camZoom", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0.5 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
+      camera.setAttribute("position", "0 0 0.5");
 
       const infoText = document.createElement("a-text");
       infoText.setAttribute("value", "Queste due cornici rappresentano le principali della tua collezione");
@@ -222,49 +157,21 @@ document.addEventListener("DOMContentLoaded", () => {
       resetAllModels();
       sequenceStep = 3;
     } else if (sequenceStep === 3) {
-      // Zoom su piece3,4,5
       frameEntities.forEach((ent, i) => {
-        if (i !== 2 && i !== 3 && i !== 4) ent.setAttribute("visible", "false");
+        if (![2, 3, 4].includes(i)) ent.setAttribute("visible", "false");
       });
 
       const p3 = frameEntities[2];
       const p4 = frameEntities[3];
       const p5 = frameEntities[4];
 
-      p3.setAttribute("animation__zoom", {
-        property: "position",
-        to: { x: -0.2, y: 0, z: 0.25 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-      p4.setAttribute("animation__zoom", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0.25 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-      p5.setAttribute("animation__zoom", {
-        property: "position",
-        to: { x: 0.2, y: 0, z: 0.25 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
+      p3.setAttribute("position", "-0.2 0 0.25");
+      p4.setAttribute("position", "0 0 0.25");
+      p5.setAttribute("position", "0.2 0 0.25");
 
-      [p3, p4, p5].forEach((p) =>
-        p.setAttribute("animation__scale", {
-          property: "scale",
-          to: { x: 0.22, y: 0.22, z: 0.22 },
-          dur: 600,
-          easing: "easeOutQuad"
-        })
-      );
+      [p3, p4, p5].forEach((p) => p.setAttribute("scale", "0.22 0.22 0.22"));
 
-      camera.setAttribute("animation__camZoom", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0.6 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
+      camera.setAttribute("position", "0 0 0.6");
 
       const infoText = document.createElement("a-text");
       infoText.setAttribute("value", "Ecco tre opere complementari");
@@ -302,33 +209,16 @@ document.addEventListener("DOMContentLoaded", () => {
       resetAllModels();
       sequenceStep = 7;
     } else if (sequenceStep === 7) {
-      // Zoom su piece7
+      // Solo piece6
       frameEntities.forEach((ent, i) => {
-        if (i !== 6) ent.setAttribute("visible", "false");
+        if (i !== 5) ent.setAttribute("visible", "false");
       });
 
-      const p7 = frameEntities[6];
+      const p6 = frameEntities[5];
+      p6.setAttribute("position", "0 0 0.3");
+      p6.setAttribute("scale", "0.25 0.25 0.25");
 
-      p7.setAttribute("animation__zoom", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0.3 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-
-      p7.setAttribute("animation__scale", {
-        property: "scale",
-        to: { x: 0.25, y: 0.25, z: 0.25 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-
-      camera.setAttribute("animation__camZoom", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0.5 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
+      camera.setAttribute("position", "0 0 0.5");
 
       const infoText = document.createElement("a-text");
       infoText.setAttribute("value", "Infine, questa cornice conclusiva");
