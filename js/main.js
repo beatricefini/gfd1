@@ -17,7 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentIndex = 0;
   let allModelsDisplayed = false;
   let frameEntities = [];
-  let step = 0; // per gestire sequenza tap dopo zoom
+  let step = 0;        // gestisce i tap dentro una sequenza
+  let sequence = 0;    // 0 = prima sequenza (p1+p2), 1 = seconda sequenza (p3+p4+p5)
 
   marker.addEventListener("targetFound", () => {
     if (started) return;
@@ -104,127 +105,148 @@ document.addEventListener("DOMContentLoaded", () => {
     const tapText = document.getElementById("tapText");
     if (tapText) tapText.setAttribute("visible", "false");
 
+    if (sequence === 0) {
+      zoomSequence12();
+    } else if (sequence === 1) {
+      zoomSequence345();
+    }
+  }
+
+  // === SEQUENZA 1: piece1 + piece2 ===
+  function zoomSequence12() {
     const p1 = frameEntities[0];
     const p2 = frameEntities[1];
 
     if (step === 0) {
-      // Nascondi le altre cornici
-      for (let i = 2; i < frameEntities.length; i++) {
-        frameEntities[i].setAttribute("visible", "false");
-      }
+      hideOthers([0, 1]);
 
-      // Zoom su piece1 e piece2
-      p1.setAttribute("animation__zoom", {
-        property: "position",
-        to: { x: -0.08, y: -0.05, z: 0.2 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-      p2.setAttribute("animation__zoom", {
-        property: "position",
-        to: { x: 0.08, y: -0.05, z: 0.2 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
+      animateZoom([p1, p2], [
+        { x: -0.1, y: -0.05, z: 0.2 },
+        { x: 0.1, y: -0.05, z: 0.2 }
+      ]);
 
-      p1.setAttribute("animation__scale", {
-        property: "scale",
-        to: { x: 0.22, y: 0.22, z: 0.22 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-      p2.setAttribute("animation__scale", {
-        property: "scale",
-        to: { x: 0.22, y: 0.22, z: 0.22 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-
-      camera.setAttribute("animation__camZoom", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0.5 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-
-      // Primo testo
-      const infoText1 = document.createElement("a-text");
-      infoText1.setAttribute("value", "Queste due cornici rappresentano le principali della tua collezione");
-      infoText1.setAttribute("align", "center");
-      infoText1.setAttribute("color", "#008000");
-      infoText1.setAttribute("position", "0 -0.2 0");
-      infoText1.setAttribute("scale", "0.15 0.15 0.15");
-      infoText1.setAttribute("wrap-count", "30");
-      infoText1.setAttribute("id", "infoText1");
-      introContainer.appendChild(infoText1);
-
+      showText("infoText1", "Queste due cornici rappresentano le principali della tua collezione");
       step = 1;
     } else if (step === 1) {
-      // Nascondi testo1, mostra testo2
-      const infoText1 = document.getElementById("infoText1");
-      if (infoText1) infoText1.setAttribute("visible", "false");
-
-      const infoText2 = document.createElement("a-text");
-      infoText2.setAttribute("value", "Ognuna di esse racconta una storia unica...");
-      infoText2.setAttribute("align", "center");
-      infoText2.setAttribute("color", "#008000");
-      infoText2.setAttribute("position", "0 -0.2 0");
-      infoText2.setAttribute("scale", "0.15 0.15 0.15");
-      infoText2.setAttribute("wrap-count", "30");
-      infoText2.setAttribute("id", "infoText2");
-      introContainer.appendChild(infoText2);
-
+      hideText("infoText1");
+      showText("infoText2", "Ognuna di esse racconta una storia unica...");
       step = 2;
     } else if (step === 2) {
-      // Nascondi testo2
-      const infoText2 = document.getElementById("infoText2");
-      if (infoText2) infoText2.setAttribute("visible", "false");
-
-      // Riporta camera e cornici alla posizione originale
-      p1.setAttribute("animation__resetPos", {
-        property: "position",
-        to: { x: 0, y: -0.05, z: 0 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-      p2.setAttribute("animation__resetPos", {
-        property: "position",
-        to: { x: 0, y: -0.05, z: 0 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-
-      p1.setAttribute("animation__resetScale", {
-        property: "scale",
-        to: { x: 0.18, y: 0.18, z: 0.18 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-      p2.setAttribute("animation__resetScale", {
-        property: "scale",
-        to: { x: 0.18, y: 0.18, z: 0.18 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-
-      camera.setAttribute("animation__camReset", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0 },
-        dur: 600,
-        easing: "easeOutQuad"
-      });
-
-      // Rendi di nuovo visibili le altre cornici
-      for (let i = 2; i < frameEntities.length; i++) {
-        frameEntities[i].setAttribute("visible", "true");
-      }
-
-      // Ripristina messaggio "Tap the screen"
-      const tapText = document.getElementById("tapText");
-      if (tapText) tapText.setAttribute("visible", "true");
-
-      step = 0; // reset ciclo
+      hideText("infoText2");
+      resetAllModels();
+      sequence = 1; // passa alla sequenza successiva
+      step = 0;
     }
   }
-});
 
+  // === SEQUENZA 2: piece3 + piece4 + piece5 ===
+  function zoomSequence345() {
+    const p3 = frameEntities[2];
+    const p4 = frameEntities[3];
+    const p5 = frameEntities[4];
+
+    if (step === 0) {
+      hideOthers([2, 3, 4]);
+
+      animateZoom([p3, p4, p5], [
+        { x: -0.15, y: -0.05, z: 0.25 },
+        { x: 0,     y: -0.05, z: 0.25 },
+        { x: 0.15,  y: -0.05, z: 0.25 }
+      ]);
+
+      showText("infoText3", "Queste tre cornici formano un trittico speciale.");
+      step = 1;
+    } else if (step === 1) {
+      hideText("infoText3");
+      showText("infoText4", "Ciascuna parte contribuisce a un racconto comune.");
+      step = 2;
+    } else if (step === 2) {
+      hideText("infoText4");
+      showText("infoText5", "Insieme danno vita a un'esperienza completa.");
+      step = 3;
+    } else if (step === 3) {
+      hideText("infoText5");
+      resetAllModels();
+      sequence = 2; // (eventuale sequenza successiva)
+      step = 0;
+    }
+  }
+
+  // === FUNZIONI UTILI ===
+  function hideOthers(keepIndexes) {
+    for (let i = 0; i < frameEntities.length; i++) {
+      if (!keepIndexes.includes(i)) {
+        frameEntities[i].setAttribute("visible", "false");
+      }
+    }
+  }
+
+  function animateZoom(entities, positions) {
+    entities.forEach((ent, i) => {
+      ent.setAttribute("animation__zoomPos", {
+        property: "position",
+        to: positions[i],
+        dur: 600,
+        easing: "easeOutQuad"
+      });
+      ent.setAttribute("animation__zoomScale", {
+        property: "scale",
+        to: { x: 0.22, y: 0.22, z: 0.22 },
+        dur: 600,
+        easing: "easeOutQuad"
+      });
+    });
+
+    camera.setAttribute("animation__camZoom", {
+      property: "position",
+      to: { x: 0, y: 0, z: 0.5 },
+      dur: 600,
+      easing: "easeOutQuad"
+    });
+  }
+
+  function resetAllModels() {
+    frameEntities.forEach(ent => {
+      ent.setAttribute("visible", "true");
+      ent.setAttribute("animation__resetPos", {
+        property: "position",
+        to: { x: 0, y: -0.05, z: 0 },
+        dur: 600,
+        easing: "easeOutQuad"
+      });
+      ent.setAttribute("animation__resetScale", {
+        property: "scale",
+        to: { x: 0.18, y: 0.18, z: 0.18 },
+        dur: 600,
+        easing: "easeOutQuad"
+      });
+    });
+
+    camera.setAttribute("animation__camReset", {
+      property: "position",
+      to: { x: 0, y: 0, z: 0 },
+      dur: 600,
+      easing: "easeOutQuad"
+    });
+
+    const tapText = document.getElementById("tapText");
+    if (tapText) tapText.setAttribute("visible", "true");
+  }
+
+  function showText(id, text) {
+    const t = document.createElement("a-text");
+    t.setAttribute("value", text);
+    t.setAttribute("align", "center");
+    t.setAttribute("color", "#008000");
+    t.setAttribute("position", "0 -0.2 0");
+    t.setAttribute("scale", "0.15 0.15 0.15");
+    t.setAttribute("wrap-count", "30");
+    t.setAttribute("id", id);
+    introContainer.appendChild(t);
+  }
+
+  function hideText(id) {
+    const t = document.getElementById(id);
+    if (t) t.setAttribute("visible", "false");
+  }
+});
