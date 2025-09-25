@@ -17,12 +17,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentIndex = 0;
   let allModelsDisplayed = false;
   let frameEntities = [];
-  let infoTextsQueue = [];
-  let showingInfoText = false;
+  let step = 0; // per gestire sequenza tap dopo zoom
 
   marker.addEventListener("targetFound", () => {
     if (started) return;
 
+    // Testo introduttivo
     const introText = document.createElement("a-text");
     introText.setAttribute("value", "Benvenuto\nnel tuo piccolo\ncinema personale\nin realtà aumentata");
     introText.setAttribute("align", "center");
@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     introText.setAttribute("id", "introText");
     introContainer.appendChild(introText);
 
+    // Testo "Tap to start"
     setTimeout(() => {
       const startText = document.createElement("a-text");
       startText.setAttribute("value", "Tap to start");
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("click", () => {
     if (!started) {
+      // Nascondi testi introduttivi
       const introText = document.getElementById("introText");
       const startText = document.getElementById("startText");
       if (introText) introText.setAttribute("visible", "false");
@@ -55,11 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       started = true;
       showAllModelsSequentially();
-    } else if (allModelsDisplayed && !showingInfoText) {
-      showingInfoText = true;
-      zoomPiece1and2();
-    } else if (showingInfoText) {
-      handleNextInfoText();
+    } else if (allModelsDisplayed) {
+      handleZoomSequence();
     }
   });
 
@@ -67,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (currentIndex >= models.length) {
       allModelsDisplayed = true;
 
+      // Mostra "Tap the screen" sotto le cornici
       const tapText = document.createElement("a-text");
       tapText.setAttribute("value", "Tap the screen");
       tapText.setAttribute("align", "center");
@@ -93,10 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
       easing: "easeOutElastic"
     });
 
-    piece.addEventListener("model-loaded", () => {
-      console.log(`✅ Modello caricato: ${models[currentIndex]}`);
-    });
-
     modelsContainer.appendChild(piece);
     frameEntities.push(piece);
     currentIndex++;
@@ -104,72 +100,131 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(showAllModelsSequentially, 900);
   }
 
-  function zoomPiece1and2() {
-    if (frameEntities.length < 2) return;
-
-    for (let i = 2; i < frameEntities.length; i++) {
-      frameEntities[i].setAttribute("visible", "false");
-    }
+  function handleZoomSequence() {
+    const tapText = document.getElementById("tapText");
+    if (tapText) tapText.setAttribute("visible", "false");
 
     const p1 = frameEntities[0];
     const p2 = frameEntities[1];
 
-    // Animazioni posizione e scala
-    p1.setAttribute("animation__zoom", { property: "position", to: { x: -0.08, y: -0.05, z: 0.2 }, dur: 600, easing: "easeOutQuad" });
-    p2.setAttribute("animation__zoom", { property: "position", to: { x: 0.08, y: -0.05, z: 0.2 }, dur: 600, easing: "easeOutQuad" });
-    p1.setAttribute("animation__scale", { property: "scale", to: { x: 0.22, y: 0.22, z: 0.22 }, dur: 600, easing: "easeOutQuad" });
-    p2.setAttribute("animation__scale", { property: "scale", to: { x: 0.22, y: 0.22, z: 0.22 }, dur: 600, easing: "easeOutQuad" });
-
-    // Camera animata
-    camera.setAttribute("animation__camZoom", { property: "position", to: { x: 0, y: 0, z: 0.5 }, dur: 600, easing: "easeOutQuad" });
-
-    // Coda dei testi
-    infoTextsQueue = [
-      "Queste due cornici rappresentano le principali della tua collezione",
-      "Ecco alcune informazioni aggiuntive sulle cornici principali"
-    ];
-
-    // Mostra primo testo
-    showNextInfoText();
-  }
-
-  function handleNextInfoText() {
-    const currentText = document.getElementById("infoText");
-    if (currentText) {
-      currentText.setAttribute("visible", "false");
-      introContainer.removeChild(currentText);
-    }
-
-    if (infoTextsQueue.length > 0) {
-      showNextInfoText();
-    } else {
-      // Tutti i testi mostrati → ritorno alla vista originale
-      for (let i = 0; i < frameEntities.length; i++) {
-        frameEntities[i].setAttribute("visible", "true");
-        frameEntities[i].setAttribute("animation__resetPos", { property: "position", to: { x: 0, y: -0.05, z: 0 }, dur: 600, easing: "easeOutQuad" });
-        frameEntities[i].setAttribute("animation__resetScale", { property: "scale", to: { x: 0.18, y: 0.18, z: 0.18 }, dur: 600, easing: "easeOutQuad" });
+    if (step === 0) {
+      // Nascondi le altre cornici
+      for (let i = 2; i < frameEntities.length; i++) {
+        frameEntities[i].setAttribute("visible", "false");
       }
 
-      // Camera ritorna alla posizione originale
-      camera.setAttribute("animation__camBack", { property: "position", to: { x: 0, y: 0, z: 0 }, dur: 600, easing: "easeOutQuad" });
+      // Zoom su piece1 e piece2
+      p1.setAttribute("animation__zoom", {
+        property: "position",
+        to: { x: -0.08, y: -0.05, z: 0.2 },
+        dur: 600,
+        easing: "easeOutQuad"
+      });
+      p2.setAttribute("animation__zoom", {
+        property: "position",
+        to: { x: 0.08, y: -0.05, z: 0.2 },
+        dur: 600,
+        easing: "easeOutQuad"
+      });
 
-      showingInfoText = false;
+      p1.setAttribute("animation__scale", {
+        property: "scale",
+        to: { x: 0.22, y: 0.22, z: 0.22 },
+        dur: 600,
+        easing: "easeOutQuad"
+      });
+      p2.setAttribute("animation__scale", {
+        property: "scale",
+        to: { x: 0.22, y: 0.22, z: 0.22 },
+        dur: 600,
+        easing: "easeOutQuad"
+      });
+
+      camera.setAttribute("animation__camZoom", {
+        property: "position",
+        to: { x: 0, y: 0, z: 0.5 },
+        dur: 600,
+        easing: "easeOutQuad"
+      });
+
+      // Primo testo
+      const infoText1 = document.createElement("a-text");
+      infoText1.setAttribute("value", "Queste due cornici rappresentano le principali della tua collezione");
+      infoText1.setAttribute("align", "center");
+      infoText1.setAttribute("color", "#008000");
+      infoText1.setAttribute("position", "0 -0.2 0");
+      infoText1.setAttribute("scale", "0.15 0.15 0.15");
+      infoText1.setAttribute("wrap-count", "30");
+      infoText1.setAttribute("id", "infoText1");
+      introContainer.appendChild(infoText1);
+
+      step = 1;
+    } else if (step === 1) {
+      // Nascondi testo1, mostra testo2
+      const infoText1 = document.getElementById("infoText1");
+      if (infoText1) infoText1.setAttribute("visible", "false");
+
+      const infoText2 = document.createElement("a-text");
+      infoText2.setAttribute("value", "Ognuna di esse racconta una storia unica...");
+      infoText2.setAttribute("align", "center");
+      infoText2.setAttribute("color", "#008000");
+      infoText2.setAttribute("position", "0 -0.2 0");
+      infoText2.setAttribute("scale", "0.15 0.15 0.15");
+      infoText2.setAttribute("wrap-count", "30");
+      infoText2.setAttribute("id", "infoText2");
+      introContainer.appendChild(infoText2);
+
+      step = 2;
+    } else if (step === 2) {
+      // Nascondi testo2
+      const infoText2 = document.getElementById("infoText2");
+      if (infoText2) infoText2.setAttribute("visible", "false");
+
+      // Riporta camera e cornici alla posizione originale
+      p1.setAttribute("animation__resetPos", {
+        property: "position",
+        to: { x: 0, y: -0.05, z: 0 },
+        dur: 600,
+        easing: "easeOutQuad"
+      });
+      p2.setAttribute("animation__resetPos", {
+        property: "position",
+        to: { x: 0, y: -0.05, z: 0 },
+        dur: 600,
+        easing: "easeOutQuad"
+      });
+
+      p1.setAttribute("animation__resetScale", {
+        property: "scale",
+        to: { x: 0.18, y: 0.18, z: 0.18 },
+        dur: 600,
+        easing: "easeOutQuad"
+      });
+      p2.setAttribute("animation__resetScale", {
+        property: "scale",
+        to: { x: 0.18, y: 0.18, z: 0.18 },
+        dur: 600,
+        easing: "easeOutQuad"
+      });
+
+      camera.setAttribute("animation__camReset", {
+        property: "position",
+        to: { x: 0, y: 0, z: 0 },
+        dur: 600,
+        easing: "easeOutQuad"
+      });
+
+      // Rendi di nuovo visibili le altre cornici
+      for (let i = 2; i < frameEntities.length; i++) {
+        frameEntities[i].setAttribute("visible", "true");
+      }
+
+      // Ripristina messaggio "Tap the screen"
+      const tapText = document.getElementById("tapText");
+      if (tapText) tapText.setAttribute("visible", "true");
+
+      step = 0; // reset ciclo
     }
-  }
-
-  function showNextInfoText() {
-    const nextTextValue = infoTextsQueue.shift();
-    if (!nextTextValue) return;
-
-    const infoText = document.createElement("a-text");
-    infoText.setAttribute("value", nextTextValue);
-    infoText.setAttribute("align", "center");
-    infoText.setAttribute("color", "#008000");
-    infoText.setAttribute("position", "0 -0.2 0");
-    infoText.setAttribute("scale", "0.15 0.15 0.15");
-    infoText.setAttribute("wrap-count", "30");
-    infoText.setAttribute("id", "infoText");
-    introContainer.appendChild(infoText);
   }
 });
 
