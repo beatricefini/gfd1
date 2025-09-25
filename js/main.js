@@ -18,13 +18,13 @@ document.addEventListener("DOMContentLoaded", () => {
   marker.addEventListener("targetFound", () => {
     if (started) return;
 
-    // Testo introduttivo più piccolo
+    // Testo introduttivo leggermente più piccolo
     const introText = document.createElement("a-text");
     introText.setAttribute("value", "Benvenuto\nnel tuo piccolo\ncinema personale\nin realtà aumentata");
     introText.setAttribute("align", "center");
     introText.setAttribute("color", "#008000");
-    introText.setAttribute("position", "0 0.2 0");
-    introText.setAttribute("scale", "0.2 0.2 0.2");
+    introText.setAttribute("position", "0 0.25 0");
+    introText.setAttribute("scale", "0.25 0.25 0.25");
     introText.setAttribute("wrap-count", "20");
     introText.setAttribute("id", "introText");
     introContainer.appendChild(introText);
@@ -36,41 +36,40 @@ document.addEventListener("DOMContentLoaded", () => {
       startText.setAttribute("align", "center");
       startText.setAttribute("color", "#FFD700");
       startText.setAttribute("position", "0 -0.05 0");
-      startText.setAttribute("scale", "0.15 0.15 0.15");
+      startText.setAttribute("scale", "0.2 0.2 0.2");
       startText.setAttribute("wrap-count", "20");
       startText.setAttribute("id", "startText");
       introContainer.appendChild(startText);
     }, 3000);
   });
 
-  // Tap per iniziare o mostrare modelli
+  // Tap per iniziare animazione modelli
   window.addEventListener("click", () => {
-    if (!started) {
-      // Rimuovi testi intro
-      const introText = document.getElementById("introText");
-      const startText = document.getElementById("startText");
-      if (introText) introText.setAttribute("visible", "false");
-      if (startText) startText.setAttribute("visible", "false");
-      started = true;
-      showNextModel();
-    } else {
-      showNextModel();
-    }
+    if (started) return;
+
+    // Rimuovi testi
+    const introText = document.getElementById("introText");
+    const startText = document.getElementById("startText");
+    if (introText) introText.setAttribute("visible", "false");
+    if (startText) startText.setAttribute("visible", "false");
+
+    started = true;
+    showAllModelsSequentially();
   });
 
-  function showNextModel() {
+  function showAllModelsSequentially() {
     if (currentIndex >= models.length) return;
 
     const piece = document.createElement("a-entity");
     piece.setAttribute("gltf-model", models[currentIndex]);
-    piece.setAttribute("scale", "0.1 0.1 0.1");   // 🔽 molto più piccolo
+    piece.setAttribute("scale", "0.18 0.18 0.18"); // leggermente più grande
     piece.setAttribute("position", "0 0 0");
 
     // Animazione pop-in
     piece.setAttribute("animation__pop", {
       property: "scale",
       from: "0 0 0",
-      to: "0.1 0.1 0.1",
+      to: "0.18 0.18 0.18",
       dur: 600,
       easing: "easeOutElastic"
     });
@@ -81,6 +80,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     modelsContainer.appendChild(piece);
     currentIndex++;
+
+    // Chiamata ricorsiva per il modello successivo dopo 2 secondi
+    if (currentIndex < models.length) {
+      setTimeout(showAllModelsSequentially, 2000);
+    }
   }
 });
 
