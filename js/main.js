@@ -17,12 +17,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentIndex = 0;
   let allModelsDisplayed = false;
   let frameEntities = [];
-  let step = 0; // Sequenza zoom
+  let infoTextsQueue = []; 
+  let showingInfoText = false;
 
   marker.addEventListener("targetFound", () => {
     if (started) return;
 
-    // Testo introduttivo
     const introText = document.createElement("a-text");
     introText.setAttribute("value", "Benvenuto\nnel tuo piccolo\ncinema personale\nin realtà aumentata");
     introText.setAttribute("align", "center");
@@ -33,7 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
     introText.setAttribute("id", "introText");
     introContainer.appendChild(introText);
 
-    // Testo "Tap to start"
     setTimeout(() => {
       const startText = document.createElement("a-text");
       startText.setAttribute("value", "Tap to start");
@@ -49,7 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("click", () => {
     if (!started) {
-      // Sparisci testi introduttivi
       const introText = document.getElementById("introText");
       const startText = document.getElementById("startText");
       if (introText) introText.setAttribute("visible", "false");
@@ -57,10 +55,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
       started = true;
       showAllModelsSequentially();
-    } else {
-      if (step === 0) zoomPiece1and2();
-      else if (step === 1) zoomPiece3to5();
-      else if (step === 2) zoomPiece6();
+    } else if (allModelsDisplayed && !showingInfoText) {
+      showingInfoText = true;
+      zoomPiece1and2();
+    } else if (showingInfoText && infoTextsQueue.length > 0) {
+      // Mostra il prossimo testo in coda
+      const currentText = document.getElementById("infoText");
+      if (currentText) currentText.setAttribute("visible", "false");
+
+      const nextTextValue = infoTextsQueue.shift();
+      if (nextTextValue) {
+        const infoText = document.createElement("a-text");
+        infoText.setAttribute("value", nextTextValue);
+        infoText.setAttribute("align", "center");
+        infoText.setAttribute("color", "#008000");
+        infoText.setAttribute("position", "0 -0.2 0");
+        infoText.setAttribute("scale", "0.15 0.15 0.15");
+        infoText.setAttribute("wrap-count", "30");
+        infoText.setAttribute("id", "infoText");
+        introContainer.appendChild(infoText);
+      } else {
+        // Tutti i testi mostrati: ritorna alla vista originale
+        frameEntities.forEach((f, i) => {
+          f.setAttribute("visible", "true");
+          f.setAttribute("position", "0 -0.05 0");
+          f.setAttribute("scale", "0.18 0.18 0.18");
+        });
+
+        camera.setAttribute("position", "0 0 0");
+        showingInfoText = false;
+      }
     }
   });
 
@@ -105,95 +129,72 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(showAllModelsSequentially, 900);
   }
 
-  // --- Funzioni zoom sequenziali ---
   function zoomPiece1and2() {
     if (frameEntities.length < 2) return;
-    step = 1; // prossima sequenza
 
-    frameEntities.slice(2).forEach(f => f.setAttribute("visible", "false"));
+    // Nascondi le altre cornici
+    for (let i = 2; i < frameEntities.length; i++) {
+      frameEntities[i].setAttribute("visible", "false");
+    }
 
     const p1 = frameEntities[0];
     const p2 = frameEntities[1];
 
-    p1.setAttribute("animation__zoom", { property: "position", to: { x: -0.08, y: -0.05, z: 0.2 }, dur: 600, easing: "easeOutQuad" });
-    p2.setAttribute("animation__zoom", { property: "position", to: { x: 0.08, y: -0.05, z: 0.2 }, dur: 600, easing: "easeOutQuad" });
+    // Sposta i modelli verso la camera
+    p1.setAttribute("animation__zoom", {
+      property: "position",
+      to: { x: -0.08, y: -0.05, z: 0.2 },
+      dur: 600,
+      easing: "easeOutQuad"
+    });
+    p2.setAttribute("animation__zoom", {
+      property: "position",
+      to: { x: 0.08, y: -0.05, z: 0.2 },
+      dur: 600,
+      easing: "easeOutQuad"
+    });
 
-    p1.setAttribute("animation__scale", { property: "scale", to: { x: 0.22, y: 0.22, z: 0.22 }, dur: 600, easing: "easeOutQuad" });
-    p2.setAttribute("animation__scale", { property: "scale", to: { x: 0.22, y: 0.22, z: 0.22 }, dur: 600, easing: "easeOutQuad" });
+    // Scala leggermente
+    p1.setAttribute("animation__scale", {
+      property: "scale",
+      to: { x: 0.22, y: 0.22, z: 0.22 },
+      dur: 600,
+      easing: "easeOutQuad"
+    });
+    p2.setAttribute("animation__scale", {
+      property: "scale",
+      to: { x: 0.22, y: 0.22, z: 0.22 },
+      dur: 600,
+      easing: "easeOutQuad"
+    });
 
-    camera.setAttribute("animation__camZoom", { property: "position", to: { x: 0, y: 0, z: 0.5 }, dur: 600, easing: "easeOutQuad" });
+    // Zoom camera verso i modelli
+    camera.setAttribute("animation__camZoom", {
+      property: "position",
+      to: { x: 0, y: 0, z: 0.5 },
+      dur: 600,
+      easing: "easeOutQuad"
+    });
 
-    const texts = [
+    // Coda dei testi da mostrare
+    infoTextsQueue = [
       "Queste due cornici rappresentano le principali della tua collezione",
       "Ecco alcune informazioni aggiuntive sulle cornici principali"
     ];
-    showTextSequence(texts);
-  }
 
-  function zoomPiece3to5() {
-    step = 2;
-
-    const pieces = frameEntities.slice(2, 5);
-    frameEntities.forEach(f => { if (!pieces.includes(f)) f.setAttribute("visible", "false"); });
-
-    pieces[0].setAttribute("position", { x: -0.1, y: -0.05, z: 0.15 });
-    pieces[1].setAttribute("position", { x: 0, y: -0.05, z: 0.15 });
-    pieces[2].setAttribute("position", { x: 0.1, y: -0.05, z: 0.15 });
-
-    pieces.forEach(p => p.setAttribute("scale", { x: 0.2, y: 0.2, z: 0.2 }));
-
-    camera.setAttribute("animation__camZoom2", { property: "position", to: { x: 0, y: 0, z: 0.6 }, dur: 600, easing: "easeOutQuad" });
-
-    const texts = [
-      "Queste tre cornici sono importanti nella tua collezione",
-      "Puoi osservarne le caratteristiche più interessanti",
-      "Ogni cornice ha una storia da raccontare"
-    ];
-    showTextSequence(texts);
-  }
-
-  function zoomPiece6() {
-    step = 3;
-    const piece = frameEntities[5];
-    frameEntities.slice(0,5).forEach(f => f.setAttribute("visible", "false"));
-
-    piece.setAttribute("position", { x: 0, y: -0.05, z: 0.15 });
-    piece.setAttribute("scale", { x: 0.22, y: 0.22, z: 0.22 });
-
-    camera.setAttribute("animation__camZoom3", { property: "position", to: { x: 0, y: 0, z: 0.65 }, dur: 600, easing: "easeOutQuad" });
-
-    const texts = [
-      "Ultima cornice da osservare",
-      "Qui sotto il testo informativo per la tua collezione"
-    ];
-    showTextSequence(texts);
-  }
-
-  // --- Funzione generica per sequenza di testi per tap ---
-  function showTextSequence(textArray) {
-    let textIndex = 0;
-    const infoText = document.createElement("a-text");
-    infoText.setAttribute("value", textArray[textIndex]);
-    infoText.setAttribute("align", "center");
-    infoText.setAttribute("color", "#008000");
-    infoText.setAttribute("position", "0 -0.2 0");
-    infoText.setAttribute("scale", "0.15 0.15 0.15");
-    infoText.setAttribute("wrap-count", "30");
-    infoText.setAttribute("id", "infoText");
-    introContainer.appendChild(infoText);
-
-    const listener = () => {
-      textIndex++;
-      if (textIndex < textArray.length) {
-        infoText.setAttribute("value", textArray[textIndex]);
-      } else {
-        window.removeEventListener("click", listener);
-        infoText.setAttribute("visible", "false");
-      }
-    };
-
-    window.addEventListener("click", listener);
+    // Mostra subito il primo testo
+    const firstText = infoTextsQueue.shift();
+    if (firstText) {
+      const infoText = document.createElement("a-text");
+      infoText.setAttribute("value", firstText);
+      infoText.setAttribute("align", "center");
+      infoText.setAttribute("color", "#008000");
+      infoText.setAttribute("position", "0 -0.2 0");
+      infoText.setAttribute("scale", "0.15 0.15 0.15");
+      infoText.setAttribute("wrap-count", "30");
+      infoText.setAttribute("id", "infoText");
+      introContainer.appendChild(infoText);
+    }
   }
 });
-
 
