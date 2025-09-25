@@ -14,6 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let started = false;
   let currentIndex = 0;
+  let allModelsDisplayed = false;
+
+  let frameEntities = []; // Per riferirci ai modelli successivamente
 
   marker.addEventListener("targetFound", () => {
     if (started) return;
@@ -28,44 +31,45 @@ document.addEventListener("DOMContentLoaded", () => {
     introText.setAttribute("wrap-count", "20");
     introText.setAttribute("id", "introText");
     introContainer.appendChild(introText);
-
-    // Testo "Tap to start" più in basso
-    setTimeout(() => {
-      const startText = document.createElement("a-text");
-      startText.setAttribute("value", "Tap to start");
-      startText.setAttribute("align", "center");
-      startText.setAttribute("color", "#FFD700");
-      startText.setAttribute("position", "0 -0.1 0");
-      startText.setAttribute("scale", "0.2 0.2 0.2");
-      startText.setAttribute("wrap-count", "20");
-      startText.setAttribute("id", "startText");
-      introContainer.appendChild(startText);
-    }, 3000);
   });
 
-  // Tap per iniziare animazione modelli
   window.addEventListener("click", () => {
-    if (started) return;
+    if (!started) {
+      // Rimuovi testi introduttivi
+      const introText = document.getElementById("introText");
+      if (introText) introText.setAttribute("visible", "false");
 
-    // Rimuovi testi
-    const introText = document.getElementById("introText");
-    const startText = document.getElementById("startText");
-    if (introText) introText.setAttribute("visible", "false");
-    if (startText) startText.setAttribute("visible", "false");
-
-    started = true;
-    showAllModelsSequentially();
+      started = true;
+      showAllModelsSequentially();
+    } else if (allModelsDisplayed) {
+      // Zoom su piece1 e piece2
+      zoomPiece1and2();
+    }
   });
 
   function showAllModelsSequentially() {
-    if (currentIndex >= models.length) return;
+    if (currentIndex >= models.length) {
+      allModelsDisplayed = true;
+
+      // Mostra "Tap the screen" sotto le cornici
+      const tapText = document.createElement("a-text");
+      tapText.setAttribute("value", "Tap the screen");
+      tapText.setAttribute("align", "center");
+      tapText.setAttribute("color", "#FFD700");
+      tapText.setAttribute("position", "0 -0.25 0");
+      tapText.setAttribute("scale", "0.2 0.2 0.2");
+      tapText.setAttribute("wrap-count", "20");
+      tapText.setAttribute("id", "tapText");
+      introContainer.appendChild(tapText);
+
+      return;
+    }
 
     const piece = document.createElement("a-entity");
     piece.setAttribute("gltf-model", models[currentIndex]);
     piece.setAttribute("scale", "0.18 0.18 0.18");
     piece.setAttribute("position", "0 -0.05 0");
 
-    // Animazione pop-in veloce
     piece.setAttribute("animation__pop", {
       property: "scale",
       from: "0 0 0",
@@ -79,12 +83,41 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     modelsContainer.appendChild(piece);
+    frameEntities.push(piece); // salviamo i riferimenti
     currentIndex++;
 
-    // Modello successivo dopo 900 ms
-    if (currentIndex < models.length) {
-      setTimeout(showAllModelsSequentially, 900);
+    setTimeout(showAllModelsSequentially, 900);
+  }
+
+  function zoomPiece1and2() {
+    if (frameEntities.length < 2) return;
+
+    // Nascondi le altre cornici
+    for (let i = 2; i < frameEntities.length; i++) {
+      frameEntities[i].setAttribute("visible", "false");
     }
+
+    const p1 = frameEntities[0];
+    const p2 = frameEntities[1];
+
+    // Posizioniamo i due pezzi affiancati e leggermente più vicini alla camera
+    p1.setAttribute("position", { x: -0.08, y: 0, z: 0.02 });
+    p2.setAttribute("position", { x: 0.08, y: 0, z: 0.02 });
+    p1.setAttribute("scale", { x: 0.2, y: 0.2, z: 0.2 });
+    p2.setAttribute("scale", { x: 0.2, y: 0.2, z: 0.2 });
+
+    // Testo informativo sotto
+    const infoText = document.createElement("a-text");
+    infoText.setAttribute("value", "Queste due cornici rappresentano le principali della tua collezione");
+    infoText.setAttribute("align", "center");
+    infoText.setAttribute("color", "#008000");
+    infoText.setAttribute("position", "0 -0.2 0");
+    infoText.setAttribute("scale", "0.15 0.15 0.15");
+    infoText.setAttribute("wrap-count", "30");
+    infoText.setAttribute("id", "infoText");
+    introContainer.appendChild(infoText);
+
+    console.log("✅ Zoom su piece1 e piece2 completato");
   }
 });
 
