@@ -16,12 +16,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentIndex = 0;
   let allModelsDisplayed = false;
 
-  let frameEntities = []; // Per riferirci ai modelli successivamente
+  let frameEntities = [];
 
   marker.addEventListener("targetFound", () => {
     if (started) return;
 
-    // Testo introduttivo più in basso
+    // Testo introduttivo
     const introText = document.createElement("a-text");
     introText.setAttribute("value", "Benvenuto\nnel tuo piccolo\ncinema personale\nin realtà aumentata");
     introText.setAttribute("align", "center");
@@ -31,18 +31,33 @@ document.addEventListener("DOMContentLoaded", () => {
     introText.setAttribute("wrap-count", "20");
     introText.setAttribute("id", "introText");
     introContainer.appendChild(introText);
+
+    // Testo "Tap to start" sotto l'intro
+    setTimeout(() => {
+      const startText = document.createElement("a-text");
+      startText.setAttribute("value", "Tap to start");
+      startText.setAttribute("align", "center");
+      startText.setAttribute("color", "#FFD700");
+      startText.setAttribute("position", "0 -0.1 0");
+      startText.setAttribute("scale", "0.2 0.2 0.2");
+      startText.setAttribute("wrap-count", "20");
+      startText.setAttribute("id", "startText");
+      introContainer.appendChild(startText);
+    }, 500); // subito dopo 0,5s
   });
 
+  // Tap iniziale
   window.addEventListener("click", () => {
     if (!started) {
-      // Rimuovi testi introduttivi
+      // Rimuovi testi intro
       const introText = document.getElementById("introText");
+      const startText = document.getElementById("startText");
       if (introText) introText.setAttribute("visible", "false");
+      if (startText) startText.setAttribute("visible", "false");
 
       started = true;
       showAllModelsSequentially();
     } else if (allModelsDisplayed) {
-      // Zoom su piece1 e piece2
       zoomPiece1and2();
     }
   });
@@ -83,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     modelsContainer.appendChild(piece);
-    frameEntities.push(piece); // salviamo i riferimenti
+    frameEntities.push(piece);
     currentIndex++;
 
     setTimeout(showAllModelsSequentially, 900);
@@ -100,11 +115,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const p1 = frameEntities[0];
     const p2 = frameEntities[1];
 
-    // Posizioniamo i due pezzi affiancati e leggermente più vicini alla camera
-    p1.setAttribute("position", { x: -0.08, y: 0, z: 0.02 });
-    p2.setAttribute("position", { x: 0.08, y: 0, z: 0.02 });
-    p1.setAttribute("scale", { x: 0.2, y: 0.2, z: 0.2 });
-    p2.setAttribute("scale", { x: 0.2, y: 0.2, z: 0.2 });
+    // Sposta verso la camera (Z positiva)
+    p1.setAttribute("animation__zoom", {
+      property: "position",
+      to: { x: -0.08, y: -0.05, z: 0.2 }, // verso lo schermo
+      dur: 600,
+      easing: "easeOutQuad"
+    });
+    p2.setAttribute("animation__zoom", {
+      property: "position",
+      to: { x: 0.08, y: -0.05, z: 0.2 },
+      dur: 600,
+      easing: "easeOutQuad"
+    });
+
+    p1.setAttribute("animation__scale", {
+      property: "scale",
+      to: { x: 0.22, y: 0.22, z: 0.22 },
+      dur: 600,
+      easing: "easeOutQuad"
+    });
+    p2.setAttribute("animation__scale", {
+      property: "scale",
+      to: { x: 0.22, y: 0.22, z: 0.22 },
+      dur: 600,
+      easing: "easeOutQuad"
+    });
 
     // Testo informativo sotto
     const infoText = document.createElement("a-text");
@@ -120,4 +156,5 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("✅ Zoom su piece1 e piece2 completato");
   }
 });
+
 
