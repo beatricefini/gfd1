@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Zoom su piece1 e piece2
       frameEntities.forEach((ent, i) => { if (i > 1) ent.setAttribute("visible", "false"); });
 
-      frameEntities[0].setAttribute("position", { x: -0.2, y: 0, z: 0.3 });
+      frameEntities[0].setAttribute("position", { x: -0.35, y: 0, z: 0.1 });
       frameEntities[1].setAttribute("position", { x: 0.15, y: 0.1, z: 0.4 });
       frameEntities[0].setAttribute("scale", "1.2 1.2 1.2");
       frameEntities[1].setAttribute("scale", "2.1 2.1 2.1");
@@ -169,9 +169,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // Zoom su piece3,4,5
       frameEntities.forEach((ent, i) => { if (i < 2 || i > 4) ent.setAttribute("visible", "false"); });
 
-      frameEntities[2].setAttribute("position", { x: -0.1, y: 0, z: 0.35 });
-      frameEntities[3].setAttribute("position", { x: 0, y: 0.25, z: 0.35 });
-      frameEntities[4].setAttribute("position", { x: 0.1, y: 0.4, z: 0.35 });
+      frameEntities[2].setAttribute("position", { x: -0.05, y: 0.2, z: 0.35 });
+      frameEntities[3].setAttribute("position", { x: 0.05, y: 0.45, z: 0.35 });
+      frameEntities[4].setAttribute("position", { x: 0.15, y: 0.3, z: 0.35 });
       [2,3,4].forEach(i => frameEntities[i].setAttribute("scale", "1.2 1.2 1.2"));
 
       camera.setAttribute("position", { x: 0, y: 0, z: 0.6 });
@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Zoom su piece6
       frameEntities.forEach((ent, i) => { if (i !== 5) ent.setAttribute("visible", "false"); });
 
-      frameEntities[5].setAttribute("position", { x: 0, y: 0, z: 0.35 });
+      frameEntities[5].setAttribute("position", { x: 0.5, y: -0.05, z: 0.35 });
       frameEntities[5].setAttribute("scale", "1.7 1.7 1.7");
 
       camera.setAttribute("position", { x: 0, y: 0, z: 0.6 });
