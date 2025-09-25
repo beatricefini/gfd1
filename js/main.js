@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
     introText.setAttribute("value", "Benvenuto\nnel tuo piccolo\ncinema personale\nin realtà aumentata");
     introText.setAttribute("align", "center");
     introText.setAttribute("color", "#008000");
-    introText.setAttribute("position", "0 -0.2 0");
+    introText.setAttribute("position", "0 0.3 0");
     introText.setAttribute("scale", "0.25 0.25 0.25");
     introText.setAttribute("wrap-count", "20");
     introText.setAttribute("id", "introText");
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
       startText.setAttribute("value", "Tap to start");
       startText.setAttribute("align", "center");
       startText.setAttribute("color", "#FFD700");
-      startText.setAttribute("position", "0 0 0");
+      startText.setAttribute("position", "0 -0.2 0");
       startText.setAttribute("scale", "0.2 0.2 0.2");
       startText.setAttribute("wrap-count", "20");
       startText.setAttribute("id", "startText");
@@ -82,13 +82,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const piece = document.createElement("a-entity");
     piece.setAttribute("gltf-model", models[currentIndex]);
-    piece.setAttribute("scale", "0.7 0.7 0.7"); // scale iniziale più grande
+    piece.setAttribute("scale", "1 1 1"); // scale iniziale più grande
     piece.setAttribute("position", "0 0 0");
 
     piece.setAttribute("animation__pop", {
       property: "scale",
       from: "0 0 0",
-      to: "0.7 0.7 0.7",
+      to: "1 1 1",
       dur: 400,
       easing: "easeOutElastic"
     });
@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     frameEntities.forEach((ent) => {
       ent.setAttribute("visible", "true");
       ent.setAttribute("position", "0 0 0");
-      ent.setAttribute("scale", "0.7 0.7 0.7"); // scala originale
+      ent.setAttribute("scale", "1 1 1"); // scala originale
     });
 
     camera.setAttribute("position", "0 0 0");
@@ -131,10 +131,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // Zoom su piece1 e piece2
       frameEntities.forEach((ent, i) => { if (i > 1) ent.setAttribute("visible", "false"); });
 
-      frameEntities[0].setAttribute("position", { x: -0.15, y: 0, z: 0.3 });
-      frameEntities[1].setAttribute("position", { x: 0.15, y: 0, z: 0.3 });
+      frameEntities[0].setAttribute("position", { x: -0.5, y: 0, z: 0.3 });
+      frameEntities[1].setAttribute("position", { x: 0.15, y: 1, z: 0.6 });
       frameEntities[0].setAttribute("scale", "1.2 1.2 1.2");
-      frameEntities[1].setAttribute("scale", "1.2 1.2 1.2");
+      frameEntities[1].setAttribute("scale", "1.7 1.7 1.7");
 
       camera.setAttribute("position", { x: 0, y: 0, z: 0.5 });
 
@@ -169,9 +169,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // Zoom su piece3,4,5
       frameEntities.forEach((ent, i) => { if (i < 2 || i > 4) ent.setAttribute("visible", "false"); });
 
-      frameEntities[2].setAttribute("position", { x: -0.3, y: 0, z: 0.35 });
-      frameEntities[3].setAttribute("position", { x: 0, y: 0, z: 0.35 });
-      frameEntities[4].setAttribute("position", { x: 0.3, y: 0, z: 0.35 });
+      frameEntities[2].setAttribute("position", { x: -0.1, y: 1, z: 0.35 });
+      frameEntities[3].setAttribute("position", { x: 0, y: 1.3, z: 0.35 });
+      frameEntities[4].setAttribute("position", { x: 0.1, y: 1, z: 0.35 });
       [2,3,4].forEach(i => frameEntities[i].setAttribute("scale", "1.2 1.2 1.2"));
 
       camera.setAttribute("position", { x: 0, y: 0, z: 0.6 });
@@ -219,8 +219,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // Zoom su piece6
       frameEntities.forEach((ent, i) => { if (i !== 5) ent.setAttribute("visible", "false"); });
 
-      frameEntities[5].setAttribute("position", { x: 0, y: 0, z: 0.35 });
-      frameEntities[5].setAttribute("scale", "1.2 1.2 1.2");
+      frameEntities[5].setAttribute("position", { x: 1, y: 0, z: 0.35 });
+      frameEntities[5].setAttribute("scale", "1.7 1.7 1.7");
 
       camera.setAttribute("position", { x: 0, y: 0, z: 0.6 });
 
