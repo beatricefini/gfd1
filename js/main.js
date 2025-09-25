@@ -18,25 +18,25 @@ document.addEventListener("DOMContentLoaded", () => {
   marker.addEventListener("targetFound", () => {
     if (started) return;
 
-    // Testo introduttivo diviso in righe
+    // Testo introduttivo più piccolo
     const introText = document.createElement("a-text");
     introText.setAttribute("value", "Benvenuto\nnel tuo piccolo\ncinema personale\nin realtà aumentata");
     introText.setAttribute("align", "center");
     introText.setAttribute("color", "#008000");
-    introText.setAttribute("position", "0 0.5 0");
-    introText.setAttribute("scale", "0.7 0.7 0.7");
+    introText.setAttribute("position", "0 0.2 0");
+    introText.setAttribute("scale", "0.2 0.2 0.2");
     introText.setAttribute("wrap-count", "20");
     introText.setAttribute("id", "introText");
     introContainer.appendChild(introText);
 
-    // Testo "Tap to start" che compare dopo 3 secondi
+    // Testo "Tap to start" piccolo
     setTimeout(() => {
       const startText = document.createElement("a-text");
       startText.setAttribute("value", "Tap to start");
       startText.setAttribute("align", "center");
       startText.setAttribute("color", "#FFD700");
-      startText.setAttribute("position", "0 -0.2 0");
-      startText.setAttribute("scale", "0.6 0.6 0.6");
+      startText.setAttribute("position", "0 -0.05 0");
+      startText.setAttribute("scale", "0.15 0.15 0.15");
       startText.setAttribute("wrap-count", "20");
       startText.setAttribute("id", "startText");
       introContainer.appendChild(startText);
@@ -63,14 +63,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const piece = document.createElement("a-entity");
     piece.setAttribute("gltf-model", models[currentIndex]);
-    piece.setAttribute("scale", "1 1 1");
-    piece.setAttribute("position", `0 0 0`);
+    piece.setAttribute("scale", "0.1 0.1 0.1");   // 🔽 molto più piccolo
+    piece.setAttribute("position", "0 0 0");
 
     // Animazione pop-in
     piece.setAttribute("animation__pop", {
       property: "scale",
       from: "0 0 0",
-      to: "1 1 1",
+      to: "0.1 0.1 0.1",
       dur: 600,
       easing: "easeOutElastic"
     });
@@ -83,7 +83,4 @@ document.addEventListener("DOMContentLoaded", () => {
     currentIndex++;
   }
 });
-
-
-
 
