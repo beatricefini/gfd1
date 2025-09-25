@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
       frameEntities.forEach((ent, i) => { if (i > 1) ent.setAttribute("visible", "false"); });
 
       frameEntities[0].setAttribute("position", { x: -0.35, y: 0, z: 0.1 });
-      frameEntities[1].setAttribute("position", { x: 0.15, y: 0.1, z: 0.4 });
+      frameEntities[1].setAttribute("position", { x: 0.05, y: 0.12, z: 0.4 });
       frameEntities[0].setAttribute("scale", "1.2 1.2 1.2");
       frameEntities[1].setAttribute("scale", "2.1 2.1 2.1");
 
@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Zoom su piece6
       frameEntities.forEach((ent, i) => { if (i !== 5) ent.setAttribute("visible", "false"); });
 
-      frameEntities[5].setAttribute("position", { x: 0.5, y: -0.05, z: 0.35 });
+      frameEntities[5].setAttribute("position", { x: 0.2, y: -0.15, z: 0.35 });
       frameEntities[5].setAttribute("scale", "1.7 1.7 1.7");
 
       camera.setAttribute("position", { x: 0, y: 0, z: 0.6 });
