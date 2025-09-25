@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let started = false;
   let currentIndex = 0;
   let allModelsDisplayed = false;
-
   let frameEntities = [];
 
   marker.addEventListener("targetFound", () => {
@@ -47,9 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 500);
   });
 
-  // Tap iniziale
   window.addEventListener("click", () => {
     if (!started) {
+      // Sparisci testi introduttivi
       const introText = document.getElementById("introText");
       const startText = document.getElementById("startText");
       if (introText) introText.setAttribute("visible", "false");
@@ -66,6 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (currentIndex >= models.length) {
       allModelsDisplayed = true;
 
+      // Mostra "Tap the screen" sotto le cornici
       const tapText = document.createElement("a-text");
       tapText.setAttribute("value", "Tap the screen");
       tapText.setAttribute("align", "center");
@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Zoom della camera verso i modelli
     camera.setAttribute("animation__camZoom", {
       property: "position",
-      to: { x: 0, y: 0, z: 0.5 }, // leggero avvicinamento
+      to: { x: 0, y: 0, z: 0.5 },
       dur: 600,
       easing: "easeOutQuad"
     });
@@ -163,6 +163,5 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("✅ Zoom su piece1 e piece2 completato con camera");
   }
 });
-
 
 
