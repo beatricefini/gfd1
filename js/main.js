@@ -1,9 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
   const marker = document.getElementById("marker");
   const introContainer = document.getElementById("introTexts");
-  const cube = document.getElementById("cube");
+  const modelsContainer = document.getElementById("modelsContainer");
+
+  const models = [
+    "#piece1",
+    "#piece2",
+    "#piece3",
+    "#piece4",
+    "#piece5",
+    "#piece6"
+  ];
 
   let started = false;
+  let currentIndex = 0;
 
   marker.addEventListener("targetFound", () => {
     if (started) return;
@@ -33,19 +43,46 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
   });
 
-  // Tap per iniziare
+  // Tap per iniziare o mostrare modelli
   window.addEventListener("click", () => {
-    if (started) return;
-    const introText = document.getElementById("introText");
-    const startText = document.getElementById("startText");
-    if (introText) introText.setAttribute("visible", "false");
-    if (startText) startText.setAttribute("visible", "false");
-    cube.setAttribute("visible", "true");
-    started = true;
+    if (!started) {
+      // Rimuovi testi intro
+      const introText = document.getElementById("introText");
+      const startText = document.getElementById("startText");
+      if (introText) introText.setAttribute("visible", "false");
+      if (startText) startText.setAttribute("visible", "false");
+      started = true;
+      showNextModel();
+    } else {
+      showNextModel();
+    }
   });
+
+  function showNextModel() {
+    if (currentIndex >= models.length) return;
+
+    const piece = document.createElement("a-entity");
+    piece.setAttribute("gltf-model", models[currentIndex]);
+    piece.setAttribute("scale", "1 1 1");
+    piece.setAttribute("position", `0 0 0`);
+
+    // Animazione pop-in
+    piece.setAttribute("animation__pop", {
+      property: "scale",
+      from: "0 0 0",
+      to: "1 1 1",
+      dur: 600,
+      easing: "easeOutElastic"
+    });
+
+    piece.addEventListener("model-loaded", () => {
+      console.log(`✅ Modello caricato: ${models[currentIndex]}`);
+    });
+
+    modelsContainer.appendChild(piece);
+    currentIndex++;
+  }
 });
-
-
 
 
 
