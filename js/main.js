@@ -4,15 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modelsContainer = document.getElementById("modelsContainer");
   const camera = document.querySelector("a-camera");
 
-  const models = [
-    "#piece1",
-    "#piece2",
-    "#piece3",
-    "#piece4",
-    "#piece5",
-    "#piece6"
-  ];
-
+  const models = ["#piece1","#piece2","#piece3","#piece4","#piece5","#piece6"];
   let started = false;
   let currentIndex = 0;
   let allModelsDisplayed = false;
@@ -22,197 +14,172 @@ document.addEventListener("DOMContentLoaded", () => {
   marker.addEventListener("targetFound", () => {
     if (started) return;
 
-    // Testo introduttivo
     const introText = document.createElement("a-text");
-    introText.setAttribute("value", "Benvenuto\nnel tuo piccolo\ncinema personale\nin realtà aumentata");
-    introText.setAttribute("align", "center");
-    introText.setAttribute("color", "#008000");
-    introText.setAttribute("position", "0 0.2 0");
-    introText.setAttribute("scale", "0.25 0.25 0.25");
-    introText.setAttribute("wrap-count", "20");
-    introText.setAttribute("id", "introText");
+    introText.setAttribute("value","Benvenuto\nnel tuo piccolo\ncinema personale\nin realtà aumentata");
+    introText.setAttribute("align","center");
+    introText.setAttribute("color","#008000");
+    introText.setAttribute("position","0 0.2 0");
+    introText.setAttribute("scale","0.25 0.25 0.25");
+    introText.setAttribute("wrap-count","20");
+    introText.setAttribute("id","introText");
     introContainer.appendChild(introText);
 
-    // Testo "Tap to start"
     setTimeout(() => {
       const startText = document.createElement("a-text");
-      startText.setAttribute("value", "Tap to start");
-      startText.setAttribute("align", "center");
-      startText.setAttribute("color", "#FFD700");
-      startText.setAttribute("position", "0 0 0");
-      startText.setAttribute("scale", "0.2 0.2 0.2");
-      startText.setAttribute("wrap-count", "20");
-      startText.setAttribute("id", "startText");
+      startText.setAttribute("value","Tap to start");
+      startText.setAttribute("align","center");
+      startText.setAttribute("color","#FFD700");
+      startText.setAttribute("position","0 0 0");
+      startText.setAttribute("scale","0.2 0.2 0.2");
+      startText.setAttribute("wrap-count","20");
+      startText.setAttribute("id","startText");
       introContainer.appendChild(startText);
-    }, 500);
+    },500);
   });
 
   window.addEventListener("click", () => {
-    if (!started) {
-      // Sparisci testi introduttivi
+    if(!started){
       const introText = document.getElementById("introText");
       const startText = document.getElementById("startText");
-      if (introText) introText.setAttribute("visible", "false");
-      if (startText) startText.setAttribute("visible", "false");
-
+      if(introText) introText.setAttribute("visible","false");
+      if(startText) startText.setAttribute("visible","false");
       started = true;
       showAllModelsSequentially();
-    } else if (allModelsDisplayed) {
+    } else if(allModelsDisplayed){
       handleSequences();
     }
   });
 
-  function showAllModelsSequentially() {
-    if (currentIndex >= models.length) {
+  function showAllModelsSequentially(){
+    if(currentIndex >= models.length){
       allModelsDisplayed = true;
-
-      // Mostra "Tap the screen"
       const tapText = document.createElement("a-text");
-      tapText.setAttribute("value", "Tap the screen");
-      tapText.setAttribute("align", "center");
-      tapText.setAttribute("color", "#FFD700");
-      tapText.setAttribute("position", "0 -0.6 0");
-      tapText.setAttribute("scale", "0.2 0.2 0.2");
-      tapText.setAttribute("wrap-count", "20");
-      tapText.setAttribute("id", "tapText");
+      tapText.setAttribute("value","Tap the screen");
+      tapText.setAttribute("align","center");
+      tapText.setAttribute("color","#FFD700");
+      tapText.setAttribute("position","0 -0.6 0");
+      tapText.setAttribute("scale","0.2 0.2 0.2");
+      tapText.setAttribute("wrap-count","20");
+      tapText.setAttribute("id","tapText");
       introContainer.appendChild(tapText);
-
       return;
     }
 
     const piece = document.createElement("a-entity");
-    piece.setAttribute("gltf-model", models[currentIndex]);
-
-    // Pop-up partendo da scala 0
-    piece.setAttribute("scale", "0 0 0");
+    piece.setAttribute("gltf-model",models[currentIndex]);
+    piece.setAttribute("scale","0 0 0"); // pop-up animazione
 
     piece.addEventListener("model-loaded", () => {
-      // Applica animazione pop-up alla scala originale
-      const mesh = piece.getObject3D("mesh");
-      if(mesh){
-        const originalScale = piece.getAttribute("scale");
-        piece.setAttribute("animation__pop", {
-          property: "scale",
-          from: "0 0 0",
-          to: `${originalScale.x} ${originalScale.y} ${originalScale.z}`,
-          dur: 400,
-          easing: "easeOutQuad"
-        });
-      }
+      const originalScale = piece.object3D.scale.clone();
+      piece.setAttribute("animation__pop",{
+        property:"scale",
+        from:"0 0 0",
+        to:`${originalScale.x} ${originalScale.y} ${originalScale.z}`,
+        dur:400,
+        easing:"easeOutQuad"
+      });
     });
 
     modelsContainer.appendChild(piece);
     frameEntities.push(piece);
     currentIndex++;
-
-    setTimeout(showAllModelsSequentially, 800); // comparsa rapida
+    setTimeout(showAllModelsSequentially,800);
   }
 
-  function clearOldTexts() {
+  function clearOldTexts(){
     const oldTexts = introContainer.querySelectorAll("a-text");
-    oldTexts.forEach((t) => {
-      if (t.id !== "tapText") t.remove();
+    oldTexts.forEach(t=>{
+      if(t.id!=="tapText") t.remove();
     });
   }
 
-  function handleSequences() {
+  function handleSequences(){
     const tapText = document.getElementById("tapText");
-    if (tapText) tapText.setAttribute("visible", "false");
-
+    if(tapText) tapText.setAttribute("visible","false");
     clearOldTexts();
 
-    // Ogni sequenza: mostra solo i modelli desiderati, mantieni posizioni originali
-    if (sequenceStep === 0) {
+    if(sequenceStep === 0){
       // piece1 e piece2
-      frameEntities.forEach((ent, i) => {
-        ent.setAttribute("visible", i <= 1 ? "true" : "false");
+      frameEntities.forEach((ent,i)=>{
+        ent.setAttribute("visible","true");
       });
-
       const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "Queste due cornici rappresentano le principali della tua collezione");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#008000");
-      infoText.setAttribute("position", "0 -0.4 0");
-      infoText.setAttribute("scale", "0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count", "30");
+      infoText.setAttribute("value","Queste due cornici rappresentano le principali della tua collezione");
+      infoText.setAttribute("align","center");
+      infoText.setAttribute("color","#008000");
+      infoText.setAttribute("position","0 -0.4 0");
+      infoText.setAttribute("scale","0.15 0.15 0.15");
+      infoText.setAttribute("wrap-count","30");
       introContainer.appendChild(infoText);
-
       sequenceStep = 1;
-    } else if (sequenceStep === 1) {
+    } else if(sequenceStep === 1){
       const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "Sono le opere più importanti, da cui parte la storia");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#008000");
-      infoText.setAttribute("position", "0 -0.5 0");
-      infoText.setAttribute("scale", "0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count", "30");
+      infoText.setAttribute("value","Sono le opere più importanti, da cui parte la storia");
+      infoText.setAttribute("align","center");
+      infoText.setAttribute("color","#008000");
+      infoText.setAttribute("position","0 -0.5 0");
+      infoText.setAttribute("scale","0.15 0.15 0.15");
+      infoText.setAttribute("wrap-count","30");
       introContainer.appendChild(infoText);
-
       sequenceStep = 2;
-    } else if (sequenceStep === 2) {
-      // torna tutte le cornici visibili
-      frameEntities.forEach(ent => ent.setAttribute("visible", "true"));
+    } else if(sequenceStep === 2){
+      // torna tutte visibili
+      frameEntities.forEach(ent=>ent.setAttribute("visible","true"));
       sequenceStep = 3;
-    } else if (sequenceStep === 3) {
+    } else if(sequenceStep === 3){
       // piece3,4,5
-      frameEntities.forEach((ent, i) => {
-        ent.setAttribute("visible", (i >= 2 && i <= 4) ? "true" : "false");
+      frameEntities.forEach((ent,i)=>{
+        ent.setAttribute("visible",(i>=2 && i<=4)?"true":"false");
       });
-
       const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "Ecco tre opere complementari");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#008000");
-      infoText.setAttribute("position", "0 -0.4 0");
-      infoText.setAttribute("scale", "0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count", "30");
+      infoText.setAttribute("value","Ecco tre opere complementari");
+      infoText.setAttribute("align","center");
+      infoText.setAttribute("color","#008000");
+      infoText.setAttribute("position","0 -0.4 0");
+      infoText.setAttribute("scale","0.15 0.15 0.15");
+      infoText.setAttribute("wrap-count","30");
       introContainer.appendChild(infoText);
-
       sequenceStep = 4;
-    } else if (sequenceStep === 4) {
+    } else if(sequenceStep === 4){
       const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "Queste aggiungono varietà alla collezione");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#008000");
-      infoText.setAttribute("position", "0 -0.5 0");
-      infoText.setAttribute("scale", "0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count", "30");
+      infoText.setAttribute("value","Queste aggiungono varietà alla collezione");
+      infoText.setAttribute("align","center");
+      infoText.setAttribute("color","#008000");
+      infoText.setAttribute("position","0 -0.5 0");
+      infoText.setAttribute("scale","0.15 0.15 0.15");
+      infoText.setAttribute("wrap-count","30");
       introContainer.appendChild(infoText);
-
       sequenceStep = 5;
-    } else if (sequenceStep === 5) {
+    } else if(sequenceStep === 5){
       const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "Ognuna di esse arricchisce la narrazione visiva");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#008000");
-      infoText.setAttribute("position", "0 -0.6 0");
-      infoText.setAttribute("scale", "0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count", "30");
+      infoText.setAttribute("value","Ognuna di esse arricchisce la narrazione visiva");
+      infoText.setAttribute("align","center");
+      infoText.setAttribute("color","#008000");
+      infoText.setAttribute("position","0 -0.6 0");
+      infoText.setAttribute("scale","0.15 0.15 0.15");
+      infoText.setAttribute("wrap-count","30");
       introContainer.appendChild(infoText);
-
       sequenceStep = 6;
-    } else if (sequenceStep === 6) {
-      // ritorna tutte le cornici visibili
-      frameEntities.forEach(ent => ent.setAttribute("visible", "true"));
+    } else if(sequenceStep === 6){
+      // torna tutte le cornici visibili
+      frameEntities.forEach(ent=>ent.setAttribute("visible","true"));
       sequenceStep = 7;
-    } else if (sequenceStep === 7) {
+    } else if(sequenceStep === 7){
       // piece6 finale
-      frameEntities.forEach((ent, i) => {
-        ent.setAttribute("visible", i === 5 ? "true" : "false");
+      frameEntities.forEach((ent,i)=>{
+        ent.setAttribute("visible",i===5?"true":"false");
       });
-
       const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "Infine, questa cornice conclusiva");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#008000");
-      infoText.setAttribute("position", "0 -0.4 0");
-      infoText.setAttribute("scale", "0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count", "30");
+      infoText.setAttribute("value","Infine, questa cornice conclusiva");
+      infoText.setAttribute("align","center");
+      infoText.setAttribute("color","#008000");
+      infoText.setAttribute("position","0 -0.4 0");
+      infoText.setAttribute("scale","0.15 0.15 0.15");
+      infoText.setAttribute("wrap-count","30");
       introContainer.appendChild(infoText);
-
       sequenceStep = 8;
-    } else if (sequenceStep === 8) {
-      frameEntities.forEach(ent => ent.setAttribute("visible", "true"));
+    } else if(sequenceStep === 8){
+      frameEntities.forEach(ent=>ent.setAttribute("visible","true"));
       sequenceStep = 9;
     }
   }
