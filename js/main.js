@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let frameEntities = [];
   let sequenceStep = 0;
 
-  // --- Mostra testi introduttivi ---
+  // --- Testi introduttivi ---
   marker.addEventListener("targetFound", () => {
     if (started) return;
 
@@ -32,7 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
     introText.setAttribute("id", "introText");
     introContainer.appendChild(introText);
 
-    // Tap to start
     setTimeout(() => {
       const startText = document.createElement("a-text");
       startText.setAttribute("value", "Tap to start");
@@ -49,12 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Click globale ---
   window.addEventListener("click", () => {
     if (!started) {
-      // Nascondi testi introduttivi
-      const introText = document.getElementById("introText");
-      const startText = document.getElementById("startText");
-      if (introText) introText.setAttribute("visible", "false");
-      if (startText) startText.setAttribute("visible", "false");
-
+      hideIntroTexts();
       started = true;
       showModelsSequentially();
     } else {
@@ -62,19 +56,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- Animazione comparsa cornici ---
+  // --- Nascondi testi introduttivi ---
+  function hideIntroTexts() {
+    const introText = document.getElementById("introText");
+    const startText = document.getElementById("startText");
+    if (introText) introText.setAttribute("visible", "false");
+    if (startText) startText.setAttribute("visible", "false");
+  }
+
+  // --- Pop-up sequenziale cornici ---
   function showModelsSequentially() {
     if (currentIndex >= models.length) {
-      // Mostra tap per le sequenze
-      const tapText = document.createElement("a-text");
-      tapText.setAttribute("value", "Tap the screen");
-      tapText.setAttribute("align", "center");
-      tapText.setAttribute("color", "#FFD700");
-      tapText.setAttribute("position", "0 -0.6 0");
-      tapText.setAttribute("scale", "0.2 0.2 0.2");
-      tapText.setAttribute("wrap-count", "20");
-      tapText.setAttribute("id", "tapText");
-      introContainer.appendChild(tapText);
+      showTapScreenText();
       return;
     }
 
@@ -98,7 +91,20 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(showModelsSequentially, 600);
   }
 
-  // --- Gestione sequenze con zoom e testi ---
+  // --- Testo Tap Screen ---
+  function showTapScreenText() {
+    const tapText = document.createElement("a-text");
+    tapText.setAttribute("value", "Tap the screen");
+    tapText.setAttribute("align", "center");
+    tapText.setAttribute("color", "#FFD700");
+    tapText.setAttribute("position", "0 -0.6 0");
+    tapText.setAttribute("scale", "0.2 0.2 0.2");
+    tapText.setAttribute("wrap-count", "20");
+    tapText.setAttribute("id", "tapText");
+    introContainer.appendChild(tapText);
+  }
+
+  // --- Gestione sequenze ---
   function handleSequences() {
     clearOldTexts();
     const tapText = document.getElementById("tapText");
@@ -114,22 +120,27 @@ document.addEventListener("DOMContentLoaded", () => {
       zoomFrames([5], ["Ultima cornice da osservare"], 0.5);
       sequenceStep = 3;
     } else if (sequenceStep === 3) {
-      // Ritorna vista completa
-      frameEntities.forEach(f => {
-        f.setAttribute("visible", "true");
-        f.setAttribute("position", "0 0 0");
-        f.setAttribute("scale", "1 1 1");
-      });
-      camera.setAttribute("position", {x:0,y:0,z:0});
-      if (tapText) tapText.setAttribute("visible", "true");
+      resetToAllFrames();
+      sequenceStep = 0; // sequenze finite, può ricominciare
     }
   }
 
+  // --- Pulizia testi ---
   function clearOldTexts() {
     const oldTexts = introContainer.querySelectorAll("a-text");
-    oldTexts.forEach(t => {
-      if (t.id !== "tapText") t.remove();
+    oldTexts.forEach(t => { if (t.id !== "tapText") t.remove(); });
+  }
+
+  // --- Reset cornici e camera ---
+  function resetToAllFrames() {
+    frameEntities.forEach(f => {
+      f.setAttribute("visible", "true");
+      f.setAttribute("position", "0 0 0");
+      f.setAttribute("scale", "1 1 1");
     });
+    camera.setAttribute("position", {x:0,y:0,z:0});
+    const tapText = document.getElementById("tapText");
+    if (tapText) tapText.setAttribute("visible","true");
   }
 
   // --- Funzione zoom generica ---
@@ -145,6 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
       f.setAttribute("scale",{x:0.7,y:0.7,z:0.7});
     });
 
+    // Zoom camera
     camera.setAttribute("position",{x:0,y:0,z:cameraZ});
 
     // Mostra testi sequenziali
@@ -165,15 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         infoText.setAttribute("visible","false");
         window.removeEventListener("click",listener);
-        // Torna alla vista completa
-        frameEntities.forEach(f=>{
-          f.setAttribute("visible","true");
-          f.setAttribute("position","0 0 0");
-          f.setAttribute("scale","1 1 1");
-        });
-        camera.setAttribute("position",{x:0,y:0,z:0});
-        const tapText = document.getElementById("tapText");
-        if(tapText) tapText.setAttribute("visible","true");
+        resetToAllFrames();
       }
     };
     window.addEventListener("click",listener);
