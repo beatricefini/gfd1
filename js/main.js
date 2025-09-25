@@ -67,10 +67,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const piece = document.createElement("a-entity");
     piece.setAttribute("gltf-model",models[currentIndex]);
-    piece.setAttribute("scale","0 0 0"); // pop-up animazione
+    piece.setAttribute("visible","false");
 
     piece.addEventListener("model-loaded", () => {
       const originalScale = piece.object3D.scale.clone();
+      piece.setAttribute("scale","0 0 0");
+      piece.setAttribute("visible","true");
       piece.setAttribute("animation__pop",{
         property:"scale",
         from:"0 0 0",
@@ -98,90 +100,59 @@ document.addEventListener("DOMContentLoaded", () => {
     if(tapText) tapText.setAttribute("visible","false");
     clearOldTexts();
 
-    if(sequenceStep === 0){
-      // piece1 e piece2
-      frameEntities.forEach((ent,i)=>{
-        ent.setAttribute("visible","true");
-      });
+    // Mostriamo sempre i modelli e facciamo "zoom" solo sulla Z relativa
+    frameEntities.forEach(ent=>{
+      ent.setAttribute("visible","true");
+      ent.removeAttribute("animation__zoom");
+    });
+
+    if(sequenceStep===0){
       const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Queste due cornici rappresentano le principali della tua collezione");
+      infoText.setAttribute("value","Focus su piece1 e piece2");
       infoText.setAttribute("align","center");
       infoText.setAttribute("color","#008000");
       infoText.setAttribute("position","0 -0.4 0");
       infoText.setAttribute("scale","0.15 0.15 0.15");
       infoText.setAttribute("wrap-count","30");
       introContainer.appendChild(infoText);
-      sequenceStep = 1;
-    } else if(sequenceStep === 1){
+
+      [frameEntities[0],frameEntities[1]].forEach(p=>{
+        const pos = p.object3D.position.clone();
+        p.setAttribute("animation__zoom",{
+          property:"position",
+          to:{x:pos.x,y:pos.y,z:pos.z+0.15},
+          dur:600,
+          easing:"easeOutQuad"
+        });
+      });
+
+      sequenceStep=1;
+    } else if(sequenceStep===1){
       const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Sono le opere più importanti, da cui parte la storia");
+      infoText.setAttribute("value","Secondo testo per piece1 e piece2");
       infoText.setAttribute("align","center");
       infoText.setAttribute("color","#008000");
       infoText.setAttribute("position","0 -0.5 0");
       infoText.setAttribute("scale","0.15 0.15 0.15");
       infoText.setAttribute("wrap-count","30");
       introContainer.appendChild(infoText);
-      sequenceStep = 2;
-    } else if(sequenceStep === 2){
-      // torna tutte visibili
-      frameEntities.forEach(ent=>ent.setAttribute("visible","true"));
-      sequenceStep = 3;
-    } else if(sequenceStep === 3){
-      // piece3,4,5
-      frameEntities.forEach((ent,i)=>{
-        ent.setAttribute("visible",(i>=2 && i<=4)?"true":"false");
+
+      sequenceStep=2;
+    } else if(sequenceStep===2){
+      // ritorno tutte le cornici
+      frameEntities.forEach(p=>{
+        const pos = p.object3D.position.clone();
+        p.setAttribute("animation__zoom",{
+          property:"position",
+          to:{x:pos.x,y:pos.y,z:pos.z},
+          dur:600,
+          easing:"easeOutQuad"
+        });
       });
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Ecco tre opere complementari");
-      infoText.setAttribute("align","center");
-      infoText.setAttribute("color","#008000");
-      infoText.setAttribute("position","0 -0.4 0");
-      infoText.setAttribute("scale","0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count","30");
-      introContainer.appendChild(infoText);
-      sequenceStep = 4;
-    } else if(sequenceStep === 4){
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Queste aggiungono varietà alla collezione");
-      infoText.setAttribute("align","center");
-      infoText.setAttribute("color","#008000");
-      infoText.setAttribute("position","0 -0.5 0");
-      infoText.setAttribute("scale","0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count","30");
-      introContainer.appendChild(infoText);
-      sequenceStep = 5;
-    } else if(sequenceStep === 5){
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Ognuna di esse arricchisce la narrazione visiva");
-      infoText.setAttribute("align","center");
-      infoText.setAttribute("color","#008000");
-      infoText.setAttribute("position","0 -0.6 0");
-      infoText.setAttribute("scale","0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count","30");
-      introContainer.appendChild(infoText);
-      sequenceStep = 6;
-    } else if(sequenceStep === 6){
-      // torna tutte le cornici visibili
-      frameEntities.forEach(ent=>ent.setAttribute("visible","true"));
-      sequenceStep = 7;
-    } else if(sequenceStep === 7){
-      // piece6 finale
-      frameEntities.forEach((ent,i)=>{
-        ent.setAttribute("visible",i===5?"true":"false");
-      });
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Infine, questa cornice conclusiva");
-      infoText.setAttribute("align","center");
-      infoText.setAttribute("color","#008000");
-      infoText.setAttribute("position","0 -0.4 0");
-      infoText.setAttribute("scale","0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count","30");
-      introContainer.appendChild(infoText);
-      sequenceStep = 8;
-    } else if(sequenceStep === 8){
-      frameEntities.forEach(ent=>ent.setAttribute("visible","true"));
-      sequenceStep = 9;
+      sequenceStep=3;
     }
+    // ... aggiungi altre sequenze simili
   }
 });
+
 
