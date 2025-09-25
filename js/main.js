@@ -10,7 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "#piece3",
     "#piece4",
     "#piece5",
-    "#piece6"
+    "#piece6",
+    "#piece7"
   ];
 
   let started = false;
@@ -18,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let allModelsDisplayed = false;
   let frameEntities = [];
   let step = 0;        // gestisce i tap dentro una sequenza
-  let sequence = 0;    // 0 = prima sequenza (p1+p2), 1 = seconda sequenza (p3+p4+p5)
+  let sequence = 0;    // 0 = seq1 (p1+p2), 1 = seq2 (p3+p4+p5), 2 = seq3 (p7)
 
   marker.addEventListener("targetFound", () => {
     if (started) return;
@@ -109,6 +110,8 @@ document.addEventListener("DOMContentLoaded", () => {
       zoomSequence12();
     } else if (sequence === 1) {
       zoomSequence345();
+    } else if (sequence === 2) {
+      zoomSequence7();
     }
   }
 
@@ -122,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       animateZoom([p1, p2], [
         { x: -0.1, y: -0.05, z: 0.2 },
-        { x: 0.1, y: -0.05, z: 0.2 }
+        { x: 0.1,  y: -0.05, z: 0.2 }
       ]);
 
       showText("infoText1", "Queste due cornici rappresentano le principali della tua collezione");
@@ -167,7 +170,28 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (step === 3) {
       hideText("infoText5");
       resetAllModels();
-      sequence = 2; // (eventuale sequenza successiva)
+      sequence = 2; // passa alla sequenza successiva
+      step = 0;
+    }
+  }
+
+  // === SEQUENZA 3: piece7 ===
+  function zoomSequence7() {
+    const p7 = frameEntities[6]; // piece7
+
+    if (step === 0) {
+      hideOthers([6]);
+
+      animateZoom([p7], [
+        { x: 0, y: -0.05, z: 0.25 }
+      ]);
+
+      showText("infoText7", "Quest'ultima cornice chiude il percorso narrativo.");
+      step = 1;
+    } else if (step === 1) {
+      hideText("infoText7");
+      resetAllModels();
+      sequence = 3; // sequenza terminata
       step = 0;
     }
   }
