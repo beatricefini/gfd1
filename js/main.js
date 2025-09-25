@@ -98,6 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(showAllModelsSequentially, 700);
   }
 
+  // --- Pulizia testi ---
   function clearOldTexts() {
     const oldTexts = introContainer.querySelectorAll("a-text");
     oldTexts.forEach((t) => {
@@ -105,32 +106,47 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function resetAllModels() {
-    frameEntities.forEach((ent) => {
-      ent.setAttribute("visible", "true");
-      ent.setAttribute("animation__pos", {
+  // --- Reset con animazione ---
+  function resetAllModels(activeIndices = []) {
+    // Nascondi temporaneamente i pezzi non attivi
+    frameEntities.forEach((ent, i) => {
+      if (!activeIndices.includes(i)) {
+        ent.setAttribute("visible", "false");
+      }
+    });
+
+    // Anima ritorno dei pezzi zoommati
+    activeIndices.forEach((i) => {
+      const ent = frameEntities[i];
+
+      ent.setAttribute("animation__backpos", {
         property: "position",
-        to: { x: 0, y: 0, z: 0 },
+        to: "0 0 0",
         dur: 800,
         easing: "easeInOutQuad"
       });
-      ent.setAttribute("animation__scale", {
+
+      ent.setAttribute("animation__backscale", {
         property: "scale",
-        to: { x: 1, y: 1, z: 1 },
+        to: "1 1 1",
         dur: 800,
         easing: "easeInOutQuad"
       });
     });
 
-    camera.setAttribute("animation__camreset", {
-      property: "position",
-      to: { x: 0, y: 0, z: 0 },
-      dur: 800,
-      easing: "easeInOutQuad"
-    });
+    // Dopo animazione → ripristina tutto
+    setTimeout(() => {
+      frameEntities.forEach((ent) => {
+        ent.setAttribute("visible", "true");
+        ent.setAttribute("position", "0 0 0");
+        ent.setAttribute("scale", "1 1 1");
+      });
 
-    const tapText = document.getElementById("tapText");
-    if (tapText) tapText.setAttribute("visible", "true");
+      camera.setAttribute("position", "0 0 0");
+
+      const tapText = document.getElementById("tapText");
+      if (tapText) tapText.setAttribute("visible", "true");
+    }, 850);
   }
 
   // --- Gestione sequenze ---
@@ -144,33 +160,12 @@ document.addEventListener("DOMContentLoaded", () => {
       // Zoom su piece1 e piece2
       frameEntities.forEach((ent, i) => { if (i > 1) ent.setAttribute("visible", "false"); });
 
-      frameEntities[0].setAttribute("animation__pos", {
-        property: "position",
-        to: { x: -0.35, y: 0, z: 0.1 },
-        dur: 800, easing: "easeInOutQuad"
-      });
-      frameEntities[1].setAttribute("animation__pos", {
-        property: "position",
-        to: { x: 0.05, y: 0.12, z: 0.4 },
-        dur: 800, easing: "easeInOutQuad"
-      });
+      frameEntities[0].setAttribute("position", { x: -0.35, y: 0, z: 0.1 });
+      frameEntities[1].setAttribute("position", { x: 0.05, y: 0.12, z: 0.4 });
+      frameEntities[0].setAttribute("scale", "1.2 1.2 1.2");
+      frameEntities[1].setAttribute("scale", "2.1 2.1 2.1");
 
-      frameEntities[0].setAttribute("animation__scale", {
-        property: "scale",
-        to: { x: 1.2, y: 1.2, z: 1.2 },
-        dur: 800, easing: "easeInOutQuad"
-      });
-      frameEntities[1].setAttribute("animation__scale", {
-        property: "scale",
-        to: { x: 2.1, y: 2.1, z: 2.1 },
-        dur: 800, easing: "easeInOutQuad"
-      });
-
-      camera.setAttribute("animation__cam", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0.5 },
-        dur: 800, easing: "easeInOutQuad"
-      });
+      camera.setAttribute("position", { x: 0, y: 0, z: 0.5 });
 
       const infoText = document.createElement("a-text");
       infoText.setAttribute("value", "Queste due cornici rappresentano le principali della tua collezione");
@@ -196,37 +191,19 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 2;
 
     } else if (sequenceStep === 2) {
-      resetAllModels();
+      resetAllModels([0, 1]);
       sequenceStep = 3;
 
     } else if (sequenceStep === 3) {
       // Zoom su piece3,4,5
       frameEntities.forEach((ent, i) => { if (i < 2 || i > 4) ent.setAttribute("visible", "false"); });
 
-      const positions = [
-        { x: -0.05, y: 0.2, z: 0.35 },
-        { x: 0.05, y: 0.45, z: 0.35 },
-        { x: 0.15, y: 0.3, z: 0.35 }
-      ];
+      frameEntities[2].setAttribute("position", { x: -0.05, y: 0.2, z: 0.35 });
+      frameEntities[3].setAttribute("position", { x: 0.05, y: 0.45, z: 0.35 });
+      frameEntities[4].setAttribute("position", { x: 0.15, y: 0.3, z: 0.35 });
+      [2,3,4].forEach(i => frameEntities[i].setAttribute("scale", "1.2 1.2 1.2"));
 
-      [2,3,4].forEach((i, idx) => {
-        frameEntities[i].setAttribute("animation__pos", {
-          property: "position",
-          to: positions[idx],
-          dur: 800, easing: "easeInOutQuad"
-        });
-        frameEntities[i].setAttribute("animation__scale", {
-          property: "scale",
-          to: { x: 1.2, y: 1.2, z: 1.2 },
-          dur: 800, easing: "easeInOutQuad"
-        });
-      });
-
-      camera.setAttribute("animation__cam2", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0.6 },
-        dur: 800, easing: "easeInOutQuad"
-      });
+      camera.setAttribute("position", { x: 0, y: 0, z: 0.6 });
 
       const infoText = document.createElement("a-text");
       infoText.setAttribute("value", "Ecco tre opere complementari");
@@ -264,29 +241,17 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 6;
 
     } else if (sequenceStep === 6) {
-      resetAllModels();
+      resetAllModels([2, 3, 4]);
       sequenceStep = 7;
 
     } else if (sequenceStep === 7) {
       // Zoom su piece6
       frameEntities.forEach((ent, i) => { if (i !== 5) ent.setAttribute("visible", "false"); });
 
-      frameEntities[5].setAttribute("animation__pos", {
-        property: "position",
-        to: { x: 0.3, y: -0.15, z: 0.35 },
-        dur: 800, easing: "easeInOutQuad"
-      });
-      frameEntities[5].setAttribute("animation__scale", {
-        property: "scale",
-        to: { x: 1.7, y: 1.7, z: 1.7 },
-        dur: 800, easing: "easeInOutQuad"
-      });
+      frameEntities[5].setAttribute("position", { x: 0.3, y: -0.15, z: 0.35 });
+      frameEntities[5].setAttribute("scale", "1.7 1.7 1.7");
 
-      camera.setAttribute("animation__cam3", {
-        property: "position",
-        to: { x: 0, y: 0, z: 0.6 },
-        dur: 800, easing: "easeInOutQuad"
-      });
+      camera.setAttribute("position", { x: 0, y: 0, z: 0.6 });
 
       const infoText = document.createElement("a-text");
       infoText.setAttribute("value", "Infine, quest'ultima cornice");
@@ -300,8 +265,9 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 8;
 
     } else if (sequenceStep === 8) {
-      resetAllModels();
+      resetAllModels([5]);
       sequenceStep = 9;
     }
   }
 });
+
