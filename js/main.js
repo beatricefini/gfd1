@@ -70,7 +70,9 @@ document.addEventListener("DOMContentLoaded", () => {
     piece.setAttribute("visible","false");
 
     piece.addEventListener("model-loaded", () => {
+      const originalPos = piece.object3D.position.clone();
       const originalScale = piece.object3D.scale.clone();
+      piece.setAttribute("position", originalPos);
       piece.setAttribute("scale","0 0 0");
       piece.setAttribute("visible","true");
       piece.setAttribute("animation__pop",{
@@ -85,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modelsContainer.appendChild(piece);
     frameEntities.push(piece);
     currentIndex++;
-    setTimeout(showAllModelsSequentially,700); // comparsa più veloce
+    setTimeout(showAllModelsSequentially,700); // comparsa rapida
   }
 
   function clearOldTexts(){
@@ -99,20 +101,17 @@ document.addEventListener("DOMContentLoaded", () => {
     frameEntities.forEach(p=>{
       p.setAttribute("visible","true");
       p.removeAttribute("animation__zoom");
+      const originalPos = p.object3D.position.clone();
+      const originalScale = p.object3D.scale.clone();
       p.setAttribute("animation__resetPos",{
         property:"position",
-        to:{
-          x: p.object3D.position.x,
-          y: p.object3D.position.y,
-          z: p.object3D.position.z
-        },
+        to:{x:originalPos.x,y:originalPos.y,z:originalPos.z},
         dur:600,
         easing:"easeOutQuad"
       });
-      const s = p.object3D.scale.clone();
       p.setAttribute("animation__resetScale",{
         property:"scale",
-        to:{x:s.x,y:s.y,z:s.z},
+        to:{x:originalScale.x,y:originalScale.y,z:originalScale.z},
         dur:600,
         easing:"easeOutQuad"
       });
@@ -128,13 +127,20 @@ document.addEventListener("DOMContentLoaded", () => {
     clearOldTexts();
 
     if(sequenceStep===0){
-      // sequenza 1: piece1 e piece2
+      // Sequenza 1: piece1 e piece2
       frameEntities.forEach((p,i)=>{p.setAttribute("visible", i<2 ? "true":"false");});
       [frameEntities[0],frameEntities[1]].forEach(p=>{
         const pos = p.object3D.position.clone();
+        const scale = p.object3D.scale.clone();
         p.setAttribute("animation__zoom",{
           property:"position",
           to:{x:pos.x,y:pos.y,z:pos.z+0.15},
+          dur:600,
+          easing:"easeOutQuad"
+        });
+        p.setAttribute("animation__scale",{
+          property:"scale",
+          to:{x:scale.x*1.2,y:scale.y*1.2,z:scale.z*1.2},
           dur:600,
           easing:"easeOutQuad"
         });
@@ -161,36 +167,42 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep=2;
 
     } else if(sequenceStep===2){
-      // ritorno a tutte le cornici
-      frameEntities.forEach(p=>p.setAttribute("visible","true"));
       resetAllModels();
       sequenceStep=3;
 
     } else if(sequenceStep===3){
-      // sequenza 2: piece3,4,5
+      // Sequenza 2: piece3,4,5
       frameEntities.forEach((p,i)=>{p.setAttribute("visible",(i>=2&&i<=4)?"true":"false");});
       [frameEntities[2],frameEntities[3],frameEntities[4]].forEach(p=>{
         const pos = p.object3D.position.clone();
+        const scale = p.object3D.scale.clone();
         p.setAttribute("animation__zoom",{
           property:"position",
           to:{x:pos.x,y:pos.y,z:pos.z+0.15},
           dur:600,
           easing:"easeOutQuad"
         });
+        p.setAttribute("animation__scale",{
+          property:"scale",
+          to:{x:scale.x*1.2,y:scale.y*1.2,z:scale.z*1.2},
+          dur:600,
+          easing:"easeOutQuad"
+        });
       });
+      const texts = ["Primo testo su piece3-5","Secondo testo su piece3-5","Terzo testo su piece3-5"];
       const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Focus su piece3,4,5");
+      infoText.setAttribute("value",texts[0]);
       infoText.setAttribute("align","center");
       infoText.setAttribute("color","#008000");
       infoText.setAttribute("position","0 -0.4 0");
       infoText.setAttribute("scale","0.15 0.15 0.15");
       infoText.setAttribute("wrap-count","30");
       introContainer.appendChild(infoText);
-      sequenceStep=4;
+      sequenceStep=4; // passerà ai testi successivi ad ogni tap
 
     } else if(sequenceStep===4){
       const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Secondo testo su piece3,4,5");
+      infoText.setAttribute("value","Secondo testo su piece3-5");
       infoText.setAttribute("align","center");
       infoText.setAttribute("color","#008000");
       infoText.setAttribute("position","0 -0.5 0");
@@ -200,18 +212,35 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep=5;
 
     } else if(sequenceStep===5){
-      frameEntities.forEach(p=>p.setAttribute("visible","true"));
-      resetAllModels();
+      const infoText = document.createElement("a-text");
+      infoText.setAttribute("value","Terzo testo su piece3-5");
+      infoText.setAttribute("align","center");
+      infoText.setAttribute("color","#008000");
+      infoText.setAttribute("position","0 -0.6 0");
+      infoText.setAttribute("scale","0.15 0.15 0.15");
+      infoText.setAttribute("wrap-count","30");
+      introContainer.appendChild(infoText);
       sequenceStep=6;
 
     } else if(sequenceStep===6){
-      // sequenza 3: piece6
+      resetAllModels();
+      sequenceStep=7;
+
+    } else if(sequenceStep===7){
+      // Sequenza 3: piece6
       frameEntities.forEach((p,i)=>{p.setAttribute("visible",i===5?"true":"false");});
       const p6 = frameEntities[5];
       const pos = p6.object3D.position.clone();
+      const scale = p6.object3D.scale.clone();
       p6.setAttribute("animation__zoom",{
         property:"position",
         to:{x:pos.x,y:pos.y,z:pos.z+0.15},
+        dur:600,
+        easing:"easeOutQuad"
+      });
+      p6.setAttribute("animation__scale",{
+        property:"scale",
+        to:{x:scale.x*1.2,y:scale.y*1.2,z:scale.z*1.2},
         dur:600,
         easing:"easeOutQuad"
       });
@@ -223,14 +252,12 @@ document.addEventListener("DOMContentLoaded", () => {
       infoText.setAttribute("scale","0.15 0.15 0.15");
       infoText.setAttribute("wrap-count","30");
       introContainer.appendChild(infoText);
-      sequenceStep=7;
-
-    } else if(sequenceStep===7){
-      frameEntities.forEach(p=>p.setAttribute("visible","true"));
-      resetAllModels();
       sequenceStep=8;
+
+    } else if(sequenceStep===8){
+      resetAllModels();
+      sequenceStep=9;
     }
   }
 });
-
 
