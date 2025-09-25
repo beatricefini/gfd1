@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentIndex = 0;
   let allModelsDisplayed = false;
   let frameEntities = [];
-  let infoTextsQueue = []; 
+  let infoTextsQueue = [];
   let showingInfoText = false;
 
   marker.addEventListener("targetFound", () => {
@@ -58,33 +58,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (allModelsDisplayed && !showingInfoText) {
       showingInfoText = true;
       zoomPiece1and2();
-    } else if (showingInfoText && infoTextsQueue.length > 0) {
-      // Mostra il prossimo testo in coda
-      const currentText = document.getElementById("infoText");
-      if (currentText) currentText.setAttribute("visible", "false");
-
-      const nextTextValue = infoTextsQueue.shift();
-      if (nextTextValue) {
-        const infoText = document.createElement("a-text");
-        infoText.setAttribute("value", nextTextValue);
-        infoText.setAttribute("align", "center");
-        infoText.setAttribute("color", "#008000");
-        infoText.setAttribute("position", "0 -0.2 0");
-        infoText.setAttribute("scale", "0.15 0.15 0.15");
-        infoText.setAttribute("wrap-count", "30");
-        infoText.setAttribute("id", "infoText");
-        introContainer.appendChild(infoText);
-      } else {
-        // Tutti i testi mostrati: ritorna alla vista originale
-        frameEntities.forEach((f, i) => {
-          f.setAttribute("visible", "true");
-          f.setAttribute("position", "0 -0.05 0");
-          f.setAttribute("scale", "0.18 0.18 0.18");
-        });
-
-        camera.setAttribute("position", "0 0 0");
-        showingInfoText = false;
-      }
+    } else if (showingInfoText) {
+      handleNextInfoText();
     }
   });
 
@@ -132,7 +107,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function zoomPiece1and2() {
     if (frameEntities.length < 2) return;
 
-    // Nascondi le altre cornici
     for (let i = 2; i < frameEntities.length; i++) {
       frameEntities[i].setAttribute("visible", "false");
     }
@@ -140,61 +114,62 @@ document.addEventListener("DOMContentLoaded", () => {
     const p1 = frameEntities[0];
     const p2 = frameEntities[1];
 
-    // Sposta i modelli verso la camera
-    p1.setAttribute("animation__zoom", {
-      property: "position",
-      to: { x: -0.08, y: -0.05, z: 0.2 },
-      dur: 600,
-      easing: "easeOutQuad"
-    });
-    p2.setAttribute("animation__zoom", {
-      property: "position",
-      to: { x: 0.08, y: -0.05, z: 0.2 },
-      dur: 600,
-      easing: "easeOutQuad"
-    });
+    // Animazioni posizione e scala
+    p1.setAttribute("animation__zoom", { property: "position", to: { x: -0.08, y: -0.05, z: 0.2 }, dur: 600, easing: "easeOutQuad" });
+    p2.setAttribute("animation__zoom", { property: "position", to: { x: 0.08, y: -0.05, z: 0.2 }, dur: 600, easing: "easeOutQuad" });
+    p1.setAttribute("animation__scale", { property: "scale", to: { x: 0.22, y: 0.22, z: 0.22 }, dur: 600, easing: "easeOutQuad" });
+    p2.setAttribute("animation__scale", { property: "scale", to: { x: 0.22, y: 0.22, z: 0.22 }, dur: 600, easing: "easeOutQuad" });
 
-    // Scala leggermente
-    p1.setAttribute("animation__scale", {
-      property: "scale",
-      to: { x: 0.22, y: 0.22, z: 0.22 },
-      dur: 600,
-      easing: "easeOutQuad"
-    });
-    p2.setAttribute("animation__scale", {
-      property: "scale",
-      to: { x: 0.22, y: 0.22, z: 0.22 },
-      dur: 600,
-      easing: "easeOutQuad"
-    });
+    // Camera animata
+    camera.setAttribute("animation__camZoom", { property: "position", to: { x: 0, y: 0, z: 0.5 }, dur: 600, easing: "easeOutQuad" });
 
-    // Zoom camera verso i modelli
-    camera.setAttribute("animation__camZoom", {
-      property: "position",
-      to: { x: 0, y: 0, z: 0.5 },
-      dur: 600,
-      easing: "easeOutQuad"
-    });
-
-    // Coda dei testi da mostrare
+    // Coda dei testi
     infoTextsQueue = [
       "Queste due cornici rappresentano le principali della tua collezione",
       "Ecco alcune informazioni aggiuntive sulle cornici principali"
     ];
 
-    // Mostra subito il primo testo
-    const firstText = infoTextsQueue.shift();
-    if (firstText) {
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", firstText);
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#008000");
-      infoText.setAttribute("position", "0 -0.2 0");
-      infoText.setAttribute("scale", "0.15 0.15 0.15");
-      infoText.setAttribute("wrap-count", "30");
-      infoText.setAttribute("id", "infoText");
-      introContainer.appendChild(infoText);
+    // Mostra primo testo
+    showNextInfoText();
+  }
+
+  function handleNextInfoText() {
+    const currentText = document.getElementById("infoText");
+    if (currentText) {
+      currentText.setAttribute("visible", "false");
+      introContainer.removeChild(currentText);
     }
+
+    if (infoTextsQueue.length > 0) {
+      showNextInfoText();
+    } else {
+      // Tutti i testi mostrati → ritorno alla vista originale
+      for (let i = 0; i < frameEntities.length; i++) {
+        frameEntities[i].setAttribute("visible", "true");
+        frameEntities[i].setAttribute("animation__resetPos", { property: "position", to: { x: 0, y: -0.05, z: 0 }, dur: 600, easing: "easeOutQuad" });
+        frameEntities[i].setAttribute("animation__resetScale", { property: "scale", to: { x: 0.18, y: 0.18, z: 0.18 }, dur: 600, easing: "easeOutQuad" });
+      }
+
+      // Camera ritorna alla posizione originale
+      camera.setAttribute("animation__camBack", { property: "position", to: { x: 0, y: 0, z: 0 }, dur: 600, easing: "easeOutQuad" });
+
+      showingInfoText = false;
+    }
+  }
+
+  function showNextInfoText() {
+    const nextTextValue = infoTextsQueue.shift();
+    if (!nextTextValue) return;
+
+    const infoText = document.createElement("a-text");
+    infoText.setAttribute("value", nextTextValue);
+    infoText.setAttribute("align", "center");
+    infoText.setAttribute("color", "#008000");
+    infoText.setAttribute("position", "0 -0.2 0");
+    infoText.setAttribute("scale", "0.15 0.15 0.15");
+    infoText.setAttribute("wrap-count", "30");
+    infoText.setAttribute("id", "infoText");
+    introContainer.appendChild(infoText);
   }
 });
 
