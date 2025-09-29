@@ -80,24 +80,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // catturo indice per closure (importante per model-loaded asincrono)
     const idx = currentIndex;
     const piece = document.createElement("a-entity");
     piece.setAttribute("gltf-model", models[idx]);
-    // non forziamo pos/scale qui: lasciamo ciò che viene da Blender
-    piece.setAttribute("visible", "false"); // visibile solo dopo model-loaded
+    piece.setAttribute("visible", "false");
 
-    // quando carica il modello salviamo transform originali e avviamo pop
     piece.addEventListener("model-loaded", () => {
       const pos = piece.getAttribute("position");
       const scale = piece.getAttribute("scale");
-      // salviamo in originalTransforms usando idx catturato
       originalTransforms[idx] = {
         position: { x: pos.x, y: pos.y, z: pos.z },
         scale: { x: scale.x, y: scale.y, z: scale.z }
       };
 
-      // pop animazione verso la scala originale
       piece.setAttribute("animation__pop", {
         property: "scale",
         from: "0 0 0",
@@ -112,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modelsContainer.appendChild(piece);
     frameEntities.push(piece);
     currentIndex++;
-    setTimeout(showAllModelsSequentially, 700); // sequenza rapida
+    setTimeout(showAllModelsSequentially, 700);
   }
 
   // rimuove i testi temporanei (tranne tapText)
@@ -123,21 +118,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /**
-   * resetAllModels(activeIndices, callback)
-   * - anima solo i pezzi in activeIndices tornando alle trasformazioni originali
-   * - quando l'animazione è finita, ripristina visibilità/transform per TUTTE le cornici
-   */
+  // --- Reset models ---
   function resetAllModels(activeIndices = [], callback) {
-    // se originalTransforms non è ancora pronto per qualche indice, fallback ad un timeout più lungo
     const dur = 800;
 
-    // 1) nascondo temporaneamente le entità NON attive (per effetto)
     frameEntities.forEach((ent, i) => {
       if (!activeIndices.includes(i)) ent.setAttribute("visible", "false");
     });
 
-    // 2) animo il ritorno delle entità attive usando le trasformazioni salvate
     activeIndices.forEach((i) => {
       const ent = frameEntities[i];
       const orig = originalTransforms[i];
@@ -157,7 +145,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    // 3) dopo la durata, ripristino TUTTE le cornici con i loro valori originali e le rendo visibili
     setTimeout(() => {
       frameEntities.forEach((ent, i) => {
         const orig = originalTransforms[i];
@@ -168,7 +155,6 @@ document.addEventListener("DOMContentLoaded", () => {
         ent.setAttribute("visible", "true");
       });
 
-      // camera ritorna alla posizione originale (animata)
       camera.setAttribute("animation__camreset", {
         property: "position",
         to: "0 0 0",
@@ -176,7 +162,6 @@ document.addEventListener("DOMContentLoaded", () => {
         easing: "easeInOutQuad"
       });
 
-      // ri-mostro il tapText
       const tapText = document.getElementById("tapText");
       if (tapText) tapText.setAttribute("visible", "true");
 
@@ -184,19 +169,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }, dur + 50);
   }
 
-  // --- Gestione sequenze (con animazioni suave) ---
+  // --- Gestione sequenze ---
   function handleSequences() {
     const tapText = document.getElementById("tapText");
     if (tapText) tapText.setAttribute("visible", "false");
 
     clearOldTexts();
 
-    // SEQ 1: piece 0 & 1
     if (sequenceStep === 0) {
-      // nascondo gli altri
       frameEntities.forEach((ent, i) => { if (i > 1) ent.setAttribute("visible", "false"); });
 
-      // animazione posizione e scala verso valori di zoom (USARE le tue coordinate testate)
       frameEntities[0].setAttribute("animation__pos_zoom", {
         property: "position",
         to: "-0.35 0 0.1",
@@ -254,10 +236,8 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 2;
 
     } else if (sequenceStep === 2) {
-      // prima animiamo indietro i pezzi zoommati (0 e 1), poi facciamo riapparire tutto
       resetAllModels([0, 1], () => { sequenceStep = 3; });
 
-    // SEQ 2: piece 2,3,4
     } else if (sequenceStep === 3) {
       frameEntities.forEach((ent, i) => { if (i < 2 || i > 4) ent.setAttribute("visible", "false"); });
 
@@ -309,7 +289,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (sequenceStep === 6) {
       resetAllModels([2, 3, 4], () => { sequenceStep = 7; });
 
-    // SEQ 3: piece 5
     } else if (sequenceStep === 7) {
       frameEntities.forEach((ent, i) => { if (i !== 5) ent.setAttribute("visible", "false"); });
 
@@ -337,9 +316,43 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 8;
 
     } else if (sequenceStep === 8) {
-      resetAllModels([5], () => { sequenceStep = 9; });
+      resetAllModels([5], () => { 
+        sequenceStep = 9;
+        showFinalCube(); // <-- scena finale
+      });
     }
   }
+
+  // --- Funzione scena finale ---
+  function showFinalCube() {
+    frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
+    clearOldTexts();
+
+    const finalCube = document.createElement("a-box");
+    finalCube.setAttribute("color", "#FF0000");
+    finalCube.setAttribute("depth", "0.3");
+    finalCube.setAttribute("height", "0.3");
+    finalCube.setAttribute("width", "0.3");
+    finalCube.setAttribute("position", "0 0 0.3");
+    finalCube.setAttribute("scale", "0 0 0");
+
+    finalCube.setAttribute("animation__pop", {
+      property: "scale",
+      to: "1 1 1",
+      dur: 800,
+      easing: "easeOutElastic"
+    });
+
+    modelsContainer.appendChild(finalCube);
+
+    const finalText = document.createElement("a-text");
+    finalText.setAttribute("value", "Grazie per aver esplorato la collezione!");
+    finalText.setAttribute("align", "center");
+    finalText.setAttribute("color", "#008000");
+    finalText.setAttribute("position", "0 -0.5 0");
+    finalText.setAttribute("scale", "0.2 0.2 0.2");
+    finalText.setAttribute("wrap-count", "30");
+    introContainer.appendChild(finalText);
+  }
+
 });
-
-
