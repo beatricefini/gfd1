@@ -18,8 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let allModelsDisplayed = false;
   const frameEntities = [];
   let sequenceStep = 0;
-
-  // salvataggio delle trasformazioni originali (pos, scale) per ogni indice
   const originalTransforms = {};
 
   // --- Intro / target found ---
@@ -36,9 +34,10 @@ document.addEventListener("DOMContentLoaded", () => {
     introText.setAttribute("id", "introText");
     introContainer.appendChild(introText);
 
+    // TAP TO CONTINUE: comparirà dopo 3 secondi
     setTimeout(() => {
       const startText = document.createElement("a-text");
-      startText.setAttribute("value", "Tap to start");
+      startText.setAttribute("value", "Tap to continue");
       startText.setAttribute("align", "center");
       startText.setAttribute("color", "#FFD700");
       startText.setAttribute("position", "0 -0.2 0");
@@ -46,16 +45,19 @@ document.addEventListener("DOMContentLoaded", () => {
       startText.setAttribute("wrap-count", "20");
       startText.setAttribute("id", "startText");
       introContainer.appendChild(startText);
-    }, 500);
+    }, 3000); // 3 secondi
   });
 
   // --- Global click handler ---
   window.addEventListener("click", () => {
+    const startText = document.getElementById("startText");
     if (!started) {
+      // blocco se la scritta non è ancora comparsa
+      if (!startText) return;
+
       const introText = document.getElementById("introText");
-      const startText = document.getElementById("startText");
       if (introText) introText.setAttribute("visible", "false");
-      if (startText) startText.setAttribute("visible", "false");
+      startText.setAttribute("visible", "false");
 
       started = true;
       showAllModelsSequentially();
@@ -317,8 +319,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } else if (sequenceStep === 8) {
       resetAllModels([5], () => { 
+        // rimuovo TAP THE SCREEN
+        const tapText = document.getElementById("tapText");
+        if (tapText) tapText.setAttribute("visible", "false");
+
         sequenceStep = 9;
-        showFinalCube(); // <-- scena finale
+        showFinalCube(); // scena finale
       });
     }
   }
