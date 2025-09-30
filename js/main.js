@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let canTap = false;
   const originalTransforms = {};
 
-  // --- Intro / target found ---
   marker.addEventListener("targetFound", () => {
     if (started) return;
 
@@ -52,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
   });
 
-  // --- Global click handler ---
   window.addEventListener("click", () => {
     const startText = document.getElementById("startText");
     if (!started && canTap) {
@@ -67,7 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- Show models one by one (pop) ---
   function showAllModelsSequentially() {
     if (currentIndex >= models.length) {
       allModelsDisplayed = true;
@@ -122,11 +119,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function resetAllModels(activeIndices = [], callback) {
     const dur = 800;
-
     frameEntities.forEach((ent, i) => {
       if (!activeIndices.includes(i)) ent.setAttribute("visible", "false");
     });
-
     activeIndices.forEach((i) => {
       const ent = frameEntities[i];
       const orig = originalTransforms[i];
@@ -155,22 +150,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         ent.setAttribute("visible", "true");
       });
-
-      camera.setAttribute("animation__camreset", {
-        property: "position",
-        to: "0 0 0",
-        dur: dur,
-        easing: "easeInOutQuad"
-      });
-
+      camera.setAttribute("animation__camreset", { property: "position", to: "0 0 0", dur: dur, easing: "easeInOutQuad" });
       const tapText = document.getElementById("tapText");
       if (tapText) tapText.setAttribute("visible", "true");
-
       if (typeof callback === "function") callback();
     }, dur + 50);
   }
 
-  // --- Finale con modello cinema ---
   function showFinalCinema() {
     frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
     clearOldTexts();
@@ -216,158 +202,113 @@ document.addEventListener("DOMContentLoaded", () => {
     introContainer.appendChild(textRuins);
   }
 
-  // --- Gestione sequenze con testi aggiornati ---
   function handleSequences() {
     const tapText = document.getElementById("tapText");
     if (tapText) tapText.setAttribute("visible", "false");
-
     clearOldTexts();
 
-    // --- Zoom 1 ---
+    // --- Zoom 1 (Piece1 & Piece2) ---
     if (sequenceStep === 0) {
       frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
-
       frameEntities[0].setAttribute("animation__pos_zoom", { property: "position", to: "-0.35 0 0.1", dur: 800, easing: "easeInOutQuad" });
       frameEntities[1].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.12 0.4", dur: 800, easing: "easeInOutQuad" });
-
       frameEntities[0].setAttribute("animation__scale_zoom", { property: "scale", to: "1.2 1.2 1.2", dur: 800, easing: "easeInOutQuad" });
       frameEntities[1].setAttribute("animation__scale_zoom", { property: "scale", to: "2.1 2.1 2.1", dur: 800, easing: "easeInOutQuad" });
-
       camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.5", dur: 800, easing: "easeInOutQuad" });
 
-      // Testi Zoom 1
-      const text1952 = document.createElement("a-text");
-      text1952.setAttribute("value", "1952");
-      text1952.setAttribute("align", "center");
-      text1952.setAttribute("color", "#000000");
-      text1952.setAttribute("font", "roboto");
-      text1952.setAttribute("position", "0 0.35 0");
-      text1952.setAttribute("scale", "0.25 0.25 0.25");
-      text1952.setAttribute("wrap-count", "30");
-      introContainer.appendChild(text1952);
+      // TESTI ZOOM 1 (molto più bassi)
+      const t1 = document.createElement("a-text");
+      t1.setAttribute("value", "1952");
+      t1.setAttribute("align", "center");
+      t1.setAttribute("color", "#000000");
+      t1.setAttribute("font", "roboto");
+      t1.setAttribute("position", "0 -0.3 0");
+      t1.setAttribute("scale", "0.25 0.25 0.25");
+      t1.setAttribute("wrap-count", "30");
+      introContainer.appendChild(t1);
 
-      const textAlfred = document.createElement("a-text");
-      textAlfred.setAttribute("value", "The cinema operator Alfred Friedrich Wolff made a proposal to build a\ncamera theater, a hotel, and a café-restaurant in Hereplein");
-      textAlfred.setAttribute("align", "center");
-      textAlfred.setAttribute("color", "#000000");
-      textAlfred.setAttribute("font", "roboto");
-      textAlfred.setAttribute("position", "0 0.2 0");
-      textAlfred.setAttribute("scale", "0.18 0.18 0.18");
-      textAlfred.setAttribute("wrap-count", "35");
-      introContainer.appendChild(textAlfred);
+      const t2 = document.createElement("a-text");
+      t2.setAttribute("value", "The cinema operator Alfred Friedrich Wolff made a proposal to build a\ncamera theater, a hotel, and a café-restaurant in Hereplein");
+      t2.setAttribute("align", "center");
+      t2.setAttribute("color", "#000000");
+      t2.setAttribute("font", "roboto");
+      t2.setAttribute("position", "0 -0.45 0");
+      t2.setAttribute("scale", "0.18 0.18 0.18");
+      t2.setAttribute("wrap-count", "35");
+      introContainer.appendChild(t2);
 
-      const textBUT = document.createElement("a-text");
-      textBUT.setAttribute("value", "BUT");
-      textBUT.setAttribute("align", "center");
-      textBUT.setAttribute("color", "#000000");
-      textBUT.setAttribute("font", "roboto");
-      textBUT.setAttribute("position", "0 0.05 0");
-      textBUT.setAttribute("scale", "0.25 0.25 0.25");
-      textBUT.setAttribute("wrap-count", "30");
-      introContainer.appendChild(textBUT);
+      const t3 = document.createElement("a-text");
+      t3.setAttribute("value", "BUT");
+      t3.setAttribute("align", "center");
+      t3.setAttribute("color", "#000000");
+      t3.setAttribute("font", "roboto");
+      t3.setAttribute("position", "0 -0.6 0");
+      t3.setAttribute("scale", "0.25 0.25 0.25");
+      t3.setAttribute("wrap-count", "30");
+      introContainer.appendChild(t3);
 
-      const textRefused = document.createElement("a-text");
-      textRefused.setAttribute("value", "The municipality refused");
-      textRefused.setAttribute("align", "center");
-      textRefused.setAttribute("color", "#000000");
-      textRefused.setAttribute("font", "roboto");
-      textRefused.setAttribute("position", "0 -0.1 0");
-      textRefused.setAttribute("scale", "0.18 0.18 0.18");
-      textRefused.setAttribute("wrap-count", "35");
-      introContainer.appendChild(textRefused);
+      const t4 = document.createElement("a-text");
+      t4.setAttribute("value", "The municipality refused");
+      t4.setAttribute("align", "center");
+      t4.setAttribute("color", "#000000");
+      t4.setAttribute("font", "roboto");
+      t4.setAttribute("position", "0 -0.75 0");
+      t4.setAttribute("scale", "0.18 0.18 0.18");
+      t4.setAttribute("wrap-count", "35");
+      introContainer.appendChild(t4);
 
       sequenceStep = 1;
+    }
 
-    } else if (sequenceStep === 1) {
-      resetAllModels([0,1], () => { sequenceStep = 2; });
+    // Zoom 2 (Piece1 & Piece2 ancora)
+    else if (sequenceStep === 3) {
+      // testi molto più bassi
+      const t1 = document.createElement("a-text");
+      t1.setAttribute("value", "1958");
+      t1.setAttribute("align", "center");
+      t1.setAttribute("color", "#000000");
+      t1.setAttribute("font", "roboto");
+      t1.setAttribute("position", "0 -0.3 0");
+      t1.setAttribute("scale", "0.25 0.25 0.25");
+      t1.setAttribute("wrap-count", "30");
+      introContainer.appendChild(t1);
 
-    } else if (sequenceStep === 2) {
-      // Zoom 2
-      frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
+      const t2 = document.createElement("a-text");
+      t2.setAttribute("value", "Some buttresses of the Alva castle, built during the Eighty Years' War,\nwere found in the construction pit of the cinema.");
+      t2.setAttribute("align", "center");
+      t2.setAttribute("color", "#000000");
+      t2.setAttribute("font", "roboto");
+      t2.setAttribute("position", "0 -0.45 0");
+      t2.setAttribute("scale", "0.18 0.18 0.18");
+      t2.setAttribute("wrap-count", "35");
+      introContainer.appendChild(t2);
 
-      frameEntities[0].setAttribute("animation__pos_zoom", { property: "position", to: "-0.35 0 0.1", dur: 800, easing: "easeInOutQuad" });
-      frameEntities[1].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.12 0.4", dur: 800, easing: "easeInOutQuad" });
+      sequenceStep = 4;
+    }
 
-      frameEntities[0].setAttribute("animation__scale_zoom", { property: "scale", to: "1.2 1.2 1.2", dur: 800, easing: "easeInOutQuad" });
-      frameEntities[1].setAttribute("animation__scale_zoom", { property: "scale", to: "2.1 2.1 2.1", dur: 800, easing: "easeInOutQuad" });
+    // Zoom 3 (Piece6)
+    else if (sequenceStep === 6) {
+      const t1 = document.createElement("a-text");
+      t1.setAttribute("value", "17th Century");
+      t1.setAttribute("align", "center");
+      t1.setAttribute("color", "#000000");
+      t1.setAttribute("font", "roboto");
+      t1.setAttribute("position", "0 -0.3 0");
+      t1.setAttribute("scale", "0.25 0.25 0.25");
+      t1.setAttribute("wrap-count", "30");
+      introContainer.appendChild(t1);
 
-      camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.5", dur: 800, easing: "easeInOutQuad" });
+      const t2 = document.createElement("a-text");
+      t2.setAttribute("value", "A rampart was built, incorporating the famous Herepoort gate.\nThe rampart and gate were demolished in 1875 and 1878, respectively,\nto allow for the construction of Hereplein square and the canals.");
+      t2.setAttribute("align", "center");
+      t2.setAttribute("color", "#000000");
+      t2.setAttribute("font", "roboto");
+      t2.setAttribute("position", "0 -0.45 0");
+      t2.setAttribute("scale", "0.18 0.18 0.18");
+      t2.setAttribute("wrap-count", "35");
+      introContainer.appendChild(t2);
 
-      // Testi Zoom 2
-      const text1958Zoom2 = document.createElement("a-text");
-      text1958Zoom2.setAttribute("value", "1958");
-      text1958Zoom2.setAttribute("align", "center");
-      text1958Zoom2.setAttribute("color", "#000000");
-      text1958Zoom2.setAttribute("font", "roboto");
-      text1958Zoom2.setAttribute("position", "0 0.35 0");
-      text1958Zoom2.setAttribute("scale", "0.25 0.25 0.25");
-      text1958Zoom2.setAttribute("wrap-count", "30");
-      introContainer.appendChild(text1958Zoom2);
-
-      const textAlva = document.createElement("a-text");
-      textAlva.setAttribute("value", "Some buttresses of the Alva castle, built during the Eighty Years' War,\nwere found in the construction pit of the cinema.");
-      textAlva.setAttribute("align", "center");
-      textAlva.setAttribute("color", "#000000");
-      textAlva.setAttribute("font", "roboto");
-      textAlva.setAttribute("position", "0 0.2 0");
-      textAlva.setAttribute("scale", "0.18 0.18 0.18");
-      textAlva.setAttribute("wrap-count", "35");
-      introContainer.appendChild(textAlva);
-
-      sequenceStep = 3;
-
-    } else if (sequenceStep === 3) {
-      resetAllModels([0,1], () => { sequenceStep = 4; });
-
-    } else if (sequenceStep === 4) {
-      // Zoom 3
-      frameEntities.forEach((ent,i)=>{ if(i!==5) ent.setAttribute("visible","false"); });
-
-      frameEntities[5].setAttribute("animation__pos_zoom", { property:"position", to:"0.3 -0.15 0.35", dur:800, easing:"easeInOutQuad" });
-      frameEntities[5].setAttribute("animation__scale_zoom", { property:"scale", to:"1.7 1.7 1.7", dur:800, easing:"easeInOutQuad" });
-
-      camera.setAttribute("animation__cam_zoom", { property:"position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
-
-      // Testi Zoom 3
-      const text17th = document.createElement("a-text");
-      text17th.setAttribute("value", "17th Century");
-      text17th.setAttribute("align", "center");
-      text17th.setAttribute("color", "#000000");
-      text17th.setAttribute("font", "roboto");
-      text17th.setAttribute("position", "0 0.35 0");
-      text17th.setAttribute("scale", "0.25 0.25 0.25");
-      text17th.setAttribute("wrap-count", "30");
-      introContainer.appendChild(text17th);
-
-      const textRampart = document.createElement("a-text");
-      textRampart.setAttribute("value", "A rampart was built, incorporating the famous Herepoort gate.\nThe rampart and gate were demolished in 1875 and 1878, respectively,\nto allow for the construction of Hereplein square and the canals.");
-      textRampart.setAttribute("align", "center");
-      textRampart.setAttribute("color", "#000000");
-      textRampart.setAttribute("font", "roboto");
-      textRampart.setAttribute("position", "0 0.2 0");
-      textRampart.setAttribute("scale", "0.18 0.18 0.18");
-      textRampart.setAttribute("wrap-count", "35");
-      introContainer.appendChild(textRampart);
-
-      sequenceStep = 5;
-
-    } else if (sequenceStep === 5) {
-      resetAllModels([0,1,2,3,4,5], () => { 
-        const tapText = document.getElementById("tapText");
-        if (tapText) tapText.setAttribute("visible", "false");
-
-        setTimeout(() => {
-          frameEntities.forEach(ent => {
-            ent.setAttribute("animation__popout", { property: "scale", to: "0 0 0", dur: 600, easing: "easeInQuad" });
-          });
-
-          setTimeout(() => {
-            frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
-            sequenceStep = 6;
-            showFinalCinema();
-          }, 600);
-        }, 2000);
-      });
+      sequenceStep = 7;
     }
   }
 });
