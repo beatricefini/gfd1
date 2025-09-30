@@ -4,36 +4,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const modelsContainer = document.getElementById("modelsContainer");
   const camera = document.querySelector("a-camera");
 
-  const models = [
-    "#piece1",
-    "#piece2",
-    "#piece3",
-    "#piece4",
-    "#piece5",
-    "#piece6"
-  ];
-
-  let started = false;
-  let currentIndex = 0;
-  let allModelsDisplayed = false;
+  const models = ["#piece1","#piece2","#piece3","#piece4","#piece5","#piece6"];
+  let started = false, currentIndex = 0, allModelsDisplayed = false;
   const frameEntities = [];
-  let sequenceStep = 0;
-  let canTap = false;
+  let sequenceStep = 0, canTap = false;
   const originalTransforms = {};
 
-  // --- Intro / target found ---
+  // --- Intro ---
   marker.addEventListener("targetFound", () => {
     if (started) return;
 
     const introText = document.createElement("a-text");
     introText.setAttribute("value",
-      "Fragments is an Augmented Reality experience that retraces the history\nof the Camera Bioscoop building.\n\nThe work is composed of four chronological interactive experiences,\nguiding visitors through different moments of its past.\n\nStep by step, the audience is accompanied through the entrance of the\nCamera Bioscoop, where history and architecture come alive in a layered,\nimmersive narrative."
+      "Fragments is an Augmented Reality experience that retraces the history\n" +
+      "of the Camera Bioscoop building.\n\n" +
+      "The work is composed of four chronological interactive experiences,\n" +
+      "guiding visitors through different moments of its past.\n\n" +
+      "Step by step, the audience is accompanied through the entrance of the\n" +
+      "Camera Bioscoop, where history and architecture come alive in a layered,\n" +
+      "immersive narrative."
     );
     introText.setAttribute("align", "center");
     introText.setAttribute("color", "#000000");
     introText.setAttribute("font", "roboto");
     introText.setAttribute("position", "0 0.25 0");
-    introText.setAttribute("scale", "0.20 0.20 0.20"); // font leggermente più grande
+    introText.setAttribute("scale", "0.18 0.18 0.18");
     introText.setAttribute("wrap-count", "35");
     introText.setAttribute("id", "introText");
     introContainer.appendChild(introText);
@@ -42,10 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const startText = document.createElement("a-text");
       startText.setAttribute("value", "Tap to continue");
       startText.setAttribute("align", "center");
-      startText.setAttribute("color", "#000000"); // nero
+      startText.setAttribute("color", "#000000");
       startText.setAttribute("font", "roboto");
+      startText.setAttribute("bold", true);
       startText.setAttribute("position", "0 -0.3 0");
-      startText.setAttribute("scale", "0.18 0.18 0.18"); // leggermente più piccolo
+      startText.setAttribute("scale", "0.18 0.18 0.18");
       startText.setAttribute("wrap-count", "20");
       startText.setAttribute("id", "startText");
       introContainer.appendChild(startText);
@@ -68,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- Show models one by one (pop) ---
+  // --- Show models ---
   function showAllModelsSequentially() {
     if (currentIndex >= models.length) {
       allModelsDisplayed = true;
@@ -76,9 +72,9 @@ document.addEventListener("DOMContentLoaded", () => {
       tapText.setAttribute("value", "Tap the screen");
       tapText.setAttribute("align", "center");
       tapText.setAttribute("color", "#000000");
-      tapText.setAttribute("font", "roboto");
+      tapText.setAttribute("bold", true);
       tapText.setAttribute("position", "0 -0.6 0");
-      tapText.setAttribute("scale", "0.2 0.2 0.2");
+      tapText.setAttribute("scale", "0.18 0.18 0.18");
       tapText.setAttribute("wrap-count", "20");
       tapText.setAttribute("id", "tapText");
       introContainer.appendChild(tapText);
@@ -93,10 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     piece.addEventListener("model-loaded", () => {
       const pos = piece.getAttribute("position");
       const scale = piece.getAttribute("scale");
-      originalTransforms[idx] = {
-        position: { x: pos.x, y: pos.y, z: pos.z },
-        scale: { x: scale.x, y: scale.y, z: scale.z }
-      };
+      originalTransforms[idx] = { position: { ...pos }, scale: { ...scale } };
 
       piece.setAttribute("animation__pop", {
         property: "scale",
@@ -105,7 +98,6 @@ document.addEventListener("DOMContentLoaded", () => {
         dur: 500,
         easing: "easeOutElastic"
       });
-
       piece.setAttribute("visible", "true");
     });
 
@@ -115,183 +107,196 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(showAllModelsSequentially, 700);
   }
 
+  // --- Clear texts ---
   function clearOldTexts() {
     const oldTexts = introContainer.querySelectorAll("a-text");
-    oldTexts.forEach((t) => {
-      if (t.id !== "tapText") t.remove();
-    });
+    oldTexts.forEach(t => { if(t.id!=="tapText") t.remove(); });
   }
 
+  // --- Reset view to all frames ---
   function resetAllModels(activeIndices = [], callback) {
     const dur = 800;
-    frameEntities.forEach((ent, i) => {
-      if (!activeIndices.includes(i)) ent.setAttribute("visible", "false");
+    frameEntities.forEach((ent,i)=>{ if(!activeIndices.includes(i)) ent.setAttribute("visible","false"); });
+    activeIndices.forEach(i => {
+      const ent = frameEntities[i], orig = originalTransforms[i];
+      if(!ent || !orig) return;
+      ent.setAttribute("animation__backpos",{ property:"position", to:`${orig.position.x} ${orig.position.y} ${orig.position.z}`, dur, easing:"easeInOutQuad"});
+      ent.setAttribute("animation__backscale",{ property:"scale", to:`${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`, dur, easing:"easeInOutQuad"});
     });
 
-    activeIndices.forEach((i) => {
-      const ent = frameEntities[i];
-      const orig = originalTransforms[i];
-      if (!ent || !orig) return;
-
-      ent.setAttribute("animation__backpos", {
-        property: "position",
-        to: `${orig.position.x} ${orig.position.y} ${orig.position.z}`,
-        dur: dur,
-        easing: "easeInOutQuad"
-      });
-      ent.setAttribute("animation__backscale", {
-        property: "scale",
-        to: `${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`,
-        dur: dur,
-        easing: "easeInOutQuad"
-      });
-    });
-
-    setTimeout(() => {
-      frameEntities.forEach((ent, i) => {
+    setTimeout(()=>{
+      frameEntities.forEach((ent,i)=>{
         const orig = originalTransforms[i];
-        if (orig) {
-          ent.setAttribute("position", `${orig.position.x} ${orig.position.y} ${orig.position.z}`);
-          ent.setAttribute("scale", `${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`);
+        if(orig){
+          ent.setAttribute("position",`${orig.position.x} ${orig.position.y} ${orig.position.z}`);
+          ent.setAttribute("scale",`${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`);
         }
-        ent.setAttribute("visible", "true");
+        ent.setAttribute("visible","true");
       });
-
-      camera.setAttribute("animation__camreset", {
-        property: "position",
-        to: "0 0 0",
-        dur: dur,
-        easing: "easeInOutQuad"
-      });
-
+      camera.setAttribute("animation__camreset",{ property:"position", to:"0 0 0", dur, easing:"easeInOutQuad" });
       const tapText = document.getElementById("tapText");
-      if (tapText) tapText.setAttribute("visible", "true");
-
-      if (typeof callback === "function") callback();
-    }, dur + 50);
+      if(tapText) tapText.setAttribute("visible","true");
+      if(typeof callback==="function") callback();
+    }, dur+50);
   }
 
-  // --- Sequenze ---
+  // --- Sequenze con TAP e ritorni ---
   function handleSequences() {
-    const tapText = document.getElementById("tapText");
-    if (tapText) tapText.setAttribute("visible", "false");
     clearOldTexts();
+    const tapText = document.getElementById("tapText");
+    if(tapText) tapText.setAttribute("visible","false");
 
-    // --- Step 0: Zoom piece1 & 2 ---
-    if (sequenceStep === 0) {
-      frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
+    switch(sequenceStep){
 
-      frameEntities[0].setAttribute("animation__pos_zoom", { property: "position", to: "-0.35 0 0.1", dur: 800, easing: "easeInOutQuad" });
-      frameEntities[1].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.12 0.4", dur: 800, easing: "easeInOutQuad" });
-      frameEntities[0].setAttribute("animation__scale_zoom", { property: "scale", to: "1.2 1.2 1.2", dur: 800, easing: "easeInOutQuad" });
-      frameEntities[1].setAttribute("animation__scale_zoom", { property: "scale", to: "2.1 2.1 2.1", dur: 800, easing: "easeInOutQuad" });
-      camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.5", dur: 800, easing: "easeInOutQuad" });
+      // --- ZOOM 1: piece1 & piece2 ---
+      case 0:
+        frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
+        frameEntities[0].setAttribute("animation__pos_zoom",{property:"position",to:"-0.35 0 0.1",dur:800,easing:"easeInOutQuad"});
+        frameEntities[1].setAttribute("animation__pos_zoom",{property:"position",to:"0.05 0.12 0.4",dur:800,easing:"easeInOutQuad"});
+        frameEntities[0].setAttribute("animation__scale_zoom",{property:"scale",to:"1.2 1.2 1.2",dur:800,easing:"easeInOutQuad"});
+        frameEntities[1].setAttribute("animation__scale_zoom",{property:"scale",to:"2.1 2.1 2.1",dur:800,easing:"easeInOutQuad"});
+        camera.setAttribute("animation__cam_zoom",{property:"position",to:"0 0 0.5",dur:800,easing:"easeInOutQuad"});
 
-      // Testo 1952 + sotto
-      const text1952 = document.createElement("a-text");
-      text1952.setAttribute("value", "1952");
-      text1952.setAttribute("align", "center");
-      text1952.setAttribute("color", "#000000");
-      text1952.setAttribute("font", "roboto");
-      text1952.setAttribute("position", "0 0.35 0"); // leggermente più in alto
-      text1952.setAttribute("scale", "0.35 0.35 0.35"); // più grande
-      introContainer.appendChild(text1952);
+        // DATA 1952
+        const text1952 = document.createElement("a-text");
+        text1952.setAttribute("value","1952");
+        text1952.setAttribute("align","center");
+        text1952.setAttribute("color","#000000");
+        text1952.setAttribute("font","roboto");
+        text1952.setAttribute("bold",true);
+        text1952.setAttribute("position","0 0.35 0");
+        text1952.setAttribute("scale","0.25 0.25 0.25");
+        introContainer.appendChild(text1952);
 
-      const text1952Desc = document.createElement("a-text");
-      text1952Desc.setAttribute("value",
-        "The cinema operator Alfred Friedrich Wolff made a proposal to build a camera theater,\na hotel, and a café-restaurant in Hereplein"
-      );
-      text1952Desc.setAttribute("align", "center");
-      text1952Desc.setAttribute("color", "#000000");
-      text1952Desc.setAttribute("font", "roboto");
-      text1952Desc.setAttribute("position", "0 -0.1 0");
-      text1952Desc.setAttribute("scale", "0.18 0.18 0.18");
-      text1952Desc.setAttribute("wrap-count", "30");
-      introContainer.appendChild(text1952Desc);
+        const desc1952 = document.createElement("a-text");
+        desc1952.setAttribute("value","The cinema operator Alfred Friedrich Wolff made a proposal to build a camera theater,\na hotel, and a café-restaurant in Hereplein.");
+        desc1952.setAttribute("align","center");
+        desc1952.setAttribute("color","#000000");
+        desc1952.setAttribute("font","roboto");
+        desc1952.setAttribute("position","0 0.05 0");
+        desc1952.setAttribute("scale","0.18 0.18 0.18");
+        desc1952.setAttribute("wrap-count","30");
+        introContainer.appendChild(desc1952);
 
-      sequenceStep = 1;
+        sequenceStep = 0.5; // attendo TAP per testo2
+        break;
 
-    // --- Step 1: Zoom piece3,4,5 ---
-    } else if (sequenceStep === 1) {
-      resetAllModels([0,1], () => {
+      case 0.5: // TESTO 2 piece1&2
+        const textBUT = document.createElement("a-text");
+        textBUT.setAttribute("value","BUT");
+        textBUT.setAttribute("align","center");
+        textBUT.setAttribute("color","#000000");
+        textBUT.setAttribute("font","roboto");
+        textBUT.setAttribute("bold",true);
+        textBUT.setAttribute("position","0 0.35 0");
+        textBUT.setAttribute("scale","0.25 0.25 0.25");
+        introContainer.appendChild(textBUT);
+
+        const descBUT = document.createElement("a-text");
+        descBUT.setAttribute("value","The municipality refused.");
+        descBUT.setAttribute("align","center");
+        descBUT.setAttribute("color","#000000");
+        descBUT.setAttribute("font","roboto");
+        descBUT.setAttribute("position","0 0.05 0");
+        descBUT.setAttribute("scale","0.18 0.18 0.18");
+        descBUT.setAttribute("wrap-count","30");
+        introContainer.appendChild(descBUT);
+
+        sequenceStep = 1; // ritorno vista completa al prossimo TAP
+        break;
+
+      case 1: // ritorno vista completa
+        resetAllModels([],()=>{ sequenceStep=2; });
+        break;
+
+      // --- ZOOM 2: piece3,4,5 ---
+      case 2:
         frameEntities.forEach((ent,i)=>{ if(i<2 || i>4) ent.setAttribute("visible","false"); });
+        [2,3,4].forEach(i=>frameEntities[i].setAttribute("animation__scale_zoom",{property:"scale",to:"1.2 1.2 1.2",dur:800,easing:"easeInOutQuad"}));
+        camera.setAttribute("animation__cam_zoom",{property:"position",to:"0 0 0.6",dur:800,easing:"easeInOutQuad"});
 
-        frameEntities[2].setAttribute("animation__pos_zoom", { property: "position", to: "-0.05 0.2 0.35", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[3].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.45 0.35", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[4].setAttribute("animation__pos_zoom", { property: "position", to: "0.15 0.3 0.35", dur: 800, easing: "easeInOutQuad" });
-        [2,3,4].forEach(i => frameEntities[i].setAttribute("animation__scale_zoom", {
-          property: "scale",
-          to: "1.2 1.2 1.2",
-          dur: 800, easing: "easeInOutQuad"
-        }));
-        camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.6", dur: 800, easing: "easeInOutQuad" });
-
-        // Testo 1958
         const text1958 = document.createElement("a-text");
-        text1958.setAttribute("value", "1958");
-        text1958.setAttribute("align", "center");
-        text1958.setAttribute("color", "#000000");
-        text1958.setAttribute("font", "roboto");
-        text1958.setAttribute("position", "0 0.35 0"); // leggermente più alto
-        text1958.setAttribute("scale", "0.35 0.35 0.35"); // più grande
+        text1958.setAttribute("value","1958");
+        text1958.setAttribute("align","center");
+        text1958.setAttribute("color","#000000");
+        text1958.setAttribute("font","roboto");
+        text1958.setAttribute("bold",true);
+        text1958.setAttribute("position","0 0.35 0");
+        text1958.setAttribute("scale","0.25 0.25 0.25");
         introContainer.appendChild(text1958);
 
-        const text1958Desc = document.createElement("a-text");
-        text1958Desc.setAttribute("value",
-          "Some buttresses of the Alva castele, built during the Eighty Years' War,\nwere found in the construction pit of the cinema."
-        );
-        text1958Desc.setAttribute("align", "center");
-        text1958Desc.setAttribute("color", "#000000");
-        text1958Desc.setAttribute("font", "roboto");
-        text1958Desc.setAttribute("position", "0 -0.1 0");
-        text1958Desc.setAttribute("scale", "0.18 0.18 0.18");
-        text1958Desc.setAttribute("wrap-count", "30");
-        introContainer.appendChild(text1958Desc);
+        const desc1958 = document.createElement("a-text");
+        desc1958.setAttribute("value","Some buttresses of the Alva castle, built during the Eighty Years' War,\nwere found in the construction pit of the cinema.");
+        desc1958.setAttribute("align","center");
+        desc1958.setAttribute("color","#000000");
+        desc1958.setAttribute("font","roboto");
+        desc1958.setAttribute("position","0 0.05 0");
+        desc1958.setAttribute("scale","0.18 0.18 0.18");
+        desc1958.setAttribute("wrap-count","30");
+        introContainer.appendChild(desc1958);
 
-        sequenceStep = 2;
-      });
+        sequenceStep=2.5; // attendo TAP per ritorno
+        break;
 
-    // --- Step 2: Zoom piece6 ---
-    } else if (sequenceStep === 2) {
-      resetAllModels([2,3,4], () => {
+      case 2.5: // ritorno vista completa
+        resetAllModels([2,3,4],()=>{ sequenceStep=3; });
+        break;
+
+      // --- ZOOM 3: piece6 ---
+      case 3:
         frameEntities.forEach((ent,i)=>{ if(i!==5) ent.setAttribute("visible","false"); });
+        frameEntities[5].setAttribute("animation__scale_zoom",{property:"scale",to:"1.7 1.7 1.7",dur:800,easing:"easeInOutQuad"});
+        camera.setAttribute("animation__cam_zoom",{property:"position",to:"0 0 0.6",dur:800,easing:"easeInOutQuad"});
 
-        frameEntities[5].setAttribute("animation__pos_zoom", { property: "position", to: "0 0.05 0.35", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[5].setAttribute("animation__scale_zoom", { property: "scale", to: "1.7 1.7 1.7", dur: 800, easing: "easeInOutQuad" });
-        camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.6", dur: 800, easing: "easeInOutQuad" });
+        const text17 = document.createElement("a-text");
+        text17.setAttribute("value","17th Century");
+        text17.setAttribute("align","center");
+        text17.setAttribute("color","#000000");
+        text17.setAttribute("font","roboto");
+        text17.setAttribute("bold",true);
+        text17.setAttribute("position","0 0.35 0");
+        text17.setAttribute("scale","0.25 0.25 0.25");
+        introContainer.appendChild(text17);
 
-        // Testo 17th century
-        const text17th = document.createElement("a-text");
-        text17th.setAttribute("value", "17th century");
-        text17th.setAttribute("align", "center");
-        text17th.setAttribute("color", "#000000");
-        text17th.setAttribute("font", "roboto");
-        text17th.setAttribute("position", "0 0.35 0"); // leggermente più alto
-        text17th.setAttribute("scale", "0.35 0.35 0.35"); // più grande
-        introContainer.appendChild(text17th);
+        const desc17 = document.createElement("a-text");
+        desc17.setAttribute("value","A rampart was built, incorporating the famous Herepoort gate.\nThe rampart and gate were demolished in 1875 and 1878, respectively,\nto allow for the construction of Hereplein square and the canals.");
+        desc17.setAttribute("align","center");
+        desc17.setAttribute("color","#000000");
+        desc17.setAttribute("font","roboto");
+        desc17.setAttribute("position","0 0.05 0");
+        desc17.setAttribute("scale","0.18 0.18 0.18");
+        desc17.setAttribute("wrap-count","30");
+        introContainer.appendChild(desc17);
 
-        const text17thDesc = document.createElement("a-text");
-        text17thDesc.setAttribute("value",
-          "A rampart was built, incorporating the famous Herepoort gate.\nThe rampart and gate were demolished in 1875 and 1878, respectively,\nto allow for the construction of Hereplein square and the canals."
-        );
-        text17thDesc.setAttribute("align", "center");
-        text17thDesc.setAttribute("color", "#000000");
-        text17thDesc.setAttribute("font", "roboto");
-        text17thDesc.setAttribute("position", "0 -0.1 0");
-        text17thDesc.setAttribute("scale", "0.18 0.18 0.18");
-        text17thDesc.setAttribute("wrap-count", "30");
-        introContainer.appendChild(text17thDesc);
+        sequenceStep=3.5; // attendo TAP per ritorno
+        break;
 
-        sequenceStep = 3;
-      });
-
-    // --- Step 3: Ritorno alla vista completa cornici ---
-    } else if (sequenceStep === 3) {
-      resetAllModels([0,1,2,3,4,5], () => {
-        // tutte le cornici tornano visibili e posizione originale
-        sequenceStep = 4;
-      });
+      case 3.5: // ritorno vista completa
+        resetAllModels([5],()=>{ sequenceStep=4; showFinalScene(); });
+        break;
     }
+  }
+
+  function showFinalScene(){
+    frameEntities.forEach(ent=>ent.setAttribute("visible","false"));
+    clearOldTexts();
+
+    const cinemaModel = document.createElement("a-entity");
+    cinemaModel.setAttribute("gltf-model","#finalCinema");
+    cinemaModel.setAttribute("position","0 0 0.2");
+    cinemaModel.setAttribute("scale","0 0 0");
+    cinemaModel.setAttribute("animation__pop",{property:"scale",to:"1 1 1",dur:800,easing:"easeOutElastic"});
+    modelsContainer.appendChild(cinemaModel);
+
+    const finalText = document.createElement("a-text");
+    finalText.setAttribute("value","Grazie per aver esplorato la collezione!");
+    finalText.setAttribute("align","center");
+    finalText.setAttribute("color","#000000");
+    finalText.setAttribute("font","roboto");
+    finalText.setAttribute("position","0 -0.5 0");
+    finalText.setAttribute("scale","0.18 0.18 0.18");
+    finalText.setAttribute("wrap-count","30");
+    introContainer.appendChild(finalText);
   }
 });
 
