@@ -18,8 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let allModelsDisplayed = false;
   const frameEntities = [];
   let sequenceStep = 0;
-  let canTap = false;
-
   const originalTransforms = {};
 
   // --- Intro / target found ---
@@ -27,13 +25,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (started) return;
 
     const introText = document.createElement("a-text");
-    introText.setAttribute("value", "Fragments is an Augmented Reality experience that retraces the history\nof the Camera Bioscoop building. The work is composed of four chronological\ninteractive experiences, guiding visitors through different moments of its past.\nStep by step, the audience is accompanied through the entrance of the\nCamera Bioscoop, where history and architecture come alive in a layered,\nimmersive narrative.");
+    introText.setAttribute("value", "Benvenuto\nnel tuo piccolo\ncinema personale\nin realtà aumentata");
     introText.setAttribute("align", "center");
-    introText.setAttribute("color", "#000000");
-    introText.setAttribute("font", "roboto");
+    introText.setAttribute("color", "#008000");
     introText.setAttribute("position", "0 0.3 0");
-    introText.setAttribute("scale", "0.15 0.15 0.15");
-    introText.setAttribute("wrap-count", "30");
+    introText.setAttribute("scale", "0.25 0.25 0.25");
+    introText.setAttribute("wrap-count", "20");
     introText.setAttribute("id", "introText");
     introContainer.appendChild(introText);
 
@@ -41,27 +38,24 @@ document.addEventListener("DOMContentLoaded", () => {
       const startText = document.createElement("a-text");
       startText.setAttribute("value", "Tap to continue");
       startText.setAttribute("align", "center");
-      startText.setAttribute("color", "#000000"); // nero
-      startText.setAttribute("font", "roboto");    // grassetto Roboto
-      startText.setAttribute("shader","msdf");
-      startText.setAttribute("negate","false");
+      startText.setAttribute("color", "#000000");
+      startText.setAttribute("font-weight", "bold");
       startText.setAttribute("position", "0 -0.2 0");
       startText.setAttribute("scale", "0.2 0.2 0.2");
       startText.setAttribute("wrap-count", "20");
       startText.setAttribute("id", "startText");
       introContainer.appendChild(startText);
-      canTap = true;
     }, 3000);
   });
 
   // --- Global click handler ---
   window.addEventListener("click", () => {
-    if (!started && canTap) {
+    const startText = document.getElementById("startText");
+    if (!started) {
+      if (!startText) return;
       const introText = document.getElementById("introText");
-      const startText = document.getElementById("startText");
       if (introText) introText.setAttribute("visible", "false");
-      if (startText) startText.setAttribute("visible", "false");
-
+      startText.setAttribute("visible", "false");
       started = true;
       showAllModelsSequentially();
     } else if (allModelsDisplayed) {
@@ -76,10 +70,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const tapText = document.createElement("a-text");
       tapText.setAttribute("value", "Tap the screen");
       tapText.setAttribute("align", "center");
-      tapText.setAttribute("color", "#000000"); // nero
-      tapText.setAttribute("font", "roboto");
-      tapText.setAttribute("shader","msdf");
-      tapText.setAttribute("negate","false");
+      tapText.setAttribute("color", "#000000");
+      tapText.setAttribute("font-weight", "bold");
       tapText.setAttribute("position", "0 -0.6 0");
       tapText.setAttribute("scale", "0.2 0.2 0.2");
       tapText.setAttribute("wrap-count", "20");
@@ -125,6 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- Reset models ---
   function resetAllModels(activeIndices = [], callback) {
     const dur = 800;
 
@@ -175,148 +168,153 @@ document.addEventListener("DOMContentLoaded", () => {
     }, dur + 50);
   }
 
-  // --- Sequenze ---
+  // --- Gestione sequenze ---
   function handleSequences() {
     const tapText = document.getElementById("tapText");
     if (tapText) tapText.setAttribute("visible", "false");
+
     clearOldTexts();
 
-    // --- SEQUENZA 1: Piece1 & Piece2 ---
     if (sequenceStep === 0) {
-      frameEntities.forEach((ent, i) => { if(i>1) ent.setAttribute("visible","false"); });
-      frameEntities[0].setAttribute("animation__pos_zoom",{property:"position",to:"-0.35 0 0.1",dur:800,easing:"easeInOutQuad"});
-      frameEntities[1].setAttribute("animation__pos_zoom",{property:"position",to:"0.05 0.12 0.4",dur:800,easing:"easeInOutQuad"});
-      frameEntities[0].setAttribute("animation__scale_zoom",{property:"scale",to:"1.2 1.2 1.2",dur:800,easing:"easeInOutQuad"});
-      frameEntities[1].setAttribute("animation__scale_zoom",{property:"scale",to:"2.1 2.1 2.1",dur:800,easing:"easeInOutQuad"});
-      camera.setAttribute("animation__cam_zoom",{property:"position",to:"0 0 0.5",dur:800,easing:"easeInOutQuad"});
+      // Zoom su piece1 e piece2
+      frameEntities.forEach((ent, i) => { if (i > 1) ent.setAttribute("visible", "false"); });
 
-      const text1952 = document.createElement("a-text");
-      text1952.setAttribute("value","1952");
-      text1952.setAttribute("align","center");
-      text1952.setAttribute("color","#000000");
-      text1952.setAttribute("font","roboto");
-      text1952.setAttribute("position",{x:0,y:0.35,z:0.5});
-      text1952.setAttribute("scale","0.45 0.45 0.45");
-      text1952.setAttribute("anchor","center");
-      introContainer.appendChild(text1952);
+      frameEntities[0].setAttribute("animation__pos_zoom", {
+        property: "position",
+        to: "-0.35 0 0.1",
+        dur: 800,
+        easing: "easeInOutQuad"
+      });
+      frameEntities[1].setAttribute("animation__pos_zoom", {
+        property: "position",
+        to: "0.05 0.12 0.4",
+        dur: 800,
+        easing: "easeInOutQuad"
+      });
 
-      const text1952Detail = document.createElement("a-text");
-      text1952Detail.setAttribute("value","The cinema operator Alfred Friedrich Wolff made a proposal to build a camera theater,\na hotel, and a café-restaurant in Hereplein.");
-      text1952Detail.setAttribute("align","center");
-      text1952Detail.setAttribute("color","#000000");
-      text1952Detail.setAttribute("font","roboto");
-      text1952Detail.setAttribute("position",{x:0,y:0.15,z:0.5});
-      text1952Detail.setAttribute("scale","0.25 0.25 0.25");
-      text1952Detail.setAttribute("wrap-count","30");
-      introContainer.appendChild(text1952Detail);
+      frameEntities[0].setAttribute("animation__scale_zoom", {
+        property: "scale",
+        to: "1.2 1.2 1.2",
+        dur: 800,
+        easing: "easeInOutQuad"
+      });
+      frameEntities[1].setAttribute("animation__scale_zoom", {
+        property: "scale",
+        to: "2.1 2.1 2.1",
+        dur: 800,
+        easing: "easeInOutQuad"
+      });
+
+      camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.5", dur: 800, easing: "easeInOutQuad" });
+
+      // Testo 1952 + descrizione
+      const infoText = document.createElement("a-text");
+      infoText.setAttribute("value", "1952\nThe cinema operator Alfred Friedrich Wolff made a proposal to build a camera theater,\na hotel, and a café-restaurant in Hereplein");
+      infoText.setAttribute("align", "center");
+      infoText.setAttribute("color", "#000000");
+      infoText.setAttribute("font", "roboto");
+      infoText.setAttribute("position", "0 -0.35 0");
+      infoText.setAttribute("scale", "0.18 0.18 0.18");
+      infoText.setAttribute("wrap-count", "30");
+      introContainer.appendChild(infoText);
 
       sequenceStep = 1;
 
-    } else if(sequenceStep === 1){
-      // TAP → BUT text
+    } else if (sequenceStep === 1) {
+      // Zoom piece1/2 secondo testo
       clearOldTexts();
-      const butText = document.createElement("a-text");
-      butText.setAttribute("value","BUT");
-      butText.setAttribute("align","center");
-      butText.setAttribute("color","#000000");
-      butText.setAttribute("font","roboto");
-      butText.setAttribute("shader","msdf");
-      butText.setAttribute("negate","false");
-      butText.setAttribute("position",{x:0,y:0.35,z:0.5});
-      butText.setAttribute("scale","0.45 0.45 0.45");
-      introContainer.appendChild(butText);
-
-      const butDetail = document.createElement("a-text");
-      butDetail.setAttribute("value","the municipality refused.");
-      butDetail.setAttribute("align","center");
-      butDetail.setAttribute("color","#000000");
-      butDetail.setAttribute("font","roboto");
-      butDetail.setAttribute("position",{x:0,y:0.15,z:0.5});
-      butDetail.setAttribute("scale","0.25 0.25 0.25");
-      butDetail.setAttribute("wrap-count","30");
-      introContainer.appendChild(butDetail);
+      const infoText = document.createElement("a-text");
+      infoText.setAttribute("value", "BUT\nThe municipality refused");
+      infoText.setAttribute("align", "center");
+      infoText.setAttribute("color", "#000000");
+      infoText.setAttribute("font", "roboto");
+      infoText.setAttribute("position", "0 -0.35 0");
+      infoText.setAttribute("scale", "0.18 0.18 0.18");
+      infoText.setAttribute("wrap-count", "30");
+      introContainer.appendChild(infoText);
 
       sequenceStep = 2;
 
-    } else if(sequenceStep === 2){
-      // TAP → ritorno alla vista con tutte le cornici
-      resetAllModels([],()=>{sequenceStep=3;});
+    } else if (sequenceStep === 2) {
+      // Ritorno alla vista con tutte le cornici
+      resetAllModels([0,1], () => { sequenceStep = 3; });
 
-    } else if(sequenceStep === 3){
-      // SEQUENZA 2: Zoom su piece3,4,5
-      frameEntities.forEach((ent,i)=>{ if(i<2 || i>4) ent.setAttribute("visible","false"); });
-      frameEntities[2].setAttribute("animation__pos_zoom",{property:"position",to:"-0.05 0.2 0.35",dur:800,easing:"easeInOutQuad"});
-      frameEntities[3].setAttribute("animation__pos_zoom",{property:"position",to:"0.05 0.45 0.35",dur:800,easing:"easeInOutQuad"});
-      frameEntities[4].setAttribute("animation__pos_zoom",{property:"position",to:"0.15 0.3 0.35",dur:800,easing:"easeInOutQuad"});
-      [2,3,4].forEach(i=>frameEntities[i].setAttribute("animation__scale_zoom",{property:"scale",to:"1.2 1.2 1.2",dur:800,easing:"easeInOutQuad"}));
-      camera.setAttribute("animation__cam_zoom",{property:"position",to:"0 0 0.6",dur:800,easing:"easeInOutQuad"});
+    } else if (sequenceStep === 3) {
+      // Zoom su piece3,4,5
+      frameEntities.forEach((ent, i) => { if (i < 2 || i > 4) ent.setAttribute("visible", "false"); });
 
-      const text1958 = document.createElement("a-text");
-      text1958.setAttribute("value","1958");
-      text1958.setAttribute("align","center");
-      text1958.setAttribute("color","#000000");
-      text1958.setAttribute("font","roboto");
-      text1958.setAttribute("position",{x:0,y:0.35,z:0.5});
-      text1958.setAttribute("scale","0.45 0.45 0.45");
-      introContainer.appendChild(text1958);
+      frameEntities[2].setAttribute("animation__pos_zoom", { property: "position", to: "-0.05 0.2 0.35", dur: 800, easing: "easeInOutQuad" });
+      frameEntities[3].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.45 0.35", dur: 800, easing: "easeInOutQuad" });
+      frameEntities[4].setAttribute("animation__pos_zoom", { property: "position", to: "0.15 0.3 0.35", dur: 800, easing: "easeInOutQuad" });
 
-      const text1958Detail = document.createElement("a-text");
-      text1958Detail.setAttribute("value","Some buttresses of the Alva castele, built during the Eighty Years' War,\nwere found in the construction pit of the cinema.");
-      text1958Detail.setAttribute("align","center");
-      text1958Detail.setAttribute("color","#000000");
-      text1958Detail.setAttribute("font","roboto");
-      text1958Detail.setAttribute("position",{x:0,y:0.15,z:0.5});
-      text1958Detail.setAttribute("scale","0.25 0.25 0.25");
-      text1958Detail.setAttribute("wrap-count","30");
-      introContainer.appendChild(text1958Detail);
+      [2,3,4].forEach(i => frameEntities[i].setAttribute("animation__scale_zoom", {
+        property: "scale",
+        to: "1.2 1.2 1.2",
+        dur: 800, easing: "easeInOutQuad"
+      }));
 
-      sequenceStep=4;
+      camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.6", dur: 800, easing: "easeInOutQuad" });
 
-    } else if(sequenceStep===4){
-      // TAP → ritorno alla vista con tutte le cornici
-      resetAllModels([],()=>{sequenceStep=5;});
+      const infoText = document.createElement("a-text");
+      infoText.setAttribute("value", "1958\nSome buttresses of the Alva castele, built during the Eighty Years' War, were found in the construction pit of the cinema");
+      infoText.setAttribute("align", "center");
+      infoText.setAttribute("color", "#000000");
+      infoText.setAttribute("font", "roboto");
+      infoText.setAttribute("position", "0 -0.35 0");
+      infoText.setAttribute("scale", "0.18 0.18 0.18");
+      infoText.setAttribute("wrap-count", "30");
+      introContainer.appendChild(infoText);
 
-    } else if(sequenceStep===5){
-      // SEQUENZA 3: Zoom su piece6
+      sequenceStep = 4;
+
+    } else if (sequenceStep === 4) {
+      resetAllModels([2,3,4], () => { sequenceStep = 5; });
+
+    } else if (sequenceStep === 5) {
+      // Zoom su piece6
       frameEntities.forEach((ent,i)=>{ if(i!==5) ent.setAttribute("visible","false"); });
-      frameEntities[5].setAttribute("animation__pos_zoom",{property:"position",to:"0.3 -0.15 0.35",dur:800,easing:"easeInOutQuad"});
-      frameEntities[5].setAttribute("animation__scale_zoom",{property:"scale",to:"1.7 1.7 1.7",dur:800,easing:"easeInOutQuad"});
-      camera.setAttribute("animation__cam_zoom",{property:"position",to:"0 0 0.6",dur:800,easing:"easeInOutQuad"});
 
-      const textPiece6 = document.createElement("a-text");
-      textPiece6.setAttribute("value","At the beginning of the 17th century, a rampart was built,\nincorporating the famous Herepoort gate.\nThe rampart and gate were demolished in 1875 and 1878, respectively,\nto allow for the construction of Hereplein square and the canals.");
-      textPiece6.setAttribute("align","center");
-      textPiece6.setAttribute("color","#000000");
-      textPiece6.setAttribute("font","roboto");
-      textPiece6.setAttribute("position",{x:0,y:0.2,z:0.5});
-      textPiece6.setAttribute("scale","0.25 0.25 0.25");
-      textPiece6.setAttribute("wrap-count","30");
-      introContainer.appendChild(textPiece6);
+      frameEntities[5].setAttribute("animation__pos_zoom", { property: "position", to: "0.3 -0.15 0.35", dur: 800, easing: "easeInOutQuad" });
+      frameEntities[5].setAttribute("animation__scale_zoom", { property: "scale", to: "1.7 1.7 1.7", dur: 800, easing: "easeInOutQuad" });
 
-      sequenceStep=6;
+      camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.6", dur: 800, easing: "easeInOutQuad" });
 
-    } else if(sequenceStep===6){
-      // TAP → ritorno alla vista con tutte le cornici
-      resetAllModels([],()=>{sequenceStep=7;});
+      const infoText = document.createElement("a-text");
+      infoText.setAttribute("value", "At the beginning of the 17th century, a rampart was built, incorporating the famous Herepoort gate.\nThe rampart and gate were demolished in 1875 and 1878, respectively, to allow for the construction of Hereplein square and the canals.");
+      infoText.setAttribute("align", "center");
+      infoText.setAttribute("color", "#000000");
+      infoText.setAttribute("font", "roboto");
+      infoText.setAttribute("position", "0 -0.35 0");
+      infoText.setAttribute("scale", "0.18 0.18 0.18");
+      infoText.setAttribute("wrap-count", "30");
+      introContainer.appendChild(infoText);
 
-    } else if(sequenceStep===7){
-      // Finale con modello cinema
-      showFinalCinema();
+      sequenceStep = 6;
+
+    } else if (sequenceStep === 6) {
+      resetAllModels([5], () => { 
+        const tapText = document.getElementById("tapText");
+        if(tapText) tapText.setAttribute("visible","false");
+        sequenceStep = 7;
+        showFinalCinema();
+      });
     }
   }
 
-  // --- Finale con modello cinema ---
+  // --- Funzione scena finale ---
   function showFinalCinema() {
     frameEntities.forEach(ent => ent.setAttribute("visible","false"));
     clearOldTexts();
 
-    const baseHeight=-0.25;
+    const baseHeight = -0.25;
 
     const cinemaModel = document.createElement("a-entity");
-    cinemaModel.setAttribute("gltf-model","#cinemaModel");
-    cinemaModel.setAttribute("position",{x:0,y:-0.3,z:0.5});
-    cinemaModel.setAttribute("scale",{x:1.5,y:1.5,z:1.5});
-    cinemaModel.addEventListener("model-loaded",()=>{
+    cinemaModel.setAttribute("gltf-model", "#cinemaModel");
+    cinemaModel.setAttribute("position", {x:0, y:-0.3, z:0.5});
+    cinemaModel.setAttribute("scale", {x:1.5, y:1.5, z:1.5});
+    cinemaModel.setAttribute("visible","false");
+
+    cinemaModel.addEventListener("model-loaded", () => {
       cinemaModel.setAttribute("visible","true");
     });
     modelsContainer.appendChild(cinemaModel);
@@ -349,5 +347,6 @@ document.addEventListener("DOMContentLoaded", () => {
     textRuins.setAttribute("animation__fadein",{property:"opacity",from:0,to:1,dur:800,easing:"easeInQuad",delay:1200});
     introContainer.appendChild(textRuins);
   }
+
 });
 
