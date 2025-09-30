@@ -1,4 +1,3 @@
-```js
 document.addEventListener("DOMContentLoaded", () => {
   const marker = document.getElementById("marker");
   const introContainer = document.getElementById("introTexts");
@@ -15,11 +14,11 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   let started = false;
-  let canTap = false; // blocco finché non compare il tap iniziale
   let currentIndex = 0;
   let allModelsDisplayed = false;
   const frameEntities = [];
   let sequenceStep = 0;
+  let canTap = false;
 
   const originalTransforms = {};
 
@@ -48,14 +47,12 @@ document.addEventListener("DOMContentLoaded", () => {
       startText.setAttribute("id", "startText");
       introContainer.appendChild(startText);
       canTap = true;
-    }, 3000); // ora compare dopo 3 secondi
+    }, 3000); // dopo 3 secondi
   });
 
   // --- Global click handler ---
   window.addEventListener("click", () => {
-    if (!started) {
-      if (!canTap) return; // blocco se troppo presto
-
+    if (!started && canTap) {
       const introText = document.getElementById("introText");
       const startText = document.getElementById("startText");
       if (introText) introText.setAttribute("visible", "false");
@@ -123,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function resetAllModels(activeIndices = [], callback) {
     const dur = 800;
+
     frameEntities.forEach((ent, i) => {
       if (!activeIndices.includes(i)) ent.setAttribute("visible", "false");
     });
@@ -170,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, dur + 50);
   }
 
-  // --- Gestione sequenze ---
+  // --- Sequenze ---
   function handleSequences() {
     const tapText = document.getElementById("tapText");
     if (tapText) tapText.setAttribute("visible", "false");
@@ -221,7 +219,7 @@ document.addEventListener("DOMContentLoaded", () => {
       frameEntities[3].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.45 0.35", dur: 800, easing: "easeInOutQuad" });
       frameEntities[4].setAttribute("animation__pos_zoom", { property: "position", to: "0.15 0.3 0.35", dur: 800, easing: "easeInOutQuad" });
 
-      [2, 3, 4].forEach(i => frameEntities[i].setAttribute("animation__scale_zoom", {
+      [2,3,4].forEach(i => frameEntities[i].setAttribute("animation__scale_zoom", {
         property: "scale",
         to: "1.2 1.2 1.2",
         dur: 800, easing: "easeInOutQuad"
@@ -268,8 +266,16 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (sequenceStep === 7) {
       frameEntities.forEach((ent, i) => { if (i !== 5) ent.setAttribute("visible", "false"); });
 
-      frameEntities[5].setAttribute("animation__pos_zoom", { property: "position", to: "0.3 -0.15 0.35", dur: 800, easing: "easeInOutQuad" });
-      frameEntities[5].setAttribute("animation__scale_zoom", { property: "scale", to: "1.7 1.7 1.7", dur: 800, easing: "easeInOutQuad" });
+      frameEntities[5].setAttribute("animation__pos_zoom", {
+        property: "position",
+        to: "0.3 -0.15 0.35",
+        dur: 800, easing: "easeInOutQuad"
+      });
+      frameEntities[5].setAttribute("animation__scale_zoom", {
+        property: "scale",
+        to: "1.7 1.7 1.7",
+        dur: 800, easing: "easeInOutQuad"
+      });
       camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.6", dur: 800, easing: "easeInOutQuad" });
 
       const infoText = document.createElement("a-text");
@@ -284,25 +290,28 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 8;
 
     } else if (sequenceStep === 8) {
-      resetAllModels([5], () => {
-        sequenceStep = 9;
-      });
+      resetAllModels([5], () => { sequenceStep = 9; });
 
     } else if (sequenceStep === 9) {
       showFinalCinema();
-      sequenceStep = 10;
     }
   }
 
   // --- Finale con modello cinema ---
   function showFinalCinema() {
-    // nascondo tutti i modelli
     frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
+    clearOldTexts();
+
+    const baseHeight = -0.25;
 
     const cinemaModel = document.createElement("a-entity");
     cinemaModel.setAttribute("gltf-model", "#cinemaModel");
-    cinemaModel.setAttribute("position", { x: 0, y: -1.2, z: 0.5 });
-    cinemaModel.setAttribute("scale", { x: 2.5, y: 2.5, z: 2.5 });
+    cinemaModel.setAttribute("position", { x: 0, y: -0.3, z: 0.5 });
+    cinemaModel.setAttribute("scale", { x: 1.5, y: 1.5, z: 1.5 });
+    cinemaModel.addEventListener("model-loaded", () => {
+      console.log("✅ Cinema model caricato!");
+      cinemaModel.setAttribute("visible", "true");
+    });
     modelsContainer.appendChild(cinemaModel);
 
     const text1958 = document.createElement("a-text");
@@ -311,10 +320,19 @@ document.addEventListener("DOMContentLoaded", () => {
     text1958.setAttribute("anchor", "center");
     text1958.setAttribute("color", "#000000");
     text1958.setAttribute("font", "roboto");
-    text1958.setAttribute("position", { x: 0, y: 0.6, z: 0.5 });
+    text1958.setAttribute("position", { x: 0, y: baseHeight + 0.5, z: 0.5 });
     text1958.setAttribute("scale", "0.5 0.5 0.5");
+    text1958.setAttribute("opacity", "0");
     text1958.setAttribute("shader", "msdf");
     text1958.setAttribute("negate", "false");
+    text1958.setAttribute("animation__fadein", {
+      property: "opacity",
+      from: 0,
+      to: 1,
+      dur: 800,
+      easing: "easeInQuad",
+      delay: 200
+    });
     introContainer.appendChild(text1958);
 
     const textRuins = document.createElement("a-text");
@@ -323,12 +341,20 @@ document.addEventListener("DOMContentLoaded", () => {
     textRuins.setAttribute("anchor", "center");
     textRuins.setAttribute("color", "#000000");
     textRuins.setAttribute("font", "roboto");
-    textRuins.setAttribute("position", { x: 0, y: 0.45, z: 0.5 });
+    textRuins.setAttribute("position", { x: 0, y: baseHeight + 0.4, z: 0.5 });
     textRuins.setAttribute("scale", "0.35 0.35 0.35");
+    textRuins.setAttribute("opacity", "0");
     textRuins.setAttribute("shader", "msdf");
     textRuins.setAttribute("negate", "false");
+    textRuins.setAttribute("animation__fadein", {
+      property: "opacity",
+      from: 0,
+      to: 1,
+      dur: 800,
+      easing: "easeInQuad",
+      delay: 1200
+    });
     introContainer.appendChild(textRuins);
   }
 });
-```
 
