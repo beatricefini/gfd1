@@ -120,7 +120,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Reset models ---
   function resetAllModels(activeIndices = [], callback) {
     const dur = 800;
 
@@ -217,13 +216,14 @@ document.addEventListener("DOMContentLoaded", () => {
     introContainer.appendChild(textRuins);
   }
 
-  // --- Gestione sequenze ---
+  // --- Gestione sequenze con testi aggiornati ---
   function handleSequences() {
     const tapText = document.getElementById("tapText");
     if (tapText) tapText.setAttribute("visible", "false");
 
     clearOldTexts();
 
+    // --- Zoom 1 ---
     if (sequenceStep === 0) {
       frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
 
@@ -235,109 +235,135 @@ document.addEventListener("DOMContentLoaded", () => {
 
       camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.5", dur: 800, easing: "easeInOutQuad" });
 
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "Queste due cornici rappresentano le principali della tua collezione");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#008000");
-      infoText.setAttribute("position", "0 -0.4 0");
-      infoText.setAttribute("scale", "0.2 0.2 0.2");
-      infoText.setAttribute("wrap-count", "30");
-      introContainer.appendChild(infoText);
+      // Testi Zoom 1
+      const text1952 = document.createElement("a-text");
+      text1952.setAttribute("value", "1952");
+      text1952.setAttribute("align", "center");
+      text1952.setAttribute("color", "#000000");
+      text1952.setAttribute("font", "roboto");
+      text1952.setAttribute("position", "0 0.35 0");
+      text1952.setAttribute("scale", "0.25 0.25 0.25");
+      text1952.setAttribute("wrap-count", "30");
+      introContainer.appendChild(text1952);
+
+      const textAlfred = document.createElement("a-text");
+      textAlfred.setAttribute("value", "The cinema operator Alfred Friedrich Wolff made a proposal to build a\ncamera theater, a hotel, and a café-restaurant in Hereplein");
+      textAlfred.setAttribute("align", "center");
+      textAlfred.setAttribute("color", "#000000");
+      textAlfred.setAttribute("font", "roboto");
+      textAlfred.setAttribute("position", "0 0.2 0");
+      textAlfred.setAttribute("scale", "0.18 0.18 0.18");
+      textAlfred.setAttribute("wrap-count", "35");
+      introContainer.appendChild(textAlfred);
+
+      const textBUT = document.createElement("a-text");
+      textBUT.setAttribute("value", "BUT");
+      textBUT.setAttribute("align", "center");
+      textBUT.setAttribute("color", "#000000");
+      textBUT.setAttribute("font", "roboto");
+      textBUT.setAttribute("position", "0 0.05 0");
+      textBUT.setAttribute("scale", "0.25 0.25 0.25");
+      textBUT.setAttribute("wrap-count", "30");
+      introContainer.appendChild(textBUT);
+
+      const textRefused = document.createElement("a-text");
+      textRefused.setAttribute("value", "The municipality refused");
+      textRefused.setAttribute("align", "center");
+      textRefused.setAttribute("color", "#000000");
+      textRefused.setAttribute("font", "roboto");
+      textRefused.setAttribute("position", "0 -0.1 0");
+      textRefused.setAttribute("scale", "0.18 0.18 0.18");
+      textRefused.setAttribute("wrap-count", "35");
+      introContainer.appendChild(textRefused);
 
       sequenceStep = 1;
 
     } else if (sequenceStep === 1) {
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "Sono le opere più importanti, da cui parte la storia");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#008000");
-      infoText.setAttribute("position", "0 -0.5 0");
-      infoText.setAttribute("scale", "0.2 0.2 0.2");
-      infoText.setAttribute("wrap-count", "30");
-      introContainer.appendChild(infoText);
-
-      sequenceStep = 2;
+      resetAllModels([0,1], () => { sequenceStep = 2; });
 
     } else if (sequenceStep === 2) {
-      resetAllModels([0,1], () => { sequenceStep = 3; });
+      // Zoom 2
+      frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
+
+      frameEntities[0].setAttribute("animation__pos_zoom", { property: "position", to: "-0.35 0 0.1", dur: 800, easing: "easeInOutQuad" });
+      frameEntities[1].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.12 0.4", dur: 800, easing: "easeInOutQuad" });
+
+      frameEntities[0].setAttribute("animation__scale_zoom", { property: "scale", to: "1.2 1.2 1.2", dur: 800, easing: "easeInOutQuad" });
+      frameEntities[1].setAttribute("animation__scale_zoom", { property: "scale", to: "2.1 2.1 2.1", dur: 800, easing: "easeInOutQuad" });
+
+      camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.5", dur: 800, easing: "easeInOutQuad" });
+
+      // Testi Zoom 2
+      const text1958Zoom2 = document.createElement("a-text");
+      text1958Zoom2.setAttribute("value", "1958");
+      text1958Zoom2.setAttribute("align", "center");
+      text1958Zoom2.setAttribute("color", "#000000");
+      text1958Zoom2.setAttribute("font", "roboto");
+      text1958Zoom2.setAttribute("position", "0 0.35 0");
+      text1958Zoom2.setAttribute("scale", "0.25 0.25 0.25");
+      text1958Zoom2.setAttribute("wrap-count", "30");
+      introContainer.appendChild(text1958Zoom2);
+
+      const textAlva = document.createElement("a-text");
+      textAlva.setAttribute("value", "Some buttresses of the Alva castle, built during the Eighty Years' War,\nwere found in the construction pit of the cinema.");
+      textAlva.setAttribute("align", "center");
+      textAlva.setAttribute("color", "#000000");
+      textAlva.setAttribute("font", "roboto");
+      textAlva.setAttribute("position", "0 0.2 0");
+      textAlva.setAttribute("scale", "0.18 0.18 0.18");
+      textAlva.setAttribute("wrap-count", "35");
+      introContainer.appendChild(textAlva);
+
+      sequenceStep = 3;
 
     } else if (sequenceStep === 3) {
-      frameEntities.forEach((ent, i) => { if (i<2 || i>4) ent.setAttribute("visible","false"); });
-
-      frameEntities[2].setAttribute("animation__pos_zoom", { property: "position", to: "-0.05 0.2 0.35", dur: 800, easing: "easeInOutQuad" });
-      frameEntities[3].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.45 0.35", dur: 800, easing: "easeInOutQuad" });
-      frameEntities[4].setAttribute("animation__pos_zoom", { property: "position", to: "0.15 0.3 0.35", dur: 800, easing: "easeInOutQuad" });
-
-      [2,3,4].forEach(i => frameEntities[i].setAttribute("animation__scale_zoom", { property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad" }));
-
-      camera.setAttribute("animation__cam_zoom", { property: "position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
-
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Ecco tre opere complementari");
-      infoText.setAttribute("align","center");
-      infoText.setAttribute("color","#008000");
-      infoText.setAttribute("position","0 -0.4 0");
-      infoText.setAttribute("scale","0.2 0.2 0.2");
-      infoText.setAttribute("wrap-count","30");
-      introContainer.appendChild(infoText);
-
-      sequenceStep = 4;
+      resetAllModels([0,1], () => { sequenceStep = 4; });
 
     } else if (sequenceStep === 4) {
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Queste aggiungono varietà alla collezione");
-      infoText.setAttribute("align","center");
-      infoText.setAttribute("color","#008000");
-      infoText.setAttribute("position","0 -0.5 0");
-      infoText.setAttribute("scale","0.2 0.2 0.2");
-      infoText.setAttribute("wrap-count","30");
-      introContainer.appendChild(infoText);
-
-      sequenceStep = 5;
-
-    } else if (sequenceStep === 5) {
-      resetAllModels([2,3,4], ()=>{ sequenceStep = 6; });
-
-    } else if (sequenceStep === 6) {
-      frameEntities.forEach((ent, i)=>{ if(i!==5) ent.setAttribute("visible","false"); });
+      // Zoom 3
+      frameEntities.forEach((ent,i)=>{ if(i!==5) ent.setAttribute("visible","false"); });
 
       frameEntities[5].setAttribute("animation__pos_zoom", { property:"position", to:"0.3 -0.15 0.35", dur:800, easing:"easeInOutQuad" });
       frameEntities[5].setAttribute("animation__scale_zoom", { property:"scale", to:"1.7 1.7 1.7", dur:800, easing:"easeInOutQuad" });
 
       camera.setAttribute("animation__cam_zoom", { property:"position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
 
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Infine, quest'ultima cornice");
-      infoText.setAttribute("align","center");
-      infoText.setAttribute("color","#008000");
-      infoText.setAttribute("position","0 -0.4 0");
-      infoText.setAttribute("scale","0.2 0.2 0.2");
-      infoText.setAttribute("wrap-count","30");
-      introContainer.appendChild(infoText);
+      // Testi Zoom 3
+      const text17th = document.createElement("a-text");
+      text17th.setAttribute("value", "17th Century");
+      text17th.setAttribute("align", "center");
+      text17th.setAttribute("color", "#000000");
+      text17th.setAttribute("font", "roboto");
+      text17th.setAttribute("position", "0 0.35 0");
+      text17th.setAttribute("scale", "0.25 0.25 0.25");
+      text17th.setAttribute("wrap-count", "30");
+      introContainer.appendChild(text17th);
 
-      sequenceStep = 7;
+      const textRampart = document.createElement("a-text");
+      textRampart.setAttribute("value", "A rampart was built, incorporating the famous Herepoort gate.\nThe rampart and gate were demolished in 1875 and 1878, respectively,\nto allow for the construction of Hereplein square and the canals.");
+      textRampart.setAttribute("align", "center");
+      textRampart.setAttribute("color", "#000000");
+      textRampart.setAttribute("font", "roboto");
+      textRampart.setAttribute("position", "0 0.2 0");
+      textRampart.setAttribute("scale", "0.18 0.18 0.18");
+      textRampart.setAttribute("wrap-count", "35");
+      introContainer.appendChild(textRampart);
 
-    } else if (sequenceStep === 7) {
-      // Ritorno alla vista completa dopo terzo zoom
+      sequenceStep = 5;
+
+    } else if (sequenceStep === 5) {
       resetAllModels([0,1,2,3,4,5], () => { 
         const tapText = document.getElementById("tapText");
         if (tapText) tapText.setAttribute("visible", "false");
 
-        // --- Pop inverso finale con delay di 2 secondi ---
         setTimeout(() => {
           frameEntities.forEach(ent => {
-            ent.setAttribute("animation__popout", {
-              property: "scale",
-              to: "0 0 0",
-              dur: 600,
-              easing: "easeInQuad"
-            });
+            ent.setAttribute("animation__popout", { property: "scale", to: "0 0 0", dur: 600, easing: "easeInQuad" });
           });
 
           setTimeout(() => {
             frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
-            sequenceStep = 8; 
-            // --- Mostra finale cinema ---
+            sequenceStep = 6;
             showFinalCinema();
           }, 600);
         }, 2000);
