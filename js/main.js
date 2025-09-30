@@ -124,12 +124,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function resetAllModels(activeIndices = [], callback) {
     const dur = 800;
 
-    // Nascondi i modelli non attivi subito
     frameEntities.forEach((ent, i) => {
       if (!activeIndices.includes(i)) ent.setAttribute("visible", "false");
     });
 
-    // Animazioni di ritorno a posizione e scala originale per quelli attivi
     activeIndices.forEach((i) => {
       const ent = frameEntities[i];
       const orig = originalTransforms[i];
@@ -150,7 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     setTimeout(() => {
-      // Riattiva tutti per eventuali interazioni future
       frameEntities.forEach((ent, i) => {
         const orig = originalTransforms[i];
         if (orig) {
@@ -160,7 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
         ent.setAttribute("visible", "true");
       });
 
-      // Reset camera
       camera.setAttribute("animation__camreset", {
         property: "position",
         to: "0 0 0",
@@ -173,6 +169,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (typeof callback === "function") callback();
     }, dur + 50);
+  }
+
+  // --- Finale con modello cinema ---
+  function showFinalCinema() {
+    frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
+    clearOldTexts();
+
+    const baseHeight = -0.25;
+
+    const cinemaModel = document.createElement("a-entity");
+    cinemaModel.setAttribute("gltf-model", "#cinemaModel");
+    cinemaModel.setAttribute("position", { x: 0, y: -0.3, z: 0.5 });
+    cinemaModel.setAttribute("scale", { x: 1.5, y: 1.5, z: 1.5 });
+    cinemaModel.addEventListener("model-loaded", () => {
+      console.log("✅ Cinema model caricato!");
+      cinemaModel.setAttribute("visible", "true");
+    });
+    modelsContainer.appendChild(cinemaModel);
+
+    const text1958 = document.createElement("a-text");
+    text1958.setAttribute("value", "1958");
+    text1958.setAttribute("align", "center");
+    text1958.setAttribute("anchor", "center");
+    text1958.setAttribute("color", "#000000");
+    text1958.setAttribute("font", "roboto");
+    text1958.setAttribute("position", { x: 0, y: baseHeight + 0.5, z: 0.5 });
+    text1958.setAttribute("scale", "0.5 0.5 0.5");
+    text1958.setAttribute("opacity", "0");
+    text1958.setAttribute("shader", "msdf");
+    text1958.setAttribute("negate", "false");
+    text1958.setAttribute("animation__fadein", { property: "opacity", from: 0, to: 1, dur: 800, easing: "easeInQuad", delay: 200 });
+    introContainer.appendChild(text1958);
+
+    const textRuins = document.createElement("a-text");
+    textRuins.setAttribute("value", "Ruins");
+    textRuins.setAttribute("align", "center");
+    textRuins.setAttribute("anchor", "center");
+    textRuins.setAttribute("color", "#000000");
+    textRuins.setAttribute("font", "roboto");
+    textRuins.setAttribute("position", { x: 0, y: baseHeight + 0.4, z: 0.5 });
+    textRuins.setAttribute("scale", "0.35 0.35 0.35");
+    textRuins.setAttribute("opacity", "0");
+    textRuins.setAttribute("shader", "msdf");
+    textRuins.setAttribute("negate", "false");
+    textRuins.setAttribute("animation__fadein", { property: "opacity", from: 0, to: 1, dur: 800, easing: "easeInQuad", delay: 1200 });
+    introContainer.appendChild(textRuins);
   }
 
   // --- Gestione sequenze ---
@@ -281,20 +323,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const tapText = document.getElementById("tapText");
         if (tapText) tapText.setAttribute("visible", "false");
 
-        // --- Pop inverso finale solo qui ---
-        frameEntities.forEach(ent => {
-          ent.setAttribute("animation__popout", {
-            property: "scale",
-            to: "0 0 0",
-            dur: 600,
-            easing: "easeInQuad"
-          });
-        });
-
+        // --- Pop inverso finale con delay di 2 secondi ---
         setTimeout(() => {
-          frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
-          sequenceStep = 8; 
-        }, 600);
+          frameEntities.forEach(ent => {
+            ent.setAttribute("animation__popout", {
+              property: "scale",
+              to: "0 0 0",
+              dur: 600,
+              easing: "easeInQuad"
+            });
+          });
+
+          setTimeout(() => {
+            frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
+            sequenceStep = 8; 
+            // --- Mostra finale cinema ---
+            showFinalCinema();
+          }, 600);
+        }, 2000);
       });
     }
   }
