@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Reset models with pop out inverso ---
+  // --- Reset models ---
   function resetAllModels(activeIndices = [], callback) {
     const dur = 800;
 
@@ -150,42 +150,28 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     setTimeout(() => {
-      // --- POP OUT inverso per far sparire tutti i modelli ---
+      // Riattiva tutti per eventuali interazioni future
       frameEntities.forEach((ent, i) => {
-        ent.setAttribute("animation__popout", {
-          property: "scale",
-          to: "0 0 0",
-          dur: 500,
-          easing: "easeInQuad"
-        });
+        const orig = originalTransforms[i];
+        if (orig) {
+          ent.setAttribute("position", `${orig.position.x} ${orig.position.y} ${orig.position.z}`);
+          ent.setAttribute("scale", `${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`);
+        }
+        ent.setAttribute("visible", "true");
       });
 
-      // Nascondi tutti dopo la fine dell'animazione
-      setTimeout(() => {
-        frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
+      // Reset camera
+      camera.setAttribute("animation__camreset", {
+        property: "position",
+        to: "0 0 0",
+        dur: dur,
+        easing: "easeInOutQuad"
+      });
 
-        // Reset posizione e scala per eventuali riutilizzi futuri
-        frameEntities.forEach((ent, i) => {
-          const orig = originalTransforms[i];
-          if (orig) {
-            ent.setAttribute("position", `${orig.position.x} ${orig.position.y} ${orig.position.z}`);
-            ent.setAttribute("scale", `${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`);
-          }
-        });
+      const tapText = document.getElementById("tapText");
+      if (tapText) tapText.setAttribute("visible", "true");
 
-        // Reset camera
-        camera.setAttribute("animation__camreset", {
-          property: "position",
-          to: "0 0 0",
-          dur: dur,
-          easing: "easeInOutQuad"
-        });
-
-        const tapText = document.getElementById("tapText");
-        if (tapText) tapText.setAttribute("visible", "true");
-
-        if (typeof callback === "function") callback();
-      }, 500); // durata del pop out inverso
+      if (typeof callback === "function") callback();
     }, dur + 50);
   }
 
@@ -290,10 +276,25 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 7;
 
     } else if (sequenceStep === 7) {
+      // Ritorno alla vista completa dopo terzo zoom
       resetAllModels([0,1,2,3,4,5], () => { 
         const tapText = document.getElementById("tapText");
         if (tapText) tapText.setAttribute("visible", "false");
-        sequenceStep = 8; 
+
+        // --- Pop inverso finale solo qui ---
+        frameEntities.forEach(ent => {
+          ent.setAttribute("animation__popout", {
+            property: "scale",
+            to: "0 0 0",
+            dur: 600,
+            easing: "easeInQuad"
+          });
+        });
+
+        setTimeout(() => {
+          frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
+          sequenceStep = 8; 
+        }, 600);
       });
     }
   }
