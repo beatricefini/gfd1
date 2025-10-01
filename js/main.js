@@ -25,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
   marker.addEventListener("targetFound", () => {
     if (started) return;
 
-    // Introduce the AR experience with an image instead of text
     const introImage = document.createElement("a-image");
     introImage.setAttribute("src", "images/intro_text.png");
     introImage.setAttribute("position", "0 0.25 0");
@@ -47,7 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
   });
 
-  // --- Global click handler ---
   window.addEventListener("click", () => {
     const startText = document.getElementById("startText");
 
@@ -63,7 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- Show models one by one ---
   function showAllModelsSequentially() {
     if (currentIndex >= models.length) {
       allModelsDisplayed = true;
@@ -113,7 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
     oldImages.forEach(img => img.remove());
   }
 
-  // --- Reset models / camera ---
   function resetAllModels(activeIndices = [], callback) {
     const dur = 800;
 
@@ -164,24 +160,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }, dur + 50);
   }
 
-  // --- Handle sequences ---
   function handleSequences() {
     const tapText = document.getElementById("tapText");
     if (tapText) tapText.setAttribute("visible", "false");
 
     clearOldImages();
 
-    // --- STEP 0: Zoom piece1 & piece2 ---
     if (sequenceStep === 0) {
-      frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
-
+      // Step 0 → Zoom piece1 & piece2 (original positions)
       frameEntities[0].setAttribute("animation__pos_zoom", { property: "position", to: "-0.35 0 0.1", dur: 800, easing: "easeInOutQuad" });
       frameEntities[1].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.12 0.4", dur: 800, easing: "easeInOutQuad" });
       frameEntities[0].setAttribute("animation__scale_zoom", { property: "scale", to: "1.2 1.2 1.2", dur: 800, easing: "easeInOutQuad" });
       frameEntities[1].setAttribute("animation__scale_zoom", { property: "scale", to: "2.1 2.1 2.1", dur: 800, easing: "easeInOutQuad" });
       camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.5", dur: 800, easing: "easeInOutQuad" });
 
-      // --- Image 1 ---
+      // Image 1
       const img1 = document.createElement("a-image");
       img1.setAttribute("src", "images/intro_text.png");
       img1.setAttribute("position", "0 0.25 0");
@@ -190,8 +183,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       sequenceStep = 1;
     }
-    // --- STEP 1: Show second image and then return ---
     else if (sequenceStep === 1) {
+      // Second image for Step 0
       const img2 = document.createElement("a-image");
       img2.setAttribute("src", "images/intro_text.png");
       img2.setAttribute("position", "0 0.25 0");
@@ -200,21 +193,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
       sequenceStep = 2;
     }
-    // --- STEP 2: Return to full view ---
     else if (sequenceStep === 2) {
       resetAllModels([0,1], () => { sequenceStep = 3; });
     }
-
-    // --- STEP 3: Zoom piece4 & piece5 ---
     else if (sequenceStep === 3) {
+      // Step 3 → Zoom piece4 & piece5 (original positions)
       frameEntities.forEach((ent,i)=>{ if(i<3 || i>4) ent.setAttribute("visible","false"); });
 
-      frameEntities[3].setAttribute("animation__pos_zoom", { property: "position", to: "-0.05 0.2 0.35", dur: 800, easing: "easeInOutQuad" });
-      frameEntities[4].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.45 0.35", dur: 800, easing: "easeInOutQuad" });
+      frameEntities[3].setAttribute("animation__pos_zoom",{ property:"position", to:"-0.05 0.2 0.35", dur:800, easing:"easeInOutQuad" });
+      frameEntities[4].setAttribute("animation__pos_zoom",{ property:"position", to:"0.05 0.45 0.35", dur:800, easing:"easeInOutQuad" });
       [3,4].forEach(i=>frameEntities[i].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad" }));
       camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
 
-      // --- Image ---
       const img3 = document.createElement("a-image");
       img3.setAttribute("src", "images/intro_text.png");
       img3.setAttribute("position", "0 0.25 0");
@@ -223,9 +213,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       sequenceStep = 4;
     }
-
-    // --- STEP 4: Zoom piece6 and final image ---
     else if (sequenceStep === 4) {
+      // Step 4 → Zoom piece6
       frameEntities.forEach((ent,i)=>{ if(i!==5) ent.setAttribute("visible","false"); });
 
       frameEntities[5].setAttribute("animation__pos_zoom",{ property:"position", to:"0.3 -0.15 0.35", dur:800, easing:"easeInOutQuad" });
@@ -240,13 +229,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       sequenceStep = 5;
     }
-
-    // --- STEP 5: Return to full view and show final cinema ---
     else if (sequenceStep === 5) {
       resetAllModels([0,1,2,3,4,5], () => {
         const tapText = document.getElementById("tapText");
         if (tapText) tapText.setAttribute("visible", "false");
-        // Pop-out animation then show final cinema
+
         setTimeout(()=>{
           frameEntities.forEach(ent=>{
             ent.setAttribute("animation__popout",{ property:"scale", to:"0 0 0", dur:600, easing:"easeInQuad" });
@@ -260,7 +247,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // --- Show final cinema model ---
   function showFinalCinema() {
     frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
     clearOldImages();
@@ -282,7 +268,6 @@ document.addEventListener("DOMContentLoaded", () => {
     finalText.setAttribute("scale","0.2 0.2 0.2");
     introContainer.appendChild(finalText);
   }
-
 });
 
 
