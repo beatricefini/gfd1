@@ -16,18 +16,19 @@
     device-orientation-permission-ui="enabled: false">
 
     <a-assets>
-<img id="introTextImg" src="images/intro_text.png" />
-<img id="introTextImg" src="images/text1.png" />
       <a-asset-item id="piece1" src="models/piece1.glb"></a-asset-item>
       <a-asset-item id="piece2" src="models/piece2.glb"></a-asset-item>
       <a-asset-item id="piece3" src="models/piece3.glb"></a-asset-item>
       <a-asset-item id="piece4" src="models/piece4.glb"></a-asset-item>
       <a-asset-item id="piece5" src="models/piece5.glb"></a-asset-item>
       <a-asset-item id="piece6" src="models/piece6.glb"></a-asset-item>
-      <a-asset-item id="cinemaModel" src="models/piece_cinema1.glb"></a-asset-item>
+      <a-asset-item id="piece_cinema1" src="models/piece_cinema1.glb"></a-asset-item>
+      <!-- immagini -->
+      <img id="intro_text" src="images/intro_text.png">
+      <img id="text1" src="images/text1.png">
     </a-assets>
 
-    <!-- Camera bloccata -->
+    <!-- Camera -->
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
     <!-- Luci -->
@@ -36,9 +37,7 @@
 
     <!-- Target AR -->
     <a-entity mindar-image-target="targetIndex: 0" id="marker">
-      <!-- Contenitore testi -->
       <a-entity id="introTexts"></a-entity>
-      <!-- Contenitore modelli -->
       <a-entity id="modelsContainer"></a-entity>
     </a-entity>
 
@@ -47,4 +46,3 @@
   <script src="js/main.js"></script>
 </body>
 </html>
-
