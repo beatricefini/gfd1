@@ -255,7 +255,6 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 1;
 
     } else if (sequenceStep === 1) {
-
       const infoTitle = document.createElement("a-text");
       infoTitle.setAttribute("value", "BUT");
       infoTitle.setAttribute("align", "center");
@@ -284,10 +283,13 @@ document.addEventListener("DOMContentLoaded", () => {
       frameEntities[3].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.45 0.35", dur: 800, easing: "easeInOutQuad" });
       frameEntities[4].setAttribute("animation__pos_zoom", { property: "position", to: "0.15 0.3 0.35", dur: 800, easing: "easeInOutQuad" });
 
-      [2,3,4].forEach(i => frameEntities[i].setAttribute("animation__scale_zoom", { property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad" }));
+      [2,3,4].forEach(i => frameEntities[i].setAttribute("animation__scale_zoom", {
+        property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad"
+      }));
 
       camera.setAttribute("animation__cam_zoom", { property: "position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
 
+      // ✅ Secondo zoom: manteniamo solo "1958" e "Some buttresses..."
       const infoTitle = document.createElement("a-text");
       infoTitle.setAttribute("value", "1958");
       infoTitle.setAttribute("align", "center");
@@ -308,24 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 4;
 
     } else if (sequenceStep === 4) {
-
-      const infoTitle = document.createElement("a-text");
-      infoTitle.setAttribute("value", "17th Century");
-      infoTitle.setAttribute("align", "center");
-      infoTitle.setAttribute("color", "#000000ff");
-      infoTitle.setAttribute("position", "0 -0.1 0");
-      infoTitle.setAttribute("scale", "0.4 0.4 0.4");
-      introContainer.appendChild(infoTitle);
-
-      const infoDesc = document.createElement("a-text");
-      infoDesc.setAttribute("value","A rampart was built,\n\n incorporating the famous Herepoort gate.\n\n The rampart and gate were demolished in 1875 and 1878,\n\n to allow the construction of Hereplein square\n\n and the canals.");
-      infoDesc.setAttribute("align","center");
-      infoDesc.setAttribute("color","#000000ff");
-      infoDesc.setAttribute("position","0 -0.5 0");
-      infoDesc.setAttribute("scale","0.2 0.2 0.2");
-      infoDesc.setAttribute("wrap-count","30");
-      introContainer.appendChild(infoDesc);
-
+      // ✅ Rimosso "17th Century" e descrizione
       sequenceStep = 5;
 
     } else if (sequenceStep === 5) {
@@ -351,12 +336,10 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 7;
 
     } else if (sequenceStep === 7) {
-      // Ritorno alla vista completa dopo terzo zoom
       resetAllModels([0,1,2,3,4,5], () => { 
         const tapText = document.getElementById("tapText");
         if (tapText) tapText.setAttribute("visible", "false");
 
-        // --- Pop inverso finale con delay di 2 secondi ---
         setTimeout(() => {
           frameEntities.forEach(ent => {
             ent.setAttribute("animation__popout", {
@@ -370,7 +353,6 @@ document.addEventListener("DOMContentLoaded", () => {
           setTimeout(() => {
             frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
             sequenceStep = 8; 
-            // --- Mostra finale cinema ---
             showFinalCinema();
           }, 600);
         }, 2000);
@@ -378,4 +360,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+
 
