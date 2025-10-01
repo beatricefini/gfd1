@@ -235,45 +235,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
       camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.5", dur: 800, easing: "easeInOutQuad" });
 
- const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "1952");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#000000ff");
-      infoText.setAttribute("position", "0 -0.1 0");
-      infoText.setAttribute("scale", "0.4 0.4 0.4");
-      infoText.setAttribute("wrap-count", "30");
-      introContainer.appendChild(infoText);
+      const infoTitle = document.createElement("a-text");
+      infoTitle.setAttribute("value", "1952");
+      infoTitle.setAttribute("align", "center");
+      infoTitle.setAttribute("color", "#000000ff");
+      infoTitle.setAttribute("position", "0 -0.1 0");
+      infoTitle.setAttribute("scale", "0.4 0.4 0.4");
+      introContainer.appendChild(infoTitle);
 
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "The cinema operator Alfred Friedrich Wolff\n\n made a proposal to build a camera theater,\n\n a hotel, and a cafe-restaurant in Hereplein");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#000000ff");
-      infoText.setAttribute("position", "0 -0.4 0");
-      infoText.setAttribute("scale", "0.25 0.25 0.25");
-      infoText.setAttribute("wrap-count", "30");
-      introContainer.appendChild(infoText);
+      const infoDesc = document.createElement("a-text");
+      infoDesc.setAttribute("value", "The cinema operator Alfred Friedrich Wolff\n\n made a proposal to build a camera theater,\n\n a hotel, and a cafe-restaurant in Hereplein");
+      infoDesc.setAttribute("align", "center");
+      infoDesc.setAttribute("color", "#000000ff");
+      infoDesc.setAttribute("position", "0 -0.4 0");
+      infoDesc.setAttribute("scale", "0.25 0.25 0.25");
+      infoDesc.setAttribute("wrap-count", "30");
+      introContainer.appendChild(infoDesc);
 
       sequenceStep = 1;
 
     } else if (sequenceStep === 1) {
 
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "BUT");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#000000ff");
-      infoText.setAttribute("position", "0 -0.1 0");
-      infoText.setAttribute("scale", "0.4 0.4 0.4");
-      infoText.setAttribute("wrap-count", "30");
-      introContainer.appendChild(infoText);
+      const infoTitle = document.createElement("a-text");
+      infoTitle.setAttribute("value", "BUT");
+      infoTitle.setAttribute("align", "center");
+      infoTitle.setAttribute("color", "#000000ff");
+      infoTitle.setAttribute("position", "0 -0.1 0");
+      infoTitle.setAttribute("scale", "0.4 0.4 0.4");
+      introContainer.appendChild(infoTitle);
 
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "The municipality refused");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#000000ff");
-      infoText.setAttribute("position", "0 -0.4 0");
-      infoText.setAttribute("scale", "0.25 0.25 0.25");
-      infoText.setAttribute("wrap-count", "30");
-      introContainer.appendChild(infoText);
+      const infoDesc = document.createElement("a-text");
+      infoDesc.setAttribute("value", "The municipality refused");
+      infoDesc.setAttribute("align", "center");
+      infoDesc.setAttribute("color", "#000000ff");
+      infoDesc.setAttribute("position", "0 -0.4 0");
+      infoDesc.setAttribute("scale", "0.25 0.25 0.25");
+      introContainer.appendChild(infoDesc);
 
       sequenceStep = 2;
 
@@ -291,45 +288,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
       camera.setAttribute("animation__cam_zoom", { property: "position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
 
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "1958");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#000000ff");
-      infoText.setAttribute("position", "0 -0.1 0");
-      infoText.setAttribute("scale", "0.4 0.4 0.4");
-      infoText.setAttribute("wrap-count", "30");
-      introContainer.appendChild(infoText);
+      const infoTitle = document.createElement("a-text");
+      infoTitle.setAttribute("value", "1958");
+      infoTitle.setAttribute("align", "center");
+      infoTitle.setAttribute("color", "#000000ff");
+      infoTitle.setAttribute("position", "0 -0.1 0");
+      infoTitle.setAttribute("scale", "0.4 0.4 0.4");
+      introContainer.appendChild(infoTitle);
 
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Some buttresses of the Alva castle,\n\n built during the Eighty Years' War,\n\n were found in the construction pit of the cinema");
-      infoText.setAttribute("align","center");
-      infoText.setAttribute("color","#000000ff");
-      infoText.setAttribute("position","0 -0.4 0");
-      infoText.setAttribute("scale","0.25 0.25 0.25");
-      infoText.setAttribute("wrap-count","30");
-      introContainer.appendChild(infoText);
+      const infoDesc = document.createElement("a-text");
+      infoDesc.setAttribute("value","Some buttresses of the Alva castle,\n\n built during the Eighty Years' War,\n\n were found in the construction pit of the cinema");
+      infoDesc.setAttribute("align","center");
+      infoDesc.setAttribute("color","#000000ff");
+      infoDesc.setAttribute("position","0 -0.4 0");
+      infoDesc.setAttribute("scale","0.25 0.25 0.25");
+      infoDesc.setAttribute("wrap-count","30");
+      introContainer.appendChild(infoDesc);
 
       sequenceStep = 4;
 
     } else if (sequenceStep === 4) {
 
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value", "17th Century");
-      infoText.setAttribute("align", "center");
-      infoText.setAttribute("color", "#000000ff");
-      infoText.setAttribute("position", "0 -0.1 0");
-      infoText.setAttribute("scale", "0.4 0.4 0.4");
-      infoText.setAttribute("wrap-count", "30");
-      introContainer.appendChild(infoText);
+      const infoTitle = document.createElement("a-text");
+      infoTitle.setAttribute("value", "17th Century");
+      infoTitle.setAttribute("align", "center");
+      infoTitle.setAttribute("color", "#000000ff");
+      infoTitle.setAttribute("position", "0 -0.1 0");
+      infoTitle.setAttribute("scale", "0.4 0.4 0.4");
+      introContainer.appendChild(infoTitle);
 
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","A rampart was built,\n\n incorporating the famous Herepoort gate.\n\n The rampart and gate were demolished in 1875 and 1878,\n\n to allow the construction of Hereplein square\n\n and the canals.");
-      infoText.setAttribute("align","center");
-      infoText.setAttribute("color","#000000ff");
-      infoText.setAttribute("position","0 -0.5 0");
-      infoText.setAttribute("scale","0.2 0.2 0.2");
-      infoText.setAttribute("wrap-count","30");
-      introContainer.appendChild(infoText);
+      const infoDesc = document.createElement("a-text");
+      infoDesc.setAttribute("value","A rampart was built,\n\n incorporating the famous Herepoort gate.\n\n The rampart and gate were demolished in 1875 and 1878,\n\n to allow the construction of Hereplein square\n\n and the canals.");
+      infoDesc.setAttribute("align","center");
+      infoDesc.setAttribute("color","#000000ff");
+      infoDesc.setAttribute("position","0 -0.5 0");
+      infoDesc.setAttribute("scale","0.2 0.2 0.2");
+      infoDesc.setAttribute("wrap-count","30");
+      introContainer.appendChild(infoDesc);
 
       sequenceStep = 5;
 
@@ -344,14 +339,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       camera.setAttribute("animation__cam_zoom", { property:"position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
 
-      const infoText = document.createElement("a-text");
-      infoText.setAttribute("value","Infine, quest'ultima cornice");
-      infoText.setAttribute("align","center");
-      infoText.setAttribute("color","#008000");
-      infoText.setAttribute("position","0 -0.4 0");
-      infoText.setAttribute("scale","0.2 0.2 0.2");
-      infoText.setAttribute("wrap-count","30");
-      introContainer.appendChild(infoText);
+      const infoDesc = document.createElement("a-text");
+      infoDesc.setAttribute("value","Infine, quest'ultima cornice");
+      infoDesc.setAttribute("align","center");
+      infoDesc.setAttribute("color","#008000");
+      infoDesc.setAttribute("position","0 -0.4 0");
+      infoDesc.setAttribute("scale","0.2 0.2 0.2");
+      infoDesc.setAttribute("wrap-count","30");
+      introContainer.appendChild(infoDesc);
 
       sequenceStep = 7;
 
@@ -383,3 +378,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+
