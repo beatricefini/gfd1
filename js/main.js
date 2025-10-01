@@ -25,11 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
   marker.addEventListener("targetFound", () => {
     if (started) return;
 
-    // ✅ Cambiato testo con immagine
+    // Intro come immagine
     const introImage = document.createElement("a-image");
     introImage.setAttribute("src", "images/intro_text.png");
     introImage.setAttribute("position", "0 0.25 0");
-    introImage.setAttribute("scale", "1.2 1.2 1.2");
+    introImage.setAttribute("scale", "1.5 1.5 1.5");
     introImage.setAttribute("id", "introImage");
     introContainer.appendChild(introImage);
 
@@ -37,11 +37,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const startText = document.createElement("a-text");
       startText.setAttribute("value", "Tap to continue");
       startText.setAttribute("align", "center");
-      startText.setAttribute("color", "#000000ff");
+      startText.setAttribute("color", "#000000");
+      startText.setAttribute("font", "roboto");
       startText.setAttribute("position", "0 -0.3 0");
-      startText.setAttribute("scale", "0.16 0.16 0.16");
+      startText.setAttribute("scale", "0.18 0.18 0.18");
       startText.setAttribute("wrap-count", "20");
       startText.setAttribute("id", "startText");
+      startText.setAttribute("font-weight", "bold");
       introContainer.appendChild(startText);
       canTap = true;
     }, 3000);
@@ -49,9 +51,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Global click handler ---
   window.addEventListener("click", () => {
-    const startText = document.getElementById("startText");
     if (!started && canTap) {
       const introImage = document.getElementById("introImage");
+      const startText = document.getElementById("startText");
       if (introImage) introImage.setAttribute("visible", "false");
       if (startText) startText.setAttribute("visible", "false");
 
@@ -69,11 +71,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const tapText = document.createElement("a-text");
       tapText.setAttribute("value", "Tap the screen");
       tapText.setAttribute("align", "center");
-      tapText.setAttribute("color", "#FFD700");
+      tapText.setAttribute("color", "#000000");
+      tapText.setAttribute("font", "roboto");
       tapText.setAttribute("position", "0 -0.6 0");
-      tapText.setAttribute("scale", "0.2 0.2 0.2");
+      tapText.setAttribute("scale", "0.18 0.18 0.18");
       tapText.setAttribute("wrap-count", "20");
       tapText.setAttribute("id", "tapText");
+      tapText.setAttribute("font-weight", "bold");
       introContainer.appendChild(tapText);
       return;
     }
@@ -108,14 +112,13 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(showAllModelsSequentially, 700);
   }
 
-  function clearOldTexts() {
-    const oldTexts = introContainer.querySelectorAll("a-text");
-    oldTexts.forEach((t) => {
+  function clearOldVisuals() {
+    const old = introContainer.querySelectorAll("a-text, a-image");
+    old.forEach((t) => {
       if (t.id !== "tapText") t.remove();
     });
   }
 
-  // --- Reset models ---
   function resetAllModels(activeIndices = [], callback) {
     const dur = 800;
     frameEntities.forEach((ent, i) => {
@@ -165,74 +168,75 @@ document.addEventListener("DOMContentLoaded", () => {
     }, dur + 50);
   }
 
-  // --- Finale con modello cinema ---
-  function showFinalCinema() {
-    frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
-    clearOldTexts();
-
-    const baseHeight = -0.25;
-
-    const cinemaModel = document.createElement("a-entity");
-    cinemaModel.setAttribute("gltf-model", "#cinemaModel");
-    cinemaModel.setAttribute("position", { x: 0, y: -0.3, z: 0.5 });
-    cinemaModel.setAttribute("scale", { x: 1.5, y: 1.5, z: 1.5 });
-    cinemaModel.addEventListener("model-loaded", () => {
-      console.log("✅ Cinema model caricato!");
-      cinemaModel.setAttribute("visible", "true");
-    });
-    modelsContainer.appendChild(cinemaModel);
-
-    const text1958 = document.createElement("a-text");
-    text1958.setAttribute("value", "1958");
-    text1958.setAttribute("align", "center");
-    text1958.setAttribute("anchor", "center");
-    text1958.setAttribute("color", "#000000");
-    text1958.setAttribute("font", "roboto");
-    text1958.setAttribute("position", { x: 0, y: baseHeight + 0.5, z: 0.5 });
-    text1958.setAttribute("scale", "0.5 0.5 0.5");
-    text1958.setAttribute("opacity", "0");
-    text1958.setAttribute("shader", "msdf");
-    text1958.setAttribute("negate", "false");
-    text1958.setAttribute("animation__fadein", {
-      property: "opacity",
-      from: 0,
-      to: 1,
-      dur: 800,
-      easing: "easeInQuad",
-      delay: 200
-    });
-    introContainer.appendChild(text1958);
-
-    const textRuins = document.createElement("a-text");
-    textRuins.setAttribute("value", "Ruins");
-    textRuins.setAttribute("align", "center");
-    textRuins.setAttribute("anchor", "center");
-    textRuins.setAttribute("color", "#000000");
-    textRuins.setAttribute("font", "roboto");
-    textRuins.setAttribute("position", { x: 0, y: baseHeight + 0.4, z: 0.5 });
-    textRuins.setAttribute("scale", "0.35 0.35 0.35");
-    textRuins.setAttribute("opacity", "0");
-    textRuins.setAttribute("shader", "msdf");
-    textRuins.setAttribute("negate", "false");
-    textRuins.setAttribute("animation__fadein", {
-      property: "opacity",
-      from: 0,
-      to: 1,
-      dur: 800,
-      easing: "easeInQuad",
-      delay: 1200
-    });
-    introContainer.appendChild(textRuins);
-  }
-
-  // --- Gestione sequenze ---
+  // --- Sequenze ---
   function handleSequences() {
     const tapText = document.getElementById("tapText");
     if (tapText) tapText.setAttribute("visible", "false");
-    clearOldTexts();
+    clearOldVisuals();
 
-    // tutte le tue sequenze step 0 → 7 (zoom1, zoom2, zoom3, reset, finale)
-    // ... (rimangono identiche al main lungo che mi hai dato, non modificate)
+    // Step 0
+    if (sequenceStep === 0) {
+      frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
+      camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.5", dur: 800 });
+
+      const img = document.createElement("a-image");
+      img.setAttribute("src", "images/intro_text.png");
+      img.setAttribute("position", "0 0.4 0");
+      img.setAttribute("scale", "1.2 1.2 1.2");
+      introContainer.appendChild(img);
+
+      sequenceStep++;
+      return;
+    }
+
+    // Step 1: ritorno
+    if (sequenceStep === 1) {
+      resetAllModels([], () => {});
+      sequenceStep++;
+      return;
+    }
+
+    // Step 2
+    if (sequenceStep === 2) {
+      frameEntities.forEach((ent,i)=>{ if(i!==2) ent.setAttribute("visible","false"); });
+
+      const img = document.createElement("a-image");
+      img.setAttribute("src", "images/intro_text.png");
+      img.setAttribute("position", "0 0.4 0");
+      img.setAttribute("scale", "1.2 1.2 1.2");
+      introContainer.appendChild(img);
+
+      sequenceStep++;
+      return;
+    }
+
+    // Step 3: ritorno
+    if (sequenceStep === 3) {
+      resetAllModels([], () => {});
+      sequenceStep++;
+      return;
+    }
+
+    // Step 4
+    if (sequenceStep === 4) {
+      frameEntities.forEach((ent,i)=>{ if(i!==3) ent.setAttribute("visible","false"); });
+
+      const img = document.createElement("a-image");
+      img.setAttribute("src", "images/intro_text.png");
+      img.setAttribute("position", "0 0.4 0");
+      img.setAttribute("scale", "1.2 1.2 1.2");
+      introContainer.appendChild(img);
+
+      sequenceStep++;
+      return;
+    }
+
+    // Step 5: ritorno
+    if (sequenceStep === 5) {
+      resetAllModels([], () => {});
+      sequenceStep++;
+      return;
+    }
   }
 });
 
