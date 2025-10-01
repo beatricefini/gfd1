@@ -71,15 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function showAllModelsSequentially() {
     if (currentIndex >= models.length) {
       allModelsDisplayed = true;
-      const tapText = document.createElement("a-text");
-      tapText.setAttribute("value", "Tap the screen");
-      tapText.setAttribute("align", "center");
-      tapText.setAttribute("color", "#FFD700");
-      tapText.setAttribute("position", "0 -0.6 0");
-      tapText.setAttribute("scale", "0.2 0.2 0.2");
-      tapText.setAttribute("wrap-count", "20");
-      tapText.setAttribute("id", "tapText");
-      introContainer.appendChild(tapText);
+      // ✅ Rimosso il tapText qui, sarà mostrato solo all'inizio e dopo il secondo zoom
       return;
     }
 
@@ -120,7 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Reset models ---
   function resetAllModels(activeIndices = [], callback) {
     const dur = 800;
 
@@ -164,14 +155,10 @@ document.addEventListener("DOMContentLoaded", () => {
         easing: "easeInOutQuad"
       });
 
-      const tapText = document.getElementById("tapText");
-      if (tapText) tapText.setAttribute("visible", "true");
-
       if (typeof callback === "function") callback();
     }, dur + 50);
   }
 
-  // --- Finale con modello cinema ---
   function showFinalCinema() {
     frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
     clearOldTexts();
@@ -183,7 +170,6 @@ document.addEventListener("DOMContentLoaded", () => {
     cinemaModel.setAttribute("position", { x: 0, y: -0.3, z: 0.5 });
     cinemaModel.setAttribute("scale", { x: 1.5, y: 1.5, z: 1.5 });
     cinemaModel.addEventListener("model-loaded", () => {
-      console.log("✅ Cinema model caricato!");
       cinemaModel.setAttribute("visible", "true");
     });
     modelsContainer.appendChild(cinemaModel);
@@ -196,10 +182,6 @@ document.addEventListener("DOMContentLoaded", () => {
     text1958.setAttribute("font", "roboto");
     text1958.setAttribute("position", { x: 0, y: baseHeight + 0.5, z: 0.5 });
     text1958.setAttribute("scale", "0.5 0.5 0.5");
-    text1958.setAttribute("opacity", "0");
-    text1958.setAttribute("shader", "msdf");
-    text1958.setAttribute("negate", "false");
-    text1958.setAttribute("animation__fadein", { property: "opacity", from: 0, to: 1, dur: 800, easing: "easeInQuad", delay: 200 });
     introContainer.appendChild(text1958);
 
     const textRuins = document.createElement("a-text");
@@ -210,14 +192,9 @@ document.addEventListener("DOMContentLoaded", () => {
     textRuins.setAttribute("font", "roboto");
     textRuins.setAttribute("position", { x: 0, y: baseHeight + 0.4, z: 0.5 });
     textRuins.setAttribute("scale", "0.35 0.35 0.35");
-    textRuins.setAttribute("opacity", "0");
-    textRuins.setAttribute("shader", "msdf");
-    textRuins.setAttribute("negate", "false");
-    textRuins.setAttribute("animation__fadein", { property: "opacity", from: 0, to: 1, dur: 800, easing: "easeInQuad", delay: 1200 });
     introContainer.appendChild(textRuins);
   }
 
-  // --- Gestione sequenze ---
   function handleSequences() {
     const tapText = document.getElementById("tapText");
     if (tapText) tapText.setAttribute("visible", "false");
@@ -225,14 +202,12 @@ document.addEventListener("DOMContentLoaded", () => {
     clearOldTexts();
 
     if (sequenceStep === 0) {
+      // primo zoom
       frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
-
       frameEntities[0].setAttribute("animation__pos_zoom", { property: "position", to: "-0.35 0 0.1", dur: 800, easing: "easeInOutQuad" });
       frameEntities[1].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.12 0.4", dur: 800, easing: "easeInOutQuad" });
-
       frameEntities[0].setAttribute("animation__scale_zoom", { property: "scale", to: "1.2 1.2 1.2", dur: 800, easing: "easeInOutQuad" });
       frameEntities[1].setAttribute("animation__scale_zoom", { property: "scale", to: "2.1 2.1 2.1", dur: 800, easing: "easeInOutQuad" });
-
       camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.5", dur: 800, easing: "easeInOutQuad" });
 
       const infoTitle = document.createElement("a-text");
@@ -255,41 +230,15 @@ document.addEventListener("DOMContentLoaded", () => {
       sequenceStep = 1;
 
     } else if (sequenceStep === 1) {
-      const infoTitle = document.createElement("a-text");
-      infoTitle.setAttribute("value", "BUT");
-      infoTitle.setAttribute("align", "center");
-      infoTitle.setAttribute("color", "#000000ff");
-      infoTitle.setAttribute("position", "0 -0.1 0");
-      infoTitle.setAttribute("scale", "0.4 0.4 0.4");
-      introContainer.appendChild(infoTitle);
-
-      const infoDesc = document.createElement("a-text");
-      infoDesc.setAttribute("value", "The municipality refused");
-      infoDesc.setAttribute("align", "center");
-      infoDesc.setAttribute("color", "#000000ff");
-      infoDesc.setAttribute("position", "0 -0.4 0");
-      infoDesc.setAttribute("scale", "0.25 0.25 0.25");
-      introContainer.appendChild(infoDesc);
-
-      sequenceStep = 2;
-
-    } else if (sequenceStep === 2) {
-      resetAllModels([0,1], () => { sequenceStep = 3; });
-
-    } else if (sequenceStep === 3) {
-      frameEntities.forEach((ent, i) => { if (i<2 || i>4) ent.setAttribute("visible","false"); });
-
+      // secondo zoom
+      frameEntities.forEach((ent,i)=>{ if(i<2 || i>4) ent.setAttribute("visible","false"); });
       frameEntities[2].setAttribute("animation__pos_zoom", { property: "position", to: "-0.05 0.2 0.35", dur: 800, easing: "easeInOutQuad" });
       frameEntities[3].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.45 0.35", dur: 800, easing: "easeInOutQuad" });
       frameEntities[4].setAttribute("animation__pos_zoom", { property: "position", to: "0.15 0.3 0.35", dur: 800, easing: "easeInOutQuad" });
-
-      [2,3,4].forEach(i => frameEntities[i].setAttribute("animation__scale_zoom", {
-        property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad"
-      }));
-
+      [2,3,4].forEach(i => frameEntities[i].setAttribute("animation__scale_zoom", { property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad" }));
       camera.setAttribute("animation__cam_zoom", { property: "position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
 
-      // ✅ Secondo zoom: manteniamo solo "1958" e "Some buttresses..."
+      // solo 1958 + Some buttresses
       const infoTitle = document.createElement("a-text");
       infoTitle.setAttribute("value", "1958");
       infoTitle.setAttribute("align", "center");
@@ -307,55 +256,14 @@ document.addEventListener("DOMContentLoaded", () => {
       infoDesc.setAttribute("wrap-count","30");
       introContainer.appendChild(infoDesc);
 
-      sequenceStep = 4;
+      sequenceStep = 2; // prossimo tap torna alla vista completa
 
-    } else if (sequenceStep === 4) {
-      // ✅ Rimosso "17th Century" e descrizione
-      sequenceStep = 5;
-
-    } else if (sequenceStep === 5) {
-      resetAllModels([2,3,4], ()=>{ sequenceStep = 6; });
-
-    } else if (sequenceStep === 6) {
-      frameEntities.forEach((ent, i)=>{ if(i!==5) ent.setAttribute("visible","false"); });
-
-      frameEntities[5].setAttribute("animation__pos_zoom", { property:"position", to:"0.3 -0.15 0.35", dur:800, easing:"easeInOutQuad" });
-      frameEntities[5].setAttribute("animation__scale_zoom", { property:"scale", to:"1.7 1.7 1.7", dur:800, easing:"easeInOutQuad" });
-
-      camera.setAttribute("animation__cam_zoom", { property:"position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
-
-      const infoDesc = document.createElement("a-text");
-      infoDesc.setAttribute("value","Infine, quest'ultima cornice");
-      infoDesc.setAttribute("align","center");
-      infoDesc.setAttribute("color","#008000");
-      infoDesc.setAttribute("position","0 -0.4 0");
-      infoDesc.setAttribute("scale","0.2 0.2 0.2");
-      infoDesc.setAttribute("wrap-count","30");
-      introContainer.appendChild(infoDesc);
-
-      sequenceStep = 7;
-
-    } else if (sequenceStep === 7) {
-      resetAllModels([0,1,2,3,4,5], () => { 
+    } else if (sequenceStep === 2) {
+      // ritorno vista completa
+      resetAllModels([0,1,2,3,4,5], () => {
+        sequenceStep = 3;
         const tapText = document.getElementById("tapText");
         if (tapText) tapText.setAttribute("visible", "false");
-
-        setTimeout(() => {
-          frameEntities.forEach(ent => {
-            ent.setAttribute("animation__popout", {
-              property: "scale",
-              to: "0 0 0",
-              dur: 600,
-              easing: "easeInQuad"
-            });
-          });
-
-          setTimeout(() => {
-            frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
-            sequenceStep = 8; 
-            showFinalCinema();
-          }, 600);
-        }, 2000);
       });
     }
   }
