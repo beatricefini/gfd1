@@ -195,8 +195,8 @@ function showFinalCinema(){
   const text1 = document.createElement("a-text");
   text1.setAttribute("value", "1958");
   text1.setAttribute("align", "center");
-  text1.setAttribute("color", "#ffffff");
-  text1.setAttribute("position", "0 0.5 0.5"); // sopra il modello
+  text1.setAttribute("color", "#000000");
+  text1.setAttribute("position", "0 0.2 0.5"); // sopra il modello
   text1.setAttribute("width", "2.2"); // più grande
   modelsContainer.appendChild(text1);
 
