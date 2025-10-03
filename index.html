@@ -106,86 +106,95 @@
   </a-scene>
 
   <script src="js/main.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const preIntro = document.getElementById("preIntroOverlay");
+ <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const sceneEl = document.querySelector("a-scene");
+  const scanningUI = document.getElementById("custom-scanning-ui");
+  const marker = document.getElementById("marker");
+
+  // --- Primo overlay pre-intro ---
+  const preIntro = document.createElement("div");
+  preIntro.id = "preIntroOverlay";
+  preIntro.className = "overlay show"; // subito visibile
+  const preImg = document.createElement("img");
+  preImg.src = "images/pre_intro.png";
+  preIntro.appendChild(preImg);
+
+  const preTapText = document.createElement("div");
+  preTapText.id = "preTapText";
+  preTapText.innerText = "Tap to continue";
+  preTapText.style.position = "absolute";
+  preTapText.style.bottom = "10%";
+  preTapText.style.width = "100%";
+  preTapText.style.textAlign = "center";
+  preTapText.style.fontSize = "1.2rem";
+  preTapText.style.color = "#FFD700";
+  preTapText.style.cursor = "pointer";
+  preIntro.appendChild(preTapText);
+
+  document.body.appendChild(preIntro);
+
+  // Al click su overlay, nascondi pre-intro e mostra count1
+  preIntro.addEventListener("click", () => {
+    preIntro.classList.remove("show");
+    preIntro.classList.add("hide");
+    setTimeout(() => {
+      preIntro.remove();
+
+      // Mostra overlay count1 come nel tuo codice originale
       const intro = document.getElementById("introOverlay");
+      setTimeout(() => intro.classList.add("show"), 100);
+      setTimeout(() => {
+        intro.classList.remove("show");
+        intro.classList.add("hide");
+        setTimeout(() => intro.remove(), 1000);
+      }, 5000);
 
-      // Mostra subito preIntro
-      setTimeout(() => preIntro.classList.add("show"), 100);
+      // Overlay istruzioni via JS
+      const instructions = document.createElement("div");
+      instructions.id = "instructionsOverlay";
+      instructions.className = "overlay";
+      const instrImg = document.createElement("img");
+      instrImg.src = "images/instructions.png";
+      instructions.appendChild(instrImg);
 
-      // Tap su preIntro → passa a count1
-      preIntro.addEventListener("click", () => {
-        preIntro.classList.remove("show");
-        preIntro.classList.add("hide");
-        setTimeout(() => preIntro.remove(), 500);
+      const tapText = document.createElement("div");
+      tapText.id = "tapText";
+      tapText.innerText = "Tap to start";
+      instructions.appendChild(tapText);
+      document.body.appendChild(instructions);
 
-        // Mostra overlay count1 originale
-        setTimeout(() => intro.classList.add("show"), 100);
-        setTimeout(() => {
-          intro.classList.remove("show");
-          intro.classList.add("hide");
-          setTimeout(() => intro.remove(), 5000);
+      setTimeout(() => {
+        instructions.classList.add("show");
+        tapText.classList.add("show");
+      }, 6000);
 
-          // Overlay istruzioni
-          const instructions = document.createElement("div");
-          instructions.id = "instructionsOverlay";
-          instructions.className = "overlay";
-          const instrImg = document.createElement("img");
-          instrImg.src = "images/instructions.png";
-          instructions.appendChild(instrImg);
-          const tapText = document.createElement("div");
-          tapText.id = "tapText";
-          tapText.innerText = "Tap to start";
-          tapText.style.position = "absolute";
-          tapText.style.bottom = "10%";
-          tapText.style.width = "100%";
-          tapText.style.textAlign = "center";
-          tapText.style.fontSize = "1.2rem";
-          tapText.style.color = "white";
-          tapText.style.cursor = "pointer";
-          instructions.appendChild(tapText);
-          document.body.appendChild(instructions);
-
-          setTimeout(() => {
-            instructions.classList.add("show");
-            tapText.classList.add("show");
-          }, 100);
-
-          // Click istruzioni: avvia scena e main
-          instructions.addEventListener("click", async () => {
-            instructions.classList.remove("show");
-            instructions.classList.add("hide");
-            setTimeout(()=>instructions.remove(),1000);
-
-            const sceneEl = document.querySelector("a-scene");
-            sceneEl.style.display = "flex";
-            const mindarSystem = sceneEl.systems["mindar-image-system"];
-            await mindarSystem.start();
-
-            const vrButton = document.querySelector(".a-enter-vr-button");
-            if(vrButton) vrButton.remove();
-
-            if(typeof initMainSequence === "function") initMainSequence();
-          }, { once:true });
-
-        }, 100);
+      // Click istruzioni: avvia scena e main instructions
+      instructions.addEventListener("click", async () => {
+        instructions.classList.remove("show");
+        instructions.classList.add("hide");
+        setTimeout(() => instructions.remove(), 1000);
+        sceneEl.style.display = "flex";
+        const mindarSystem = sceneEl.systems["mindar-image-system"];
+        await mindarSystem.start();
+        const vrButton = document.querySelector(".a-enter-vr-button");
+        if (vrButton) vrButton.remove();
+        if (typeof initMainSequence === "function") initMainSequence();
       }, { once: true });
+    }, 600); // durata fade-out pre-intro
+  }, { once: true });
 
-      // Scanner UI visibile finché marker non trovato
-      const sceneEl = document.querySelector("a-scene");
-      const scanningUI = document.getElementById("custom-scanning-ui");
-      const marker = document.getElementById("marker");
+  // Scanner UI visibile finché marker non trovato
+  marker.addEventListener('targetFound', () => {
+    scanningUI.classList.add("hidden");
+    scanningUI.classList.remove("visible");
+  });
+  marker.addEventListener('targetLost', () => {
+    scanningUI.classList.remove("hidden");
+    scanningUI.classList.add("visible");
+  });
+});
+</script>
 
-      marker.addEventListener('targetFound', () => {
-        scanningUI.classList.add("hidden");
-        scanningUI.classList.remove("visible");
-      });
-      marker.addEventListener('targetLost', () => {
-        scanningUI.classList.remove("hidden");
-        scanningUI.classList.add("visible");
-      });
-    });
-  </script>
 </body>
 </html>
