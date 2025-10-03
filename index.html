@@ -24,31 +24,34 @@
       opacity: 0;
       transition: opacity 1s ease-in-out;
       z-index: 9999;
+      pointer-events: auto; /* fix click */
     }
+
     .overlay img {
       max-width: var(--instructions-scale);
       max-height: var(--instructions-scale);
       width: auto;
       height: auto;
     }
+
     .overlay.show { opacity: 1; }
     .overlay.hide { opacity: 0; }
 
-    /* Testo Tap */
-    #tapText, #preTapText {
+    /* Testo Tap to Start */
+    .overlay #tapText {
       position: absolute;
       bottom: 10%;
       width: 100%;
       text-align: center;
       font-size: 1.2rem;
-      color: black;
+      color: white;
       opacity: 0;
       transition: opacity 1s ease-in-out;
       cursor: pointer;
       z-index: 10;
       font-family: Arial, sans-serif;
     }
-    #tapText.show, #preTapText.show { opacity: 1; }
+    .overlay #tapText.show { opacity: 1; }
 
     /* Custom scanning UI */
     #custom-scanning-ui {
@@ -96,18 +99,19 @@
   </style>
 </head>
 <body>
-  <!-- Overlay pre-intro -->
+
+  <!-- Pre-intro overlay -->
   <div id="preIntroOverlay" class="overlay">
-    <img src="images/preintro.png" alt="Pre Intro">
+    <img src="images/pre_intro.png" alt="Pre Intro">
     <div id="preTapText">Tap to continue</div>
   </div>
 
-  <!-- Overlay count1.png -->
+  <!-- Overlay iniziale: count1.png -->
   <div id="introOverlay" class="overlay">
     <img src="images/count1.png" alt="Intro">
   </div>
 
-  <!-- Overlay instructions -->
+  <!-- Overlay istruzioni: instructions.png -->
   <div id="instructionsOverlay" class="overlay">
     <img src="images/instructions.png" alt="Instructions">
     <div id="tapText">Tap to start</div>
@@ -138,9 +142,7 @@
       <a-asset-item id="piece5" src="models/piece5.glb"></a-asset-item>
       <a-asset-item id="piece6" src="models/piece6.glb"></a-asset-item>
       <a-asset-item id="pieceCinema" src="models/piece_cinema3.glb"></a-asset-item>
-      <!-- Outro -->
       <img id="outroImg" src="images/outro1.png">
-      <!-- Testi -->
       <img id="introImg" src="images/intro_text.png">
       <img id="text1Img" src="images/text1.png">
       <img id="text2Img" src="images/text2.png">
@@ -205,7 +207,7 @@
         instructions.classList.add("hide");
         setTimeout(() => instructions.remove(), 1000);
 
-        sceneEl.style.display = "block";
+        sceneEl.style.display = "flex";
         const mindarSystem = sceneEl.systems["mindar-image-system"];
         await mindarSystem.start();
 
