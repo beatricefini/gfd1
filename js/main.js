@@ -18,29 +18,12 @@ function initMainSequence() {
 
   const originalTransforms = {};
 
-  // --- Marker found: mostra intro ---
-  marker.addEventListener("targetFound", () => {
+marker.addEventListener("targetFound", () => {
     if (started) return;
+    started = true; // segna che la sequenza è iniziata
+    showAllModelsSequentially(); // parte subito la sequenza di cornici
+});
 
-    const introImg = document.createElement("a-plane");
-    introImg.setAttribute("src", "#introImg");
-    introImg.setAttribute("position", "0 0.3 0");
-    introImg.setAttribute("scale", "0.8 0.6 1");
-    introImg.setAttribute("material", "transparent: true");
-    introContainer.appendChild(introImg);
-
-    setTimeout(() => {
-      const startText = document.createElement("a-text");
-      startText.setAttribute("value", "Tap to start");
-      startText.setAttribute("align", "center");
-      startText.setAttribute("color", "#FFD700");
-      startText.setAttribute("position", "0 -0.2 0");
-      startText.setAttribute("scale", "0.2 0.2 0.2");
-      startText.setAttribute("wrap-count", "20");
-      startText.setAttribute("id", "startText");
-      introContainer.appendChild(startText);
-    }, 3000);
-  });
 
   // --- Click globale ---
   window.addEventListener("click", () => {
