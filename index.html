@@ -12,8 +12,10 @@
     /* Overlay base */
     .overlay {
       position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       background: black;
       display: flex;
       justify-content: center;
@@ -23,11 +25,14 @@
       transition: opacity 1s ease-in-out;
       z-index: 9999;
     }
+
     .overlay img {
       max-width: var(--instructions-scale);
       max-height: var(--instructions-scale);
-      width: auto; height: auto;
+      width: auto;
+      height: auto;
     }
+
     .overlay.show { opacity: 1; }
     .overlay.hide { opacity: 0; }
 
@@ -50,8 +55,10 @@
     /* Custom scanning UI */
     #custom-scanning-ui {
       position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       pointer-events: none;
       display: flex;
       justify-content: center;
@@ -64,7 +71,10 @@
 
     /* Angoli */
     .corner {
-      position: absolute; width: 40px; height: 40px; border: 6px solid #ffffff;
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border: 6px solid #ffffff;
     }
     .top-left { top: 10%; left: 10%; border-right: none; border-bottom: none; }
     .top-right { top: 10%; right: 10%; border-left: none; border-bottom: none; }
@@ -88,12 +98,12 @@
   </style>
 </head>
 <body>
-  <!-- Overlay 1: count1.png -->
+  <!-- Overlay iniziale: count1.png -->
   <div id="introOverlay" class="overlay">
     <img src="images/count1.png" alt="Intro">
   </div>
 
-  <!-- Overlay 2: instructions.png -->
+  <!-- Overlay istruzioni: instructions.png -->
   <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0;">
     <img src="images/instructions.png" alt="Instructions">
     <div id="tapText">Tap to start</div>
@@ -124,8 +134,9 @@
       <a-asset-item id="piece5" src="models/piece5.glb"></a-asset-item>
       <a-asset-item id="piece6" src="models/piece6.glb"></a-asset-item>
       <a-asset-item id="pieceCinema" src="models/piece_cinema3.glb"></a-asset-item>
-
-<!-- Immagini testuali --> <img id="introImg" src="images/intro_text.png"> <img id="text1Img" src="images/text1.png"> <img id="text2Img" src="images/text2.png"> <img id="text3Img" src="images/text3.png"> <img id="text4Img" src="images/text4.png"> <img id="text5Img" src="images/text5.png"> <img id="outroImg" src="images/outro1.png">
+      <!-- Outro image asset -->
+      <img id="outroImg" src="images/outro1.png">
+<!-- Immagini testuali --> <img id="introImg" src="images/intro_text.png"> <img id="text1Img" src="images/text1.png"> <img id="text2Img" src="images/text2.png"> <img id="text3Img" src="images/text3.png"> <img id="text4Img" src="images/text4.png"> <img id="text5Img" src="images/text5.png"> </a-assets>
 
     </a-assets>
 
@@ -139,53 +150,5 @@
   </a-scene>
 
   <script src="js/main.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const sceneEl = document.querySelector("a-scene");
-      const introOverlay = document.getElementById("introOverlay");
-      const instructionsOverlay = document.getElementById("instructionsOverlay");
-      const tapText = document.getElementById("tapText");
-      const scanningUI = document.getElementById("custom-scanning-ui");
-      const marker = document.getElementById("marker");
-
-      // Mostra intro count1.png
-      setTimeout(() => introOverlay.classList.add("show"), 100);
-      setTimeout(() => {
-        introOverlay.classList.remove("show");
-        introOverlay.classList.add("hide");
-        setTimeout(()=>introOverlay.remove(), 1000);
-      }, 5000);
-
-      // Mostra overlay instructions.png con tap
-      setTimeout(() => {
-        instructionsOverlay.classList.add("show");
-        tapText.classList.add("show");
-      }, 6000);
-
-      instructionsOverlay.addEventListener("click", async () => {
-        instructionsOverlay.classList.remove("show");
-        instructionsOverlay.classList.add("hide");
-        setTimeout(() => instructionsOverlay.remove(), 1000);
-
-        // Mostra scena e avvia MindAR
-        sceneEl.style.display = "flex";
-        const mindarSystem = sceneEl.systems["mindar-image-system"];
-        await mindarSystem.start();
-
-        const vrButton = document.querySelector(".a-enter-vr-button");
-        if(vrButton) vrButton.remove();
-      }, { once: true });
-
-      // Scanner UI visibile finché marker non trovato
-      marker.addEventListener('targetFound', () => {
-        scanningUI.classList.add("hidden");
-        scanningUI.classList.remove("visible");
-      });
-      marker.addEventListener('targetLost', () => {
-        scanningUI.classList.remove("hidden");
-        scanningUI.classList.add("visible");
-      });
-    });
-  </script>
 </body>
 </html>
