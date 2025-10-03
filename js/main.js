@@ -123,10 +123,11 @@ marker.addEventListener("targetFound", () => {
   }
 
  let sequenceStep = 0;
+let tapText = null;
 
-function handleSequences() {
-    // --- Recupero o creazione del "tapText" ---
-    let tapText = document.getElementById("tapText");
+function initializeTapText() {
+    // Crea il testo "Tap to continue" se non esiste
+    tapText = document.getElementById("tapText");
     if (!tapText) {
         tapText = document.createElement("a-text");
         tapText.setAttribute("id", "tapText");
@@ -138,76 +139,101 @@ function handleSequences() {
         tapText.setAttribute("wrap-count", "20");
         introContainer.appendChild(tapText);
     }
-    tapText.setAttribute("visible", "false"); // inizialmente non visibile
+    tapText.setAttribute("visible", "false"); // Inizialmente non visibile
+}
 
-    // --- Funzione per creare le immagini delle sequenze ---
-    function createTextImage(imgId, posY) {
-        const img = document.createElement("a-image");
-        img.setAttribute("src", imgId);
-        img.setAttribute("position", `0 ${posY} 0`);
-        img.setAttribute("scale", "1 1 1");
-        img.setAttribute("material", "transparent: true");
-        img.classList.add("sequence-img");
-        return img;
-    }
+// Funzione per creare le immagini
+function createTextImage(imgId, posY) {
+    const img = document.createElement("a-image");
+    img.setAttribute("src", imgId);
+    img.setAttribute("position", `0 ${posY} 0`);
+    img.setAttribute("scale", "1 1 1");  // Manteniamo la scala originale
+    img.setAttribute("material", "transparent: true");
+    img.classList.add("sequence-img");
+    return img;
+}
 
-    // --- Rimozione delle immagini precedenti ---
+// Funzione per la sequenza delle immagini
+function handleSequences() {
+    if (!tapText) initializeTapText(); // Assicuriamoci che il tapText sia inizializzato
+
+    // Rimuovi le immagini precedenti
     const oldImgs = introContainer.querySelectorAll(".sequence-img");
     oldImgs.forEach(img => img.remove());
 
-    // --- SEQUENZE --- 
+    // --- SEQUENZE DI ZOOM ---
     if (sequenceStep === 0) {
-        // Prima sequenza di zoom (text1)
+        // Prima sequenza: text1
         const img1 = createTextImage("#text1Img", -0.4);
         introContainer.appendChild(img1);
-        tapText.setAttribute("visible", "true");  // Mostra "Tap to continue"
+        tapText.setAttribute("visible", "true");  // Mostra il testo "Tap to continue"
         sequenceStep = 1;
     } 
     else if (sequenceStep === 1) {
-        // Seconda sequenza di zoom (text2)
+        // Seconda sequenza: text2
         const img2 = createTextImage("#text2Img", -0.5);
         introContainer.appendChild(img2);
         tapText.setAttribute("visible", "true");
         sequenceStep = 2;
     }
     else if (sequenceStep === 2) {
-        // Terza sequenza di zoom (text3)
+        // Terza sequenza: text3
         const img3 = createTextImage("#text3Img", -0.4);
         introContainer.appendChild(img3);
         tapText.setAttribute("visible", "true");
         sequenceStep = 3;
     }
     else if (sequenceStep === 3) {
-        // Quarta sequenza di zoom (text4)
+        // Quarta sequenza: text4
         const img4 = createTextImage("#text4Img", -0.4);
         introContainer.appendChild(img4);
         tapText.setAttribute("visible", "true");
         sequenceStep = 4;
     }
     else if (sequenceStep === 4) {
-        // Quinta sequenza di zoom (text5)
+        // Quinta sequenza: text5
         const img5 = createTextImage("#text5Img", -0.5);
         introContainer.appendChild(img5);
         tapText.setAttribute("visible", "true");
         sequenceStep = 5;
     }
 
-    // --- Fine delle sequenze: nascondi "tapText" e continua ---
+    // --- Fine delle sequenze: nascondi "Tap to continue" e continua ---
     if (sequenceStep === 5) {
         setTimeout(() => {
-            tapText.setAttribute("visible", "false");
+            tapText.setAttribute("visible", "false");  // Nascondi il testo "Tap to continue"
             resetAllModels([0,1,2,3,4,5], () => {
                 setTimeout(() => {
-                    frameEntities.forEach((ent,i) => {
+                    frameEntities.forEach((ent, i) => {
                         ent.setAttribute("animation__popout", { property: "scale", to: "0 0 0", dur: 800, easing: "easeInQuad" });
                     });
-                    setTimeout(() => { showFinalCinema(); }, 800);
+                    setTimeout(() => { showFinalCinema(); }, 800);  // Mostra la scena finale
                 }, 3000);
             });
             sequenceStep = 6;
-        }, 3000); // delay di 3 secondi prima di proseguire
+        }, 3000); // Ritardo di 3 secondi prima di proseguire
     }
 }
+
+// Funzione di reset dei modelli
+function resetAllModels(modelIndices, callback) {
+    modelIndices.forEach((index) => {
+        // Reset dei modelli (puoi personalizzare la logica di reset)
+        const model = scene.querySelector(`#model-${index}`);
+        if (model) model.setAttribute("animation", { property: "scale", to: "1 1 1", dur: 1000 });
+    });
+    if (callback) callback();
+}
+
+// Funzione per mostrare la scena finale (modifica secondo le tue esigenze)
+function showFinalCinema() {
+    // Mostra il modello finale e le animazioni
+    const finalModel = scene.querySelector("#finalModel");
+    if (finalModel) {
+        finalModel.setAttribute("animation", { property: "scale", to: "1 1 1", dur: 1000 });
+    }
+}
+
 
 
 
