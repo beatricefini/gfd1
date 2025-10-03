@@ -1,4 +1,3 @@
-
 function initMainSequence() {
   const marker = document.getElementById("marker");
   const modelsContainer = document.getElementById("modelsContainer");
@@ -17,25 +16,24 @@ function initMainSequence() {
 
   const originalTransforms = {};
 
-  // --- Marker found: mostra intro ---
+  // --- Marker found: subito sequenza ---
   marker.addEventListener("targetFound", () => {
-  if (started) return;
-  started = true;
-  showAllModelsSequentially();
-});
+    if (started) return;
+    started = true;
+    showAllModelsSequentially();
+  });
 
-
-  // --- Click globale ---
- window.addEventListener("click", () => {
-  if (allModelsDisplayed) {
-    handleSequences();
-  }
-});
-
+  // --- Click globale per avanzare sequenze ---
+  window.addEventListener("click", () => {
+    if (allModelsDisplayed) {
+      handleSequences();
+    }
+  });
 
   function showAllModelsSequentially() {
     if (currentIndex >= models.length) {
       allModelsDisplayed = true;
+
       const tapText = document.createElement("a-text");
       tapText.setAttribute("value", "Tap to continue");
       tapText.setAttribute("align", "center");
@@ -44,7 +42,7 @@ function initMainSequence() {
       tapText.setAttribute("scale", "0.2 0.2 0.2");
       tapText.setAttribute("wrap-count", "20");
       tapText.setAttribute("id", "tapText");
-      introContainer.appendChild(tapText);
+      document.body.appendChild(tapText);
       return;
     }
 
@@ -53,11 +51,17 @@ function initMainSequence() {
     piece.setAttribute("gltf-model", models[idx]);
     piece.setAttribute("visible","false");
 
-    piece.addEventListener("model-loaded", ()=>{
+    piece.addEventListener("model-loaded", () => {
       const pos = piece.getAttribute("position");
       const scale = piece.getAttribute("scale");
       originalTransforms[idx] = { position: {...pos}, scale: {...scale} };
-      piece.setAttribute("animation__pop", { property:"scale", from:"0 0 0", to:`${scale.x} ${scale.y} ${scale.z}`, dur:500, easing:"easeOutElastic" });
+      piece.setAttribute("animation__pop", { 
+        property:"scale", 
+        from:"0 0 0", 
+        to:`${scale.x} ${scale.y} ${scale.z}`, 
+        dur:500, 
+        easing:"easeOutElastic" 
+      });
       piece.setAttribute("visible","true");
     });
 
@@ -68,7 +72,7 @@ function initMainSequence() {
   }
 
   function clearOldTexts() {
-    const oldTexts = introContainer.querySelectorAll("a-text, a-plane");
+    const oldTexts = document.querySelectorAll("a-text, a-plane");
     oldTexts.forEach(t => { if(t.id !== "tapText") t.remove(); });
   }
 
@@ -117,7 +121,7 @@ function initMainSequence() {
       img1.setAttribute("position","0 -0.4 0");
       img1.setAttribute("scale","0.5 0.2 1");
       img1.setAttribute("material","transparent:true");
-      introContainer.appendChild(img1);
+      document.body.appendChild(img1);
 
       sequenceStep=1;
 
@@ -127,7 +131,7 @@ function initMainSequence() {
       img2.setAttribute("position","0 -0.5 0");
       img2.setAttribute("scale","0.5 0.2 1");
       img2.setAttribute("material","transparent:true");
-      introContainer.appendChild(img2);
+      document.body.appendChild(img2);
       sequenceStep=2;
 
     } else if(sequenceStep===2){
@@ -146,7 +150,7 @@ function initMainSequence() {
       img3.setAttribute("position","0 -0.4 0");
       img3.setAttribute("scale","0.5 0.2 1");
       img3.setAttribute("material","transparent:true");
-      introContainer.appendChild(img3);
+      document.body.appendChild(img3);
 
       sequenceStep=4;
 
@@ -164,7 +168,7 @@ function initMainSequence() {
       img4.setAttribute("position","0 -0.4 0");
       img4.setAttribute("scale","0.5 0.2 1");
       img4.setAttribute("material","transparent:true");
-      introContainer.appendChild(img4);
+      document.body.appendChild(img4);
 
       sequenceStep=6;
 
@@ -174,7 +178,7 @@ function initMainSequence() {
       img5.setAttribute("position","0 -0.5 0");
       img5.setAttribute("scale","0.5 0.2 1");
       img5.setAttribute("material","transparent:true");
-      introContainer.appendChild(img5);
+      document.body.appendChild(img5);
       sequenceStep=7;
 
     } else if(sequenceStep===7){
@@ -205,9 +209,12 @@ function initMainSequence() {
       outroOverlay.setAttribute("position","0 0 0");
       outroOverlay.setAttribute("scale","1 0.75 1");
       outroOverlay.setAttribute("material","transparent:true; opacity:0");
-      introContainer.appendChild(outroOverlay);
+      document.body.appendChild(outroOverlay);
 
       outroOverlay.setAttribute("animation__fadein",{ property:"material.opacity", from:0, to:1, dur:800, easing:"easeInQuad" });
     },10000);
   }
 }
+
+// --- Inizializzazione ---
+initMainSequence();
