@@ -191,6 +191,23 @@ function showFinalCinema(){
   cinemaModel.addEventListener("model-loaded", () => cinemaModel.setAttribute("visible","true"));
   modelsContainer.appendChild(cinemaModel);
 
+  // Aggiungo testi sopra il modello
+  const text1 = document.createElement("a-text");
+  text1.setAttribute("value", "1958");
+  text1.setAttribute("align", "center");
+  text1.setAttribute("color", "#ffffff");
+  text1.setAttribute("position", "0 0.5 0.5"); // sopra il modello
+  text1.setAttribute("width", "1.2"); // più grande
+  modelsContainer.appendChild(text1);
+
+  const text2 = document.createElement("a-text");
+  text2.setAttribute("value", "Ruins");
+  text2.setAttribute("align", "center");
+  text2.setAttribute("color", "#ffffff");
+  text2.setAttribute("position", "0 0.35 0.5"); // leggermente sotto il primo testo
+  text2.setAttribute("width", "0.8"); // più piccolo
+  modelsContainer.appendChild(text2);
+
   // Mostro overlay HTML/CSS con fade-in dopo 10s
   setTimeout(() => {
     let outroOverlay = document.getElementById("outroOverlay");
@@ -212,6 +229,7 @@ function showFinalCinema(){
     outroOverlay.removeAttribute("aria-hidden");
   }, 10000);
 }
+
 
 
 }
