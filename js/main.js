@@ -1,269 +1,305 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const intro = document.getElementById("introOverlay");
+  const instructions = document.getElementById("instructionsOverlay");
+  const tapText = document.getElementById("tapText");
+  const sceneEl = document.querySelector("a-scene");
+  const scanningUI = document.getElementById("custom-scanning-ui");
   const marker = document.getElementById("marker");
-  const introContainer = document.getElementById("introTexts");
-  const modelsContainer = document.getElementById("modelsContainer");
-  const camera = document.querySelector("a-camera");
 
-  const models = ["#piece1", "#piece2", "#piece3", "#piece4", "#piece5", "#piece6"];
-  let started = false;
-  let currentIndex = 0;
-  let allModelsDisplayed = false;
-  const frameEntities = [];
-  let sequenceStep = 0;
-  const originalTransforms = {};
+  // --- Overlay 1: count3.png ---
+  setTimeout(() => intro.classList.add("show"), 100);
+  setTimeout(() => {
+    intro.classList.remove("show");
+    intro.classList.add("hide");
+    setTimeout(() => intro.remove(), 1000);
+  }, 5000);
 
-  // --- Intro / target found ---
-  marker.addEventListener("targetFound", () => {
-    if (started) return;
+  // --- Overlay 2: instructions.png ---
+  setTimeout(() => {
+    instructions.style.opacity = 1;
+    setTimeout(() => instructions.classList.add("show"), 100);
+    setTimeout(() => tapText.classList.add("show"), 500);
 
-    const introImg = document.createElement("a-plane");
-    introImg.setAttribute("src", "#introImg");
-    introImg.setAttribute("position", "0 0.3 0");
-    introImg.setAttribute("scale", "0.8 0.6 1");
-    introImg.setAttribute("material", "transparent: true");
-    introContainer.appendChild(introImg);
+    instructions.addEventListener("click", async () => {
+      instructions.classList.remove("show");
+      instructions.classList.add("hide");
+      setTimeout(() => instructions.remove(), 1000);
 
-    // Tap to start testo dopo 3 secondi
-    setTimeout(() => {
-      const startText = document.createElement("a-text");
-      startText.setAttribute("value", "Tap to start");
-      startText.setAttribute("align", "center");
-      startText.setAttribute("color", "#FFD700");
-      startText.setAttribute("position", "0 -0.2 0");
-      startText.setAttribute("scale", "0.2 0.2 0.2");
-      startText.setAttribute("wrap-count", "20");
-      startText.setAttribute("id", "startText");
-      introContainer.appendChild(startText);
-    }, 3000);
+      // Mostra scena e avvia MindAR
+      sceneEl.style.display = "flex";
+      const mindarSystem = sceneEl.systems["mindar-image-system"];
+      await mindarSystem.start();
+
+      // Rimuove pulsante VR se presente
+      const vrButton = document.querySelector(".a-enter-vr-button");
+      if(vrButton) vrButton.remove();
+
+      // --- Aspetta targetFound per far partire il main ---
+    }, { once: true });
+  }, 6000);
+
+  // --- SCANNER UI visibile finché il marker non viene trovato ---
+  marker.addEventListener('targetFound', () => {
+    scanningUI.classList.add("hidden");
+    scanningUI.classList.remove("visible");
+
+    // Avvia il main drag & drop
+    initDragPuzzle();
   });
 
-  // --- Global click handler ---
-  window.addEventListener("click", () => {
-    if (!started) {
-      const startText = document.getElementById("startText");
-      if (!startText) return;
+  marker.addEventListener('targetLost', () => {
+    scanningUI.classList.remove("hidden");
+    scanningUI.classList.add("visible");
+  });
 
-      const introPlane = introContainer.querySelector("a-plane");
+  // --- MAIN DRAG & DROP ---
+  function initDragPuzzle() {
+    const container = document.getElementById("pieces");
+    const cameraEl = document.querySelector("a-camera");
 
-      startText.setAttribute("animation__fadeout", {
-        property: "opacity",
-        from: 1,
-        to: 0,
-        dur: 600,
-        easing: "easeInQuad"
+    const modelIds = ['#piece1','#piece2','#piece3','#piece4','#piece5','#piece6'];
+    const pieces = [];
+
+    const positions = [
+      { x: -0.2, y: 0, z: 0 },  
+      { x: -0.5, y: 0.6, z: 0 }, 
+      { x: 0.2, y: 0, z: 0 },   
+      { x: 0.15, y: -0.5, z: 0 }, 
+      { x: 0.15, y: -0.45, z: 0 }, 
+      { x: -0.1, y: 0.3, z: 0 }  
+    ];
+
+    const scales = [0.15,0.35,0.15,0.2,0.35,0.35];
+    const centerPos = { x: 0, y: 0, z: 0 };
+    const centerScale = 0.3;
+    const raggioSnap = 0.1;
+
+    // --- SCRITTA DRAG FRAGMENTS HERE ---
+    const dragText = document.createElement('a-text');
+    dragText.setAttribute('value', 'Drag\nFragments\nHere');
+    dragText.setAttribute('align', 'center');
+    dragText.setAttribute('color', '#FFD700');
+    dragText.setAttribute('position', `${centerPos.x} ${centerPos.y + 0.05} ${centerPos.z}`);
+    dragText.setAttribute('scale', '0.25 0.25 0.25');
+    dragText.setAttribute('id', 'dragText');
+    container.appendChild(dragText);
+
+    // --- CREA PIECE ---
+    function createPiece(idx){
+      const piece = document.createElement('a-entity');
+      piece.setAttribute('gltf-model', modelIds[idx]);
+      piece.setAttribute('position', positions[idx]);
+      piece.setAttribute('scale', { x: 0, y: 0, z: 0 });
+      piece.dataset.locked = "false";
+
+      piece.addEventListener('model-loaded', () => {
+        piece.setAttribute('animation__pop', {
+          property: 'scale',
+          from: '0 0 0',
+          to: `${scales[idx]} ${scales[idx]} ${scales[idx]}`,
+          dur: 500,
+          easing: 'easeOutElastic'
+        });
       });
 
-      if (introPlane) {
-        introPlane.setAttribute("animation__fadeout", {
-          property: "opacity",
-          from: 1,
-          to: 0,
-          dur: 600,
-          easing: "easeInQuad"
-        });
+      container.appendChild(piece);
+      pieces.push(piece);
+    }
+
+    // --- DRAG & DROP ---
+    let selectedPiece = null;
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    function updateMouse(event){
+      if(event.touches){
+        mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
+      } else {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
       }
-
-      setTimeout(() => {
-        startText.setAttribute("visible", "false");
-        if (introPlane) introPlane.setAttribute("visible", "false");
-
-        started = true;
-        showAllModelsSequentially();
-      }, 650);
-
-      return;
     }
 
-    if (allModelsDisplayed) handleSequences();
-  });
-
-  // --- Show models one by one ---
-  function showAllModelsSequentially() {
-    if (currentIndex >= models.length) {
-      allModelsDisplayed = true;
-      const tapText = document.createElement("a-text");
-      tapText.setAttribute("value", "Tap to continue");
-      tapText.setAttribute("align", "center");
-      tapText.setAttribute("color", "#FFD700");
-      tapText.setAttribute("position", "0 -0.6 0");
-      tapText.setAttribute("scale", "0.2 0.2 0.2");
-      tapText.setAttribute("wrap-count", "20");
-      tapText.setAttribute("id", "tapText");
-      introContainer.appendChild(tapText);
-      return;
+    function checkSnap(piece){
+      const pos = piece.object3D.position;
+      const distanza = Math.sqrt((pos.x - centerPos.x)**2 + (pos.y - centerPos.y)**2 + (pos.z - centerPos.z)**2);
+      if(distanza < raggioSnap){
+        piece.setAttribute('position', {...centerPos});
+        piece.setAttribute('scale', { x: centerScale, y: centerScale, z: centerScale });
+        piece.dataset.locked = "true";
+      }
     }
 
-    const idx = currentIndex;
-    const piece = document.createElement("a-entity");
-    piece.setAttribute("gltf-model", models[idx]);
-    piece.setAttribute("visible", "false");
+    function onPointerDown(event){
+      updateMouse(event);
+      raycaster.setFromCamera(mouse, cameraEl.getObject3D('camera'));
+      const intersects = raycaster.intersectObjects(
+        pieces.filter(p => p.dataset.locked === "false").map(p => p.object3D), true
+      );
+      if(intersects.length>0){
+        selectedPiece = intersects[0].object.el;
+        selectedPiece.object3D.position.y += 0.01;
+      }
+    }
 
-    piece.addEventListener("model-loaded", () => {
-      const pos = piece.getAttribute("position");
-      const scale = piece.getAttribute("scale");
-      originalTransforms[idx] = { position: { x: pos.x, y: pos.y, z: pos.z }, scale: { x: scale.x, y: scale.y, z: scale.z } };
+    function onPointerMove(event){
+      if(!selectedPiece || selectedPiece.dataset.locked === "true") return;
+      updateMouse(event);
+      raycaster.setFromCamera(mouse, cameraEl.getObject3D('camera'));
+      const distance = cameraEl.object3D.position.z || 1;
+      const dir = new THREE.Vector3();
+      raycaster.ray.direction.clone().normalize().multiplyScalar(distance);
+      const targetPos = raycaster.ray.origin.clone().add(dir);
 
-      piece.setAttribute("animation__pop", {
-        property: "scale",
-        from: "0 0 0",
-        to: `${scale.x} ${scale.y} ${scale.z}`,
-        dur: 500,
-        easing: "easeOutElastic"
-      });
-      piece.setAttribute("visible", "true");
-    });
+      const currentPos = selectedPiece.object3D.position;
+      const lerpFactor = 0.15;
+      currentPos.x += (targetPos.x - currentPos.x) * lerpFactor;
+      currentPos.y += (targetPos.y - currentPos.y) * lerpFactor;
+      currentPos.z = 0;
+      selectedPiece.setAttribute('position', currentPos);
 
-    modelsContainer.appendChild(piece);
-    frameEntities.push(piece);
-    currentIndex++;
-    setTimeout(showAllModelsSequentially, 700);
-  }
+      checkSnap(selectedPiece);
 
-  function clearOldTexts() {
-    const oldTexts = introContainer.querySelectorAll("a-text, a-plane");
-    oldTexts.forEach(t => { if (t.id !== "tapText") t.remove(); });
-  }
+      if(pieces.every(p=>p.dataset.locked==='true')){
+        const textEl = document.getElementById('dragText');
+        if(textEl) textEl.parentNode.removeChild(textEl);
+        pieces.forEach(p => { if(p.parentNode) p.parentNode.removeChild(p); });
 
-  function resetAllModels(activeIndices = [], callback) {
-    const dur = 800;
+        // --- CREA MODELLO FINALE ---
+        const finalShape = document.createElement('a-entity');
+        finalShape.setAttribute('gltf-model','models/piece_final.glb');
+        finalShape.setAttribute('position', {...centerPos});
+        finalShape.setAttribute('scale',{x:centerScale, y:centerScale, z:centerScale});
+        container.appendChild(finalShape);
 
-    frameEntities.forEach((ent, i) => { if (!activeIndices.includes(i)) ent.setAttribute("visible", "false"); });
-
-    activeIndices.forEach(i => {
-      const ent = frameEntities[i];
-      const orig = originalTransforms[i];
-      if (!ent || !orig) return;
-      ent.setAttribute("animation__backpos", { property: "position", to: `${orig.position.x} ${orig.position.y} ${orig.position.z}`, dur: dur, easing: "easeInOutQuad" });
-      ent.setAttribute("animation__backscale", { property: "scale", to: `${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`, dur: dur, easing: "easeInOutQuad" });
-    });
-
-    setTimeout(() => {
-      frameEntities.forEach((ent, i) => {
-        const orig = originalTransforms[i];
-        if (orig) {
-          ent.setAttribute("position", `${orig.position.x} ${orig.position.y} ${orig.position.z}`);
-          ent.setAttribute("scale", `${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`);
-        }
-        ent.setAttribute("visible", "true");
-      });
-
-      camera.setAttribute("animation__camreset", { property: "position", to: "0 0 0", dur: dur, easing: "easeInOutQuad" });
-
-      const tapText = document.getElementById("tapText");
-      if (tapText) tapText.setAttribute("visible", "true");
-
-      if (typeof callback === "function") callback();
-    }, dur + 50);
-  }
-
-  // --- Gestione sequenze ---
-  function handleSequences() {
-    const tapText = document.getElementById("tapText");
-    if (tapText) tapText.setAttribute("visible", "false");
-
-    clearOldTexts();
-
-    switch (sequenceStep) {
-      case 0: // SEQ1
-        frameEntities.forEach((ent, i) => { if (i > 1) ent.setAttribute("visible", "false"); });
-        frameEntities[0].setAttribute("animation__pos_zoom", { property: "position", to: "-0.35 0 0.1", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[1].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.12 0.4", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[0].setAttribute("animation__scale_zoom", { property: "scale", to: "1.2 1.2 1.2", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[1].setAttribute("animation__scale_zoom", { property: "scale", to: "2.1 2.1 2.1", dur: 800, easing: "easeInOutQuad" });
-        camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.5", dur: 800, easing: "easeInOutQuad" });
-        const img1 = document.createElement("a-plane");
-        img1.setAttribute("src", "#text1Img");
-        img1.setAttribute("position", "0 -0.4 0");
-        img1.setAttribute("scale", "0.5 0.2 1");
-        img1.setAttribute("material", "transparent: true");
-        introContainer.appendChild(img1);
-        sequenceStep = 1;
-        break;
-
-      case 1:
-        const img2 = document.createElement("a-plane");
-        img2.setAttribute("src", "#text2Img");
-        img2.setAttribute("position", "0 -0.5 0");
-        img2.setAttribute("scale", "0.5 0.2 1");
-        img2.setAttribute("material", "transparent: true");
-        introContainer.appendChild(img2);
-        sequenceStep = 2;
-        break;
-
-      case 2:
-        resetAllModels([0, 1], () => { sequenceStep = 3; });
-        break;
-
-      case 3: // SEQ2
-        frameEntities.forEach((ent, i) => { if (i < 2 || i > 4) ent.setAttribute("visible", "false"); });
-        [2,3,4].forEach(i => { frameEntities[i].setAttribute("animation__scale_zoom", { property: "scale", to: "1.2 1.2 1.2", dur: 800, easing: "easeInOutQuad" }); });
-        frameEntities[2].setAttribute("animation__pos_zoom", { property: "position", to: "-0.05 0.2 0.35", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[3].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.45 0.35", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[4].setAttribute("animation__pos_zoom", { property: "position", to: "0.15 0.3 0.35", dur: 800, easing: "easeInOutQuad" });
-        camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.6", dur: 800, easing: "easeInOutQuad" });
-        const img3 = document.createElement("a-plane");
-        img3.setAttribute("src", "#text3Img");
-        img3.setAttribute("position", "0 -0.4 0");
-        img3.setAttribute("scale", "0.5 0.2 1");
-        img3.setAttribute("material", "transparent: true");
-        introContainer.appendChild(img3);
-        sequenceStep = 4;
-        break;
-
-      case 4:
-        resetAllModels([2,3,4], () => { sequenceStep = 5; });
-        break;
-
-      case 5: // SEQ3
-        frameEntities.forEach((ent, i) => { if (i !== 5) ent.setAttribute("visible", "false"); });
-        frameEntities[5].setAttribute("animation__pos_zoom", { property: "position", to: "0.3 -0.15 0.35", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[5].setAttribute("animation__scale_zoom", { property: "scale", to: "1.7 1.7 1.7", dur: 800, easing: "easeInOutQuad" });
-        camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.6", dur: 800, easing: "easeInOutQuad" });
-        const img4 = document.createElement("a-plane");
-        img4.setAttribute("src", "#text4Img");
-        img4.setAttribute("position", "0 -0.4 0");
-        img4.setAttribute("scale", "0.5 0.2 1");
-        img4.setAttribute("material", "transparent: true");
-        introContainer.appendChild(img4);
-        sequenceStep = 6;
-        break;
-
-      case 6:
-        const img5 = document.createElement("a-plane");
-        img5.setAttribute("src", "#text5Img");
-        img5.setAttribute("position", "0 -0.5 0");
-        img5.setAttribute("scale", "0.5 0.2 1");
-        img5.setAttribute("material", "transparent: true");
-        introContainer.appendChild(img5);
-        sequenceStep = 7;
-        break;
-
-      case 7:
-        resetAllModels([0,1,2,3,4,5], () => {
-          setTimeout(() => {
-            frameEntities.forEach((ent,i) => { ent.setAttribute("animation__popout", { property: "scale", to: "0 0 0", dur: 800, easing: "easeInQuad" }); });
-            setTimeout(() => { showOutroOverlay(); }, 800);
-          }, 3000);
+        finalShape.setAttribute('animation__float', {
+          property: 'position',
+          dir: 'alternate',
+          dur: 1000,
+          easing: 'easeInOutSine',
+          loop: true,
+          to: `${centerPos.x} ${centerPos.y + 0.3} ${centerPos.z}`
         });
-        sequenceStep = 8;
-        break;
+
+        setTimeout(() => {
+          finalShape.removeAttribute('animation__float');
+
+          const finalPos = { x: -0.2, y: 0.5, z: 0 };
+          finalShape.setAttribute('animation__move', {
+            property: 'position',
+            to: `${finalPos.x} ${finalPos.y} ${finalPos.z}`,
+            dur: 1000,
+            easing: 'easeInOutQuad'
+          });
+          finalShape.setAttribute('animation__scale', {
+            property: 'scale',
+            to: '0.1 0.1 0.1',
+            dur: 1000,
+            easing: 'easeInOutQuad'
+          });
+
+          // --- CREA MODELLO piece_cinema3.glb leggermente a destra ---
+          const baseHeight = -0.25;
+          const cinemaModel = document.createElement('a-entity');
+          cinemaModel.setAttribute('gltf-model', 'models/piece_cinema3.glb');
+          cinemaModel.setAttribute('position', { x: 0.05, y: baseHeight, z: 0 });
+          cinemaModel.setAttribute('scale', { x: 0.8, y: 0.8, z: 0.8 });
+          container.appendChild(cinemaModel);
+
+          // --- Testo "1960" ---
+          const text1960 = document.createElement('a-text');
+          text1960.setAttribute('value', '1960');
+          text1960.setAttribute('align', 'center');
+          text1960.setAttribute('anchor', 'center');
+          text1960.setAttribute('color', '#000000');
+          text1960.setAttribute('font', 'roboto');
+          text1960.setAttribute('position', { x: 0, y: baseHeight + 0.5, z: 0 });
+          text1960.setAttribute('scale', '0.35 0.35 0.35'); 
+          text1960.setAttribute('opacity', '0');
+          text1960.setAttribute('shader', 'msdf');
+          text1960.setAttribute('animation__fadein', {
+            property: 'opacity',
+            from: 0,
+            to: 1,
+            dur: 800,
+            easing: 'easeInQuad',
+            delay: 200
+          });
+          container.appendChild(text1960);
+
+          // --- Testo "Sculpture" ---
+          const textSculpture = document.createElement('a-text');
+          textSculpture.setAttribute('value', 'Sculpture');
+          textSculpture.setAttribute('align', 'center');
+          textSculpture.setAttribute('anchor', 'center');
+          textSculpture.setAttribute('color', '#000000');
+          textSculpture.setAttribute('font', 'roboto');
+          textSculpture.setAttribute('position', { x: 0, y: baseHeight + 0.35, z: 0 });
+          textSculpture.setAttribute('scale', '0.25 0.25 0.25'); 
+          textSculpture.setAttribute('opacity', '0');
+          textSculpture.setAttribute('shader', 'msdf');
+          textSculpture.setAttribute('animation__fadein', {
+            property: 'opacity',
+            from: 0,
+            to: 1,
+            dur: 800,
+            easing: 'easeInQuad',
+            delay: 1200
+          });
+          container.appendChild(textSculpture);
+
+          // --- Overlay finale outro3.png dopo 10 secondi ---
+          setTimeout(() => {
+            const outroOverlay = document.createElement('div');
+            outroOverlay.id = "outroOverlay";
+            outroOverlay.style.position="fixed";
+            outroOverlay.style.top="0";
+            outroOverlay.style.left="0";
+            outroOverlay.style.width="100vw";
+            outroOverlay.style.height="100vh";
+            outroOverlay.style.backgroundColor="black";
+            outroOverlay.style.display="flex";
+            outroOverlay.style.justifyContent="center";
+            outroOverlay.style.alignItems="center";
+            outroOverlay.style.zIndex="9999";
+            outroOverlay.style.opacity="0";
+            outroOverlay.style.transition="opacity 1s ease-in-out";
+
+            const img = document.createElement("img");
+            img.src="images/outro3.png";
+            img.style.maxWidth="100%";
+            img.style.maxHeight="100%";
+            outroOverlay.appendChild(img);
+            document.body.appendChild(outroOverlay);
+
+            setTimeout(()=>{ outroOverlay.style.opacity="1"; },100);
+          }, 10000);
+
+        }, 3000);
+      }
+    }
+
+    function onPointerUp(){
+      if(selectedPiece){
+        selectedPiece.object3D.position.y -= 0.01;
+        selectedPiece = null;
+      }
+    }
+
+    window.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+    window.addEventListener('touchstart', onPointerDown, {passive:false});
+    window.addEventListener('touchmove', onPointerMove, {passive:false});
+    window.addEventListener('touchend', onPointerUp);
+
+    // --- POP-UP PIECE ANIMATE DOPO TARGET FOUND ---
+    pieces.length = 0;
+    let delay = 0;
+    for(let i=0;i<modelIds.length;i++){
+      setTimeout(()=> createPiece(i), delay);
+      delay += 700;
     }
   }
-
-  // --- Overlay finale outro1.png ---
-  function showOutroOverlay() {
-    clearOldTexts();
-    frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
-
-    const outro = document.createElement("div");
-    outro.className = "overlay";
-    outro.id = "outroOverlay";
-    const img = document.createElement("img");
-    img.src = "images/outro1.png";
-    outro.appendChild(img);
-    document.body.appendChild(outro);
-
-    setTimeout(() => outro.classList.add("show"), 100);
-  }
-
 });
