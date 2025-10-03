@@ -201,15 +201,23 @@ marker.addEventListener("targetFound", () => {
       introContainer.appendChild(img5);
       sequenceStep=7;
 
-    } else if(sequenceStep===7){
-      resetAllModels([0,1,2,3,4,5],()=>{
-        setTimeout(()=>{
-          frameEntities.forEach(ent=>ent.setAttribute("animation__popout",{ property:"scale", to:"0 0 0", dur:800, easing:"easeInQuad" }));
-          setTimeout(()=>showFinalCinema(),800);
-        },3000);
-      });
-      sequenceStep=8;
-    }
+    } else if (sequenceStep === 7) {
+    // Nascondi "Tap to continue"
+    const tapText = document.getElementById("tapText");
+    if (tapText) tapText.setAttribute("visible", "false");
+
+    // Ritorno alla vista completa delle cornici
+    resetAllModels([0,1,2,3,4,5], () => {
+        // Dopo 3s pop inverso
+        setTimeout(() => {
+            frameEntities.forEach((ent,i) => {
+                ent.setAttribute("animation__popout", { property: "scale", to: "0 0 0", dur: 800, easing: "easeInQuad" });
+            });
+            setTimeout(() => { showFinalCinema(); }, 800);
+        }, 3000);
+    });
+    sequenceStep = 8;
+}
   }
 
   function showFinalCinema() {
