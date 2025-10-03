@@ -103,12 +103,6 @@
     <img src="images/count1.png" alt="Intro">
   </div>
 
-  <!-- Overlay istruzioni: instructions.png -->
-  <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0;">
-    <img src="images/instructions.png" alt="Instructions">
-    <div id="tapText">Tap to start</div>
-  </div>
-
   <!-- Custom MindAR scanning UI -->
   <div id="custom-scanning-ui" class="visible">
     <div class="corner top-left"></div>
@@ -134,11 +128,9 @@
       <a-asset-item id="piece5" src="models/piece5.glb"></a-asset-item>
       <a-asset-item id="piece6" src="models/piece6.glb"></a-asset-item>
       <a-asset-item id="pieceCinema" src="models/piece_cinema3.glb"></a-asset-item>
-
-      <!-- Outro image asset -->
+      <!-- Outro -->
       <img id="outroImg" src="images/outro1.png">
-
-      <!-- Immagini testuali -->
+      <!-- Testi -->
       <img id="introImg" src="images/intro_text.png">
       <img id="text1Img" src="images/text1.png">
       <img id="text2Img" src="images/text2.png">
@@ -163,7 +155,7 @@
       const scanningUI = document.getElementById("custom-scanning-ui");
       const marker = document.getElementById("marker");
 
-      // Overlay iniziale (count1.png) già in HTML
+      // --- Overlay iniziale (count1.png) ---
       const intro = document.getElementById("introOverlay");
       setTimeout(() => intro.classList.add("show"), 100);
       setTimeout(() => {
@@ -172,9 +164,22 @@
         setTimeout(()=>intro.remove(),1000);
       }, 5000);
 
-      // Overlay istruzioni (instructions.png) già in HTML
-      const instructions = document.getElementById("instructionsOverlay");
-      const tapText = document.getElementById("tapText");
+      // --- Overlay istruzioni via JS ---
+      const instructions = document.createElement("div");
+      instructions.id = "instructionsOverlay";
+      instructions.className = "overlay";
+
+      const instrImg = document.createElement("img");
+      instrImg.src = "images/instructions.png";
+      instructions.appendChild(instrImg);
+
+      const tapText = document.createElement("div");
+      tapText.id = "tapText";
+      tapText.innerText = "Tap to start";
+      instructions.appendChild(tapText);
+
+      document.body.appendChild(instructions);
+
       setTimeout(() => {
         instructions.classList.add("show");
         tapText.classList.add("show");
@@ -194,7 +199,7 @@
         if(vrButton) vrButton.remove();
       }, { once: true });
 
-      // Scanner UI -> si nasconde quando trova il marker
+      // --- Scanner UI visibile finché marker non trovato ---
       marker.addEventListener('targetFound', () => {
         scanningUI.classList.add("hidden");
         scanningUI.classList.remove("visible");
