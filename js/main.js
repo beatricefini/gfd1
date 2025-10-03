@@ -13,7 +13,6 @@ function initMainSequence() {
   let currentIndex = 0;
   let allModelsDisplayed = false;
   const frameEntities = [];
-  let sequenceStep = 0;
 
   const originalTransforms = {};
 
