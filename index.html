@@ -134,10 +134,17 @@
       <a-asset-item id="piece5" src="models/piece5.glb"></a-asset-item>
       <a-asset-item id="piece6" src="models/piece6.glb"></a-asset-item>
       <a-asset-item id="pieceCinema" src="models/piece_cinema3.glb"></a-asset-item>
+
       <!-- Outro image asset -->
       <img id="outroImg" src="images/outro1.png">
-<!-- Immagini testuali --> <img id="introImg" src="images/intro_text.png"> <img id="text1Img" src="images/text1.png"> <img id="text2Img" src="images/text2.png"> <img id="text3Img" src="images/text3.png"> <img id="text4Img" src="images/text4.png"> <img id="text5Img" src="images/text5.png"> </a-assets>
 
+      <!-- Immagini testuali -->
+      <img id="introImg" src="images/intro_text.png">
+      <img id="text1Img" src="images/text1.png">
+      <img id="text2Img" src="images/text2.png">
+      <img id="text3Img" src="images/text3.png">
+      <img id="text4Img" src="images/text4.png">
+      <img id="text5Img" src="images/text5.png">
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -150,5 +157,53 @@
   </a-scene>
 
   <script src="js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const sceneEl = document.querySelector("a-scene");
+      const scanningUI = document.getElementById("custom-scanning-ui");
+      const marker = document.getElementById("marker");
+
+      // Overlay iniziale (count1.png) già in HTML
+      const intro = document.getElementById("introOverlay");
+      setTimeout(() => intro.classList.add("show"), 100);
+      setTimeout(() => {
+        intro.classList.remove("show");
+        intro.classList.add("hide");
+        setTimeout(()=>intro.remove(),1000);
+      }, 5000);
+
+      // Overlay istruzioni (instructions.png) già in HTML
+      const instructions = document.getElementById("instructionsOverlay");
+      const tapText = document.getElementById("tapText");
+      setTimeout(() => {
+        instructions.classList.add("show");
+        tapText.classList.add("show");
+      }, 6000);
+
+      instructions.addEventListener("click", async () => {
+        instructions.classList.remove("show");
+        instructions.classList.add("hide");
+        setTimeout(() => instructions.remove(), 1000);
+
+        // Mostra scena e avvia MindAR
+        sceneEl.style.display = "flex";
+        const mindarSystem = sceneEl.systems["mindar-image-system"];
+        await mindarSystem.start();
+
+        const vrButton = document.querySelector(".a-enter-vr-button");
+        if(vrButton) vrButton.remove();
+      }, { once: true });
+
+      // Scanner UI -> si nasconde quando trova il marker
+      marker.addEventListener('targetFound', () => {
+        scanningUI.classList.add("hidden");
+        scanningUI.classList.remove("visible");
+      });
+      marker.addEventListener('targetLost', () => {
+        scanningUI.classList.remove("hidden");
+        scanningUI.classList.add("visible");
+      });
+    });
+  </script>
 </body>
 </html>
