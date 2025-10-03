@@ -173,34 +173,42 @@ function initMainSequence() {
     }
   }
 
-  function showFinalCinema(){
-    frameEntities.forEach(ent=>ent.setAttribute("visible","false"));
-    clearOldTexts();
+function showFinalCinema(){
+  frameEntities.forEach(ent => ent.setAttribute("visible","false"));
+  clearOldTexts();
 
-    const cinemaModel=document.createElement("a-entity");
-    cinemaModel.setAttribute("gltf-model","#pieceCinema");
-    cinemaModel.setAttribute("position",{x:0,y:-0.3,z:0.5});
-    cinemaModel.setAttribute("scale",{x:1.5,y:1.5,z:1.5});
-    cinemaModel.addEventListener("model-loaded",()=>cinemaModel.setAttribute("visible","true"));
-    modelsContainer.appendChild(cinemaModel);
+  // Aggiungo il modello cinema
+  const cinemaModel = document.createElement("a-entity");
+  cinemaModel.setAttribute("gltf-model","#pieceCinema");
+  cinemaModel.setAttribute("position",{x:0,y:-0.3,z:0.5});
+  cinemaModel.setAttribute("scale",{x:1.5,y:1.5,z:1.5});
+  cinemaModel.addEventListener("model-loaded", () => cinemaModel.setAttribute("visible","true"));
+  modelsContainer.appendChild(cinemaModel);
 
-    setTimeout(()=>{
-      if (!introContainer) return;
+  setTimeout(() => {
+    const camera = document.querySelector("a-camera");
+    if (!camera) return;
 
-      const outroOverlay = document.createElement("a-plane");
-      outroOverlay.setAttribute("src","#outroImg");
-      outroOverlay.setAttribute("position","0 0 0");
-      outroOverlay.setAttribute("scale","1 0.75 1");
-      outroOverlay.setAttribute("material", {transparent:true, opacity:0});
-      introContainer.appendChild(outroOverlay);
+    // Creo overlay UI fissato alla camera
+    const outroOverlay = document.createElement("a-plane");
+    outroOverlay.setAttribute("src", "#outroImg");
+    outroOverlay.setAttribute("position", "0 0 -1"); // sempre davanti alla camera
+    outroOverlay.setAttribute("scale", "1 0.75 1");
+    outroOverlay.setAttribute("material", {transparent: true, opacity: 0});
 
-      outroOverlay.setAttribute("animation__fadein", {
-        property:"material.opacity",
-        from:0,
-        to:1,
-        dur:800,
-        easing:"easeInQuad"
-      });
-    }, 10000);
-  }
+    // Append all’overlay alla camera
+    camera.appendChild(outroOverlay);
+
+    // Animazione fade-in dell’overlay
+    outroOverlay.setAttribute("animation__fadein", {
+      property: "material.opacity",
+      from: 0,
+      to: 1,
+      dur: 800,
+      easing: "easeInQuad"
+    });
+
+  }, 10000);
+}
+
 }
