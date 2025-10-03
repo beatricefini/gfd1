@@ -9,53 +9,111 @@
   <style>
     :root { --instructions-scale: 100%; }
 
+    /* Overlay base */
     .overlay {
       position: fixed;
-      top:0; left:0; width:100vw; height:100vh;
-      background:black;
-      display:flex; justify-content:center; align-items:center; flex-direction:column;
-      opacity:0; transition:opacity 1s ease-in-out; z-index:9999;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+      z-index: 9999;
+    }
+    .overlay img {
+      max-width: var(--instructions-scale);
+      max-height: var(--instructions-scale);
+      width: auto;
+      height: auto;
     }
     .overlay.show { opacity: 1; }
-    .overlay.hide { opacity:0; }
-    .overlay img { max-width: var(--instructions-scale); max-height: var(--instructions-scale); width:auto; height:auto; }
+    .overlay.hide { opacity: 0; }
 
-    #tapText {
-      position:absolute; bottom:10%; width:100%; text-align:center;
-      font-size:1.2rem; color:black; opacity:0; transition:opacity 1s ease-in-out;
-      cursor:pointer; z-index:10; font-family:Arial, sans-serif;
+    /* Testo Tap to Start */
+    #tapText, #preTapText {
+      position: absolute;
+      bottom: 10%;
+      width: 100%;
+      text-align: center;
+      font-size: 1.2rem;
+      color: white;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+      cursor: pointer;
+      z-index: 10;
+      font-family: Arial, sans-serif;
     }
-    #tapText.show { opacity:1; }
+    #tapText.show, #preTapText.show { opacity: 1; }
 
+    /* Custom scanning UI */
     #custom-scanning-ui {
-      position:fixed; top:0; left:0; width:100vw; height:100vh;
-      pointer-events:none; display:flex; justify-content:center; align-items:center; z-index:998;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 998;
       transition: opacity 0.5s ease;
     }
-    #custom-scanning-ui.hidden { opacity:0; pointer-events:none; }
-    #custom-scanning-ui.visible { opacity:1; pointer-events:none; }
+    #custom-scanning-ui.hidden { opacity: 0; pointer-events: none; }
+    #custom-scanning-ui.visible { opacity: 1; pointer-events: none; }
 
-    .corner { position:absolute; width:40px; height:40px; border:6px solid #fff; }
-    .top-left { top:10%; left:10%; border-right:none; border-bottom:none; }
-    .top-right { top:10%; right:10%; border-left:none; border-bottom:none; }
-    .bottom-left { bottom:10%; left:10%; border-right:none; border-top:none; }
-    .bottom-right { bottom:10%; right:10%; border-left:none; border-top:none; }
+    /* Angoli */
+    .corner {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border: 6px solid #ffffff;
+    }
+    .top-left { top: 10%; left: 10%; border-right: none; border-bottom: none; }
+    .top-right { top: 10%; right: 10%; border-left: none; border-bottom: none; }
+    .bottom-left { bottom: 10%; left: 10%; border-right: none; border-top: none; }
+    .bottom-right { bottom: 10%; right: 10%; border-left: none; border-top: none; }
 
-    #custom-scanning-ui .scan-bar { position:absolute; width:80%; height:6px; background:#fff; top:10%; animation:moveBar 2s infinite alternate ease-in-out; }
-    @keyframes moveBar { 0% { top:10%; } 100% { top:70%; } }
+    /* Barra centrale animata */
+    #custom-scanning-ui .scan-bar {
+      position: absolute;
+      width: calc(80%);
+      height: 6px;
+      background: #ffffff;
+      top: 10%;
+      animation: moveBar 2s infinite alternate ease-in-out;
+    }
+    @keyframes moveBar { 0% { top: 10%; } 100% { top: 70%; } }
 
-    a-scene { display:none; }
-    .a-enter-vr-button { display:none !important; }
+    /* Inizio scena nascosta */
+    a-scene { display: none; }
+    .a-enter-vr-button { display: none !important; }
   </style>
 </head>
 <body>
+  <!-- Overlay 0: pre-intro con tap -->
+  <div id="preIntroOverlay" class="overlay">
+    <img src="images/preintro.png" alt="Pre Intro">
+    <div id="preTapText">Tap to continue</div>
+  </div>
 
-  <!-- Overlay iniziale -->
+  <!-- Overlay 1: count1.png -->
   <div id="introOverlay" class="overlay">
     <img src="images/count1.png" alt="Intro">
   </div>
 
-  <!-- Custom scanning UI -->
+  <!-- Overlay 2: instructions.png -->
+  <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0;">
+    <img src="images/instructions.png" alt="Instructions">
+    <div id="tapText">Tap to start</div>
+  </div>
+
+  <!-- Custom MindAR scanning UI -->
   <div id="custom-scanning-ui" class="visible">
     <div class="corner top-left"></div>
     <div class="corner top-right"></div>
@@ -65,8 +123,12 @@
   </div>
 
   <!-- Scena AR -->
-  <a-scene mindar-image="imageTargetSrc: targets/target.mind; uiScanning:no; uiError:no; uiLoading:no;"
-           color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+  <a-scene
+    mindar-image="imageTargetSrc: targets/target.mind; uiScanning:no; uiError:no; uiLoading:no;"
+    color-space="sRGB"
+    renderer="colorManagement: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
 
     <a-assets>
       <a-asset-item id="piece1" src="models/piece1.glb"></a-asset-item>
@@ -77,80 +139,83 @@
       <a-asset-item id="piece6" src="models/piece6.glb"></a-asset-item>
       <a-asset-item id="pieceCinema" src="models/piece_cinema3.glb"></a-asset-item>
       <img id="outroImg" src="images/outro1.png">
-      <img id="introImg" src="images/intro_text.png">
-      <img id="text1Img" src="images/text1.png">
-      <img id="text2Img" src="images/text2.png">
-      <img id="text3Img" src="images/text3.png">
-      <img id="text4Img" src="images/text4.png">
-      <img id="text5Img" src="images/text5.png">
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-    <a-entity light="type: ambient; color: #fff; intensity:0.8"></a-entity>
-    <a-entity light="type: directional; color: #fff; intensity:0.6" position="0 1 1"></a-entity>
+    <a-entity light="type: ambient; color: #ffffff; intensity: 0.8"></a-entity>
+    <a-entity light="type: directional; color: #ffffff; intensity: 0.6" position="0 1 1"></a-entity>
 
     <a-entity mindar-image-target="targetIndex: 0" id="marker">
-      <!-- Contenitori richiesti dal main -->
-      <a-entity id="introTexts"></a-entity>
-      <a-entity id="modelsContainer"></a-entity>
       <a-entity id="pieces"></a-entity>
     </a-entity>
-
   </a-scene>
 
-  <script src="js/main.js"></script>
+  <!-- Script overlay sequence -->
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const sceneEl = document.querySelector("a-scene");
-      const scanningUI = document.getElementById("custom-scanning-ui");
-      const marker = document.getElementById("marker");
+  document.addEventListener("DOMContentLoaded", () => {
+    const sceneEl = document.querySelector("a-scene");
+    const scanningUI = document.getElementById("custom-scanning-ui");
+    const marker = document.getElementById("marker");
 
-      // Overlay iniziale count1.png
-      const intro = document.getElementById("introOverlay");
-      setTimeout(() => intro.classList.add("show"), 100);
-      setTimeout(() => { intro.classList.remove("show"); intro.classList.add("hide"); setTimeout(()=>intro.remove(),1000); }, 5000);
+    const preIntro = document.getElementById("preIntroOverlay");
+    const preTapText = document.getElementById("preTapText");
+    const intro = document.getElementById("introOverlay");
+    const instructions = document.getElementById("instructionsOverlay");
 
-      // Overlay istruzioni via JS
-      const instructions = document.createElement("div");
-      instructions.id = "instructionsOverlay";
-      instructions.className = "overlay";
-      const instrImg = document.createElement("img");
-      instrImg.src = "images/instructions.png";
-      instructions.appendChild(instrImg);
-      const tapText = document.createElement("div");
-      tapText.id = "tapText";
-      tapText.innerText = "Tap to start";
-      instructions.appendChild(tapText);
-      document.body.appendChild(instructions);
-      setTimeout(()=>{ instructions.classList.add("show"); tapText.classList.add("show"); },6000);
+    // Mostra subito pre-intro
+    setTimeout(() => {
+      preIntro.classList.add("show");
+      preTapText.classList.add("show");
+    }, 300);
 
-      // Click istruzioni: avvia scena e main
-      instructions.addEventListener("click", async () => {
-        instructions.classList.remove("show");
-        instructions.classList.add("hide");
-        setTimeout(()=>instructions.remove(),1000);
+    // Primo tap → passa a count1.png
+    preIntro.addEventListener("click", () => {
+      preIntro.classList.remove("show");
+      preIntro.classList.add("hide");
+      setTimeout(() => preIntro.remove(), 1000);
 
-        sceneEl.style.display = "flex";
-        const mindarSystem = sceneEl.systems["mindar-image-system"];
-        await mindarSystem.start();
+      setTimeout(() => {
+        intro.classList.add("show");
+      }, 500);
 
-        const vrButton = document.querySelector(".a-enter-vr-button");
-        if(vrButton) vrButton.remove();
+      setTimeout(() => {
+        intro.classList.remove("show");
+        intro.classList.add("hide");
+        setTimeout(() => intro.remove(), 1000);
 
-        // Chiama la funzione che contiene tutta la logica principale
-        if (typeof initMainSequence === "function") initMainSequence();
-      }, { once:true });
-
-      // Scanner UI visibile finché marker non trovato
-      marker.addEventListener('targetFound', () => {
-        scanningUI.classList.add("hidden");
-        scanningUI.classList.remove("visible");
-      });
-      marker.addEventListener('targetLost', () => {
-        scanningUI.classList.remove("hidden");
-        scanningUI.classList.add("visible");
-      });
+        // Mostra instructions dopo count1
+        setTimeout(() => {
+          instructions.classList.add("show");
+          const tapText = document.getElementById("tapText");
+          if (tapText) tapText.classList.add("show");
+        }, 500);
+      }, 5000);
     });
+
+    // Tap su instructions → avvia scena AR
+    instructions.addEventListener("click", async () => {
+      instructions.classList.remove("show");
+      instructions.classList.add("hide");
+      setTimeout(() => instructions.remove(), 1000);
+
+      sceneEl.style.display = "flex";
+      const mindarSystem = sceneEl.systems["mindar-image-system"];
+      await mindarSystem.start();
+
+      const vrButton = document.querySelector(".a-enter-vr-button");
+      if (vrButton) vrButton.remove();
+    }, { once: true });
+
+    // Scanner UI gestito dal marker
+    marker.addEventListener("targetFound", () => {
+      scanningUI.classList.add("hidden");
+      scanningUI.classList.remove("visible");
+    });
+    marker.addEventListener("targetLost", () => {
+      scanningUI.classList.remove("hidden");
+      scanningUI.classList.add("visible");
+    });
+  });
   </script>
 </body>
 </html>
