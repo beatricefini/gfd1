@@ -185,7 +185,7 @@ function showFinalCinema(){
   cinemaModel.addEventListener("model-loaded", () => cinemaModel.setAttribute("visible","true"));
   modelsContainer.appendChild(cinemaModel);
 
-  // Dopo 10s mostro overlay HTML/CSS indipendente dal target
+  // Mostro overlay HTML/CSS con fade-in dopo 10s
   setTimeout(() => {
     let outroOverlay = document.getElementById("outroOverlay");
     if (!outroOverlay) {
@@ -201,7 +201,7 @@ function showFinalCinema(){
       document.body.appendChild(outroOverlay);
     }
 
-    // Mostra overlay con transizione
+    // Aggiungo classe show per fade-in
     outroOverlay.classList.add("show");
     outroOverlay.removeAttribute("aria-hidden");
   }, 10000);
