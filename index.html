@@ -22,16 +22,12 @@
 
     /* Testo dei tap */
     .tapText {
-      position:absolute;
-      bottom:10%;
-      width:100%;
-      text-align:center;
+      margin-top: 20px; /* stacca dal bordo inferiore dell'immagine */
       font-size:1.2rem;
       color:white;
       opacity:0;
       transition:opacity 1s ease-in-out;
       cursor:pointer;
-      z-index:10;
       font-family:Arial, sans-serif;
     }
     .overlay.show .tapText { opacity:1; }
@@ -59,7 +55,7 @@
 </head>
 <body>
 
-  <!-- Overlay count1 (iniziale, mostrato solo via JS) -->
+  <!-- Overlay count1 (iniziale, gestito via JS) -->
   <div id="introOverlay" class="overlay">
     <img src="images/count1.png" alt="Intro">
   </div>
@@ -113,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const scanningUI = document.getElementById("custom-scanning-ui");
   const marker = document.getElementById("marker");
 
-  // Helper per creare overlay con fade e testo opzionale
+  // Helper overlay con fade e testo opzionale
   function createOverlay(id, imgSrc, tapTextStr = null) {
     const overlay = document.createElement("div");
     overlay.id = id;
@@ -121,7 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const img = document.createElement("img");
     img.src = imgSrc;
-    overlay.appendChild(img);
 
     if(tapTextStr) {
       const tapText = document.createElement("div");
@@ -130,14 +125,16 @@ document.addEventListener("DOMContentLoaded", () => {
       overlay.appendChild(tapText);
     }
 
+    overlay.insertBefore(img, overlay.firstChild);
     document.body.appendChild(overlay);
+
+    // Mostra solo quando l'immagine è caricata
+    img.onload = () => overlay.classList.add("show");
     return overlay;
   }
 
-  // Funzione per mostrare overlay con fade in/out
   function showOverlay(overlay, duration = 4000) {
     return new Promise((resolve) => {
-      overlay.classList.add("show");
       if(duration > 0) {
         setTimeout(() => {
           overlay.classList.remove("show");
@@ -150,41 +147,40 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 1️⃣ Pre Intro overlay
+  // 1️⃣ Pre Intro
   const preIntro = createOverlay("preIntroOverlay", "images/pre_intro.png", "Tap to continue");
-  preIntro.classList.add("show");
 
   preIntro.addEventListener("click", async () => {
     preIntro.classList.remove("show");
     preIntro.classList.add("hide");
     setTimeout(() => preIntro.remove(), 1000);
 
-    // 2️⃣ Count1 overlay (fade automatico)
+    // 2️⃣ Count1
     const count1 = document.getElementById("introOverlay");
-    await showOverlay(count1, 4000);
+    count1.querySelector("img").onload = async () => {
+      count1.classList.add("show");
+      await showOverlay(count1, 4000);
 
-    // 3️⃣ Instructions overlay
-    const instructions = createOverlay("instructionsOverlay", "images/instructions.png", "Tap to start");
-    instructions.classList.add("show");
+      // 3️⃣ Instructions
+      const instructions = createOverlay("instructionsOverlay", "images/instructions.png", "Tap to start");
+      instructions.addEventListener("click", async () => {
+        instructions.classList.remove("show");
+        instructions.classList.add("hide");
+        setTimeout(()=>instructions.remove(),1000);
 
-    instructions.addEventListener("click", async () => {
-      instructions.classList.remove("show");
-      instructions.classList.add("hide");
-      setTimeout(()=>instructions.remove(),1000);
+        sceneEl.style.display = "flex";
+        const mindarSystem = sceneEl.systems["mindar-image-system"];
+        await mindarSystem.start();
 
-      // Avvio scena AR
-      sceneEl.style.display = "flex";
-      const mindarSystem = sceneEl.systems["mindar-image-system"];
-      await mindarSystem.start();
+        const vrButton = document.querySelector(".a-enter-vr-button");
+        if(vrButton) vrButton.remove();
 
-      const vrButton = document.querySelector(".a-enter-vr-button");
-      if(vrButton) vrButton.remove();
-
-      if (typeof initMainSequence === "function") initMainSequence();
-    }, { once:true });
+        if (typeof initMainSequence === "function") initMainSequence();
+      }, { once:true });
+    };
   }, { once:true });
 
-  // Scanner UI visibile finché marker non trovato
+  // Scanner UI
   marker.addEventListener('targetFound', () => {
     scanningUI.classList.add("hidden");
     scanningUI.classList.remove("visible");
