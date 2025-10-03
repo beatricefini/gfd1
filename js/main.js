@@ -186,7 +186,7 @@ function showFinalCinema(){
   // Aggiungo il modello cinema
   const cinemaModel = document.createElement("a-entity");
   cinemaModel.setAttribute("gltf-model","#pieceCinema");
-  cinemaModel.setAttribute("position",{x:0,y:-0.3,z:0.5});
+  cinemaModel.setAttribute("position",{x:0,y:-0.1,z:0.1});
   cinemaModel.setAttribute("scale",{x:1.5,y:1.5,z:1.5});
   cinemaModel.addEventListener("model-loaded", () => cinemaModel.setAttribute("visible","true"));
   modelsContainer.appendChild(cinemaModel);
