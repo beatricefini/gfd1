@@ -136,77 +136,54 @@ marker.addEventListener("targetFound", () => {
         tapText.setAttribute("wrap-count", "20");
         introContainer.appendChild(tapText);
     }
+    tapText.setAttribute("visible", "true");
 
-    tapText.setAttribute("visible", "true"); // visibile all’inizio di ogni sequenza
-
-    clearOldTexts(); // rimuove le immagini precedenti ma non il tapText
-
+    // --- Funzione helper per creare immagini ---
     function createTextImage(imgId, posY) {
         const img = document.createElement("a-image");
         img.setAttribute("src", imgId);
         img.setAttribute("position", `0 ${posY} 0`);
         img.setAttribute("scale", "1 1 1");
         img.setAttribute("material", "transparent: true");
+        img.classList.add("sequence-img"); // aggiungiamo una classe per gestire rimozione
         return img;
     }
 
-    // --- SEQ1 ---
-    if (sequenceStep === 0) {
-        frameEntities.forEach((ent, i) => { if (i > 1) ent.setAttribute("visible", "false"); });
-        frameEntities[0].setAttribute("animation__pos_zoom", { property: "position", to: "-0.35 0 0.1", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[1].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.12 0.4", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[0].setAttribute("animation__scale_zoom", { property: "scale", to: "1.2 1.2 1.2", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[1].setAttribute("animation__scale_zoom", { property: "scale", to: "2.1 2.1 2.1", dur: 800, easing: "easeInOutQuad" });
-        camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.5", dur: 800, easing: "easeInOutQuad" });
+    // --- Prima di aggiungere nuove immagini, rimuoviamo le vecchie ---
+    const oldImgs = introContainer.querySelectorAll(".sequence-img");
+    oldImgs.forEach(img => img.remove());
 
+    // --- SEQUENCES ---
+    if (sequenceStep === 0) {
+        // gestione frameEntities e zoom come prima...
         const img1 = createTextImage("#text1Img", -0.4);
         introContainer.appendChild(img1);
-
         sequenceStep = 1;
     } 
     else if (sequenceStep === 1) {
         const img2 = createTextImage("#text2Img", -0.5);
         introContainer.appendChild(img2);
         sequenceStep = 2;
-    } 
-    else if (sequenceStep === 2) {
-        resetAllModels([0, 1], () => { sequenceStep = 3; });
-    } 
+    }
     else if (sequenceStep === 3) {
-        frameEntities.forEach((ent, i) => { if (i < 2 || i > 4) ent.setAttribute("visible", "false"); });
-        [2,3,4].forEach(i => { frameEntities[i].setAttribute("animation__scale_zoom", { property: "scale", to: "1.2 1.2 1.2", dur: 800, easing: "easeInOutQuad" }); });
-        frameEntities[2].setAttribute("animation__pos_zoom", { property: "position", to: "-0.05 0.2 0.35", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[3].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.45 0.35", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[4].setAttribute("animation__pos_zoom", { property: "position", to: "0.15 0.3 0.35", dur: 800, easing: "easeInOutQuad" });
-        camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.6", dur: 800, easing: "easeInOutQuad" });
-
         const img3 = createTextImage("#text3Img", -0.4);
         introContainer.appendChild(img3);
-
         sequenceStep = 4;
-    } 
-    else if (sequenceStep === 4) {
-        resetAllModels([2,3,4], () => { sequenceStep = 5; });
-    } 
+    }
     else if (sequenceStep === 5) {
-        frameEntities.forEach((ent, i) => { if (i !== 5) ent.setAttribute("visible", "false"); });
-        frameEntities[5].setAttribute("animation__pos_zoom", { property: "position", to: "0.3 -0.15 0.35", dur: 800, easing: "easeInOutQuad" });
-        frameEntities[5].setAttribute("animation__scale_zoom", { property: "scale", to: "1.7 1.7 1.7", dur: 800, easing: "easeInOutQuad" });
-        camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.6", dur: 800, easing: "easeInOutQuad" });
-
         const img4 = createTextImage("#text4Img", -0.4);
         introContainer.appendChild(img4);
-
         sequenceStep = 6;
-    } 
+    }
     else if (sequenceStep === 6) {
         const img5 = createTextImage("#text5Img", -0.5);
         introContainer.appendChild(img5);
         sequenceStep = 7;
-    } 
-    else if (sequenceStep === 7) {
-        if (tapText) tapText.setAttribute("visible", "false"); // sparisce al reset finale
+    }
 
+    // TapText scompare solo alla fine
+    if (sequenceStep === 7) {
+        if (tapText) tapText.setAttribute("visible", "false");
         resetAllModels([0,1,2,3,4,5], () => {
             setTimeout(() => {
                 frameEntities.forEach((ent,i) => {
@@ -218,6 +195,7 @@ marker.addEventListener("targetFound", () => {
         sequenceStep = 8;
     }
 }
+
 
 
  function showFinalCinema() {
