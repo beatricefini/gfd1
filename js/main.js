@@ -253,7 +253,6 @@ marker.addEventListener("targetFound", () => {
     textRuins.setAttribute("shader", "msdf");
     textRuins.setAttribute("animation__fadein", "property: opacity; from: 0; to: 1; dur: 800; easing: easeInQuad; delay: 1200");
     introContainer.appendChild(textRuins);
-}
 
   }
 }
