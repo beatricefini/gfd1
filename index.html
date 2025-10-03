@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AR Modelli Posizione Manuale</title>
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
@@ -11,26 +11,48 @@
 
     .overlay {
       position: fixed;
-      top:0; left:0; width:100vw; height:100vh;
-      background:black;
-      display:flex; justify-content:center; align-items:center; flex-direction:column;
-      opacity:0; transition:opacity 1s ease-in-out; z-index:9999;
+      inset: 0;
+      background: black;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      flex-direction:column;
+      opacity:0;
+      transition: opacity 0.6s ease;
+      z-index:9999;
+      pointer-events: auto; /* cattura i click */
     }
     .overlay.show { opacity: 1; }
-    .overlay.hide { opacity:0; }
-    .overlay img { max-width: var(--instructions-scale); max-height: var(--instructions-scale); width:auto; height:auto; }
+    .overlay.hide { opacity: 0; }
 
-    /* Testo dei tap */
-    .tapText {
-      margin-top: 20px; /* stacca dal bordo inferiore dell'immagine */
-      font-size:1.2rem;
-      color:white;
-      opacity:0;
-      transition:opacity 1s ease-in-out;
-      cursor:pointer;
-      font-family:Arial, sans-serif;
+    /* immagine centrata, non troppo grande */
+    .overlay img {
+      max-width: 90%;
+      max-height: 78%;
+      display:block;
+      user-select: none;
+      -webkit-user-drag: none;
     }
-    .overlay.show .tapText { opacity:1; }
+
+    /* Testo dei tap: sempre sopra l'immagine */
+    .tapText {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 8%;
+      font-size: 1.15rem;
+      color: white;
+      background: rgba(0,0,0,0.35);
+      padding: 8px 14px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      z-index:10001;
+      pointer-events: none; /* click gestiti dall'overlay */
+      font-family: Arial, sans-serif;
+      white-space: nowrap;
+    }
+    .tapText.show { opacity: 1; }
 
     #custom-scanning-ui {
       position:fixed; top:0; left:0; width:100vw; height:100vh;
@@ -51,16 +73,18 @@
 
     a-scene { display:none; }
     .a-enter-vr-button { display:none !important; }
+    /* piccolo reset per evitare selezione immagine */
+    img { -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
   </style>
 </head>
 <body>
 
-  <!-- Overlay count1 (iniziale, gestito via JS) -->
-  <div id="introOverlay" class="overlay">
-    <img src="images/count1.png" alt="Intro">
+  <!-- count1 (esistente in markup) -->
+  <div id="introOverlay" class="overlay" aria-hidden="true">
+    <img src="images/count1.png" alt="count" />
   </div>
 
-  <!-- Custom scanning UI -->
+  <!-- UI di scanning personalizzata -->
   <div id="custom-scanning-ui" class="visible">
     <div class="corner top-left"></div>
     <div class="corner top-right"></div>
@@ -74,6 +98,7 @@
            color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
 
     <a-assets>
+      <!-- assets esistenti -->
       <a-asset-item id="piece1" src="models/piece1.glb"></a-asset-item>
       <a-asset-item id="piece2" src="models/piece2.glb"></a-asset-item>
       <a-asset-item id="piece3" src="models/piece3.glb"></a-asset-item>
@@ -104,93 +129,166 @@
 
   <script src="js/main.js"></script>
   <script>
+/* Sequenza precisa: pre_intro -> show "Tap to continue" -> tap -> count1 -> instructions -> show "Tap to start" -> tap -> start scanner */
 document.addEventListener("DOMContentLoaded", () => {
   const sceneEl = document.querySelector("a-scene");
   const scanningUI = document.getElementById("custom-scanning-ui");
   const marker = document.getElementById("marker");
 
-  // Helper overlay con fade e testo opzionale
-  function createOverlay(id, imgSrc, tapTextStr = null) {
-    const overlay = document.createElement("div");
+  /* crea overlay (immagine + testo opzionale). 
+     L'overlay farà .show SOLO quando l'immagine è completamente caricata.
+     Il testo viene mostrato separatamente (dopo un breve delay) per garantire
+     che l'immagine sia già renderizzata sotto il testo. */
+  function createOverlayWithDelayedText(id, imgSrc, tapTextStr = null, textDelay = 350) {
+    const overlay = document.createElement('div');
     overlay.id = id;
-    overlay.className = "overlay";
+    overlay.className = 'overlay';
+    overlay.setAttribute('aria-hidden', 'true');
 
-    const img = document.createElement("img");
-    img.src = imgSrc;
+    const img = document.createElement('img');
+    // non impostiamo src prima di aver collegato onload
+    let imgLoaded = false;
 
-    if(tapTextStr) {
-      const tapText = document.createElement("div");
-      tapText.className = "tapText";
+    const tapText = tapTextStr ? document.createElement('div') : null;
+    if (tapText) {
+      tapText.className = 'tapText';
       tapText.innerText = tapTextStr;
-      overlay.appendChild(tapText);
     }
 
-    overlay.insertBefore(img, overlay.firstChild);
+    overlay.appendChild(img);
+    if (tapText) overlay.appendChild(tapText);
     document.body.appendChild(overlay);
 
-    // Mostra solo quando l'immagine è caricata
-    img.onload = () => overlay.classList.add("show");
-    return overlay;
+    const readyPromise = new Promise((resolve) => {
+      const onImgLoad = () => {
+        imgLoaded = true;
+        // mostra overlay (immagine + sfondo)
+        overlay.classList.add('show');
+        overlay.removeAttribute('aria-hidden');
+
+        // mostriamo il testo SOLO dopo un piccolo delay (così l'immagine è visibile)
+        if (tapText) {
+          setTimeout(() => {
+            tapText.classList.add('show');
+            resolve(); // "pronto" quando testo è visibile
+          }, textDelay);
+        } else {
+          // se non c'è testo, consideriamo pronto subito
+          resolve();
+        }
+      };
+
+      img.onload = onImgLoad;
+      img.src = imgSrc;
+      // se è già in cache e completo, chiamare subito
+      if (img.complete) {
+        // tiny timeout per permettere il browser ad aggiornare il layout
+        setTimeout(onImgLoad, 20);
+      }
+    });
+
+    return { overlay, img, tapText, readyPromise };
   }
 
-  function showOverlay(overlay, duration = 4000) {
+  /* mostra un overlay già presente in DOM (es. #introOverlay). 
+     attende che l'immagine sia caricata, poi lo fa apparire per `duration` ms e lo rimuove */
+  function showExistingOverlay(id, duration = 4000) {
     return new Promise((resolve) => {
-      if(duration > 0) {
+      const overlay = document.getElementById(id);
+      if (!overlay) return resolve();
+      const img = overlay.querySelector('img');
+      const start = () => {
+        overlay.classList.add('show');
+        overlay.removeAttribute('aria-hidden');
         setTimeout(() => {
-          overlay.classList.remove("show");
-          overlay.classList.add("hide");
-          setTimeout(() => { overlay.remove(); resolve(); }, 1000);
+          overlay.classList.remove('show');
+          overlay.classList.add('hide');
+          setTimeout(() => { overlay.remove(); resolve(); }, 600);
         }, duration);
+      };
+      if (img.complete) {
+        setTimeout(start, 20);
       } else {
-        resolve();
+        img.onload = start;
       }
     });
   }
 
-  // 1️⃣ Pre Intro
-  const preIntro = createOverlay("preIntroOverlay", "images/pre_intro.png", "Tap to continue");
+  /* Sequenza controllata con flag per evitare tap prematuri */
+  (async function runSequence() {
+    // 1) pre_intro: immagine -> poi testo "Tap to continue"
+    const pre = createOverlayWithDelayedText('preIntroOverlay', 'images/pre_intro.png', 'Tap to continue', 350);
+    let preReady = false;
+    pre.readyPromise.then(()=> { preReady = true; });
 
-  preIntro.addEventListener("click", async () => {
-    preIntro.classList.remove("show");
-    preIntro.classList.add("hide");
-    setTimeout(() => preIntro.remove(), 1000);
+    // aspettiamo il tap (ma ignori i tap prima che preReady sia true)
+    await new Promise((resolve) => {
+      pre.overlay.addEventListener('click', function onPreClick() {
+        if (!preReady) return; // ignora tap precoce
+        pre.overlay.removeEventListener('click', onPreClick);
+        // rimuoviamo overlay pre con fade
+        if (pre.tapText) pre.tapText.classList.remove('show');
+        pre.overlay.classList.remove('show');
+        pre.overlay.classList.add('hide');
+        setTimeout(()=> { pre.overlay.remove(); resolve(); }, 600);
+      }, { once: false });
+    });
 
-    // 2️⃣ Count1
-    const count1 = document.getElementById("introOverlay");
-    count1.querySelector("img").onload = async () => {
-      count1.classList.add("show");
-      await showOverlay(count1, 4000);
+    // 2) show count1 (overlay già nel markup)
+    await showExistingOverlay('introOverlay', 4000);
 
-      // 3️⃣ Instructions
-      const instructions = createOverlay("instructionsOverlay", "images/instructions.png", "Tap to start");
-      instructions.addEventListener("click", async () => {
-        instructions.classList.remove("show");
-        instructions.classList.add("hide");
-        setTimeout(()=>instructions.remove(),1000);
+    // 3) instructions: immagine -> poi testo "Tap to start"
+    const inst = createOverlayWithDelayedText('instructionsOverlay', 'images/instructions.png', 'Tap to start', 350);
+    let instReady = false;
+    inst.readyPromise.then(()=> { instReady = true; });
 
-        sceneEl.style.display = "flex";
-        const mindarSystem = sceneEl.systems["mindar-image-system"];
+    // aspettiamo tap su instructions (ignora tap prima che testo sia visibile)
+    await new Promise((resolve) => {
+      inst.overlay.addEventListener('click', async function onInstClick() {
+        if (!instReady) return; // ignora tap precoce
+        inst.overlay.removeEventListener('click', onInstClick);
+        if (inst.tapText) inst.tapText.classList.remove('show');
+        inst.overlay.classList.remove('show');
+        inst.overlay.classList.add('hide');
+        setTimeout(()=> { inst.overlay.remove(); resolve(); }, 600);
+      }, { once: false });
+    });
+
+    // 4) avvio scena AR (scanner attivo)
+    try {
+      sceneEl.style.display = 'flex';
+      // assicurati che la UI di scanning sia visibile (prima che il marker venga trovato)
+      scanningUI.classList.remove('hidden');
+      scanningUI.classList.add('visible');
+
+      const mindarSystem = sceneEl.systems['mindar-image-system'];
+      if (mindarSystem && typeof mindarSystem.start === 'function') {
         await mindarSystem.start();
+      } else {
+        console.warn('mindar-image-system non trovato o start non disponibile');
+      }
 
-        const vrButton = document.querySelector(".a-enter-vr-button");
-        if(vrButton) vrButton.remove();
+      // rimuoviamo eventuale bottone VR
+      const vrBtn = document.querySelector('.a-enter-vr-button');
+      if (vrBtn) vrBtn.remove();
 
-        if (typeof initMainSequence === "function") initMainSequence();
-      }, { once:true });
-    };
-  }, { once:true });
+      // ora entra la logica principale (se definita)
+      if (typeof initMainSequence === 'function') initMainSequence();
+    } catch (err) {
+      console.error('Errore avviando la scena AR:', err);
+    }
+  })();
 
-  // Scanner UI
+  // Scanner UI visibile/nascosta automaticamente al targetFound/targetLost
   marker.addEventListener('targetFound', () => {
-    scanningUI.classList.add("hidden");
-    scanningUI.classList.remove("visible");
+    scanningUI.classList.add('hidden');
+    scanningUI.classList.remove('visible');
   });
   marker.addEventListener('targetLost', () => {
-    scanningUI.classList.remove("hidden");
-    scanningUI.classList.add("visible");
+    scanningUI.classList.remove('hidden');
+    scanningUI.classList.add('visible');
   });
 });
-</script>
-
+  </script>
 </body>
 </html>
