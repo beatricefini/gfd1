@@ -1,5 +1,6 @@
 function initMainSequence() {
   const marker = document.getElementById("marker");
+  const introContainer = document.getElementById("introTexts");
   const modelsContainer = document.getElementById("modelsContainer");
   const camera = document.querySelector("a-camera");
 
@@ -16,14 +17,14 @@ function initMainSequence() {
 
   const originalTransforms = {};
 
-  // --- Marker found: subito sequenza ---
+  // --- Marker found: parte subito l'esperienza ---
   marker.addEventListener("targetFound", () => {
     if (started) return;
     started = true;
     showAllModelsSequentially();
   });
 
-  // --- Click globale per avanzare sequenze ---
+  // --- Click globale per sequenze successive ---
   window.addEventListener("click", () => {
     if (allModelsDisplayed) {
       handleSequences();
@@ -33,16 +34,6 @@ function initMainSequence() {
   function showAllModelsSequentially() {
     if (currentIndex >= models.length) {
       allModelsDisplayed = true;
-
-      const tapText = document.createElement("a-text");
-      tapText.setAttribute("value", "Tap to continue");
-      tapText.setAttribute("align", "center");
-      tapText.setAttribute("color", "#FFD700");
-      tapText.setAttribute("position", "0 -0.6 0");
-      tapText.setAttribute("scale", "0.2 0.2 0.2");
-      tapText.setAttribute("wrap-count", "20");
-      tapText.setAttribute("id", "tapText");
-      document.body.appendChild(tapText);
       return;
     }
 
@@ -51,17 +42,11 @@ function initMainSequence() {
     piece.setAttribute("gltf-model", models[idx]);
     piece.setAttribute("visible","false");
 
-    piece.addEventListener("model-loaded", () => {
+    piece.addEventListener("model-loaded", ()=>{
       const pos = piece.getAttribute("position");
       const scale = piece.getAttribute("scale");
       originalTransforms[idx] = { position: {...pos}, scale: {...scale} };
-      piece.setAttribute("animation__pop", { 
-        property:"scale", 
-        from:"0 0 0", 
-        to:`${scale.x} ${scale.y} ${scale.z}`, 
-        dur:500, 
-        easing:"easeOutElastic" 
-      });
+      piece.setAttribute("animation__pop", { property:"scale", from:"0 0 0", to:`${scale.x} ${scale.y} ${scale.z}`, dur:500, easing:"easeOutElastic" });
       piece.setAttribute("visible","true");
     });
 
@@ -72,8 +57,8 @@ function initMainSequence() {
   }
 
   function clearOldTexts() {
-    const oldTexts = document.querySelectorAll("a-text, a-plane");
-    oldTexts.forEach(t => { if(t.id !== "tapText") t.remove(); });
+    const oldTexts = introContainer.querySelectorAll("a-text, a-plane");
+    oldTexts.forEach(t => t.remove());
   }
 
   function resetAllModels(activeIndices=[], callback) {
@@ -96,15 +81,11 @@ function initMainSequence() {
         ent.setAttribute("visible","true");
       });
       camera.setAttribute("animation__camreset",{ property:"position", to:"0 0 0", dur:dur, easing:"easeInOutQuad" });
-      const tapText = document.getElementById("tapText");
-      if(tapText) tapText.setAttribute("visible","true");
       if(typeof callback==="function") callback();
     }, dur+50);
   }
 
   function handleSequences(){
-    const tapText = document.getElementById("tapText");
-    if(tapText) tapText.setAttribute("visible","false");
     clearOldTexts();
 
     // --- SEQUENZE ---
@@ -121,7 +102,7 @@ function initMainSequence() {
       img1.setAttribute("position","0 -0.4 0");
       img1.setAttribute("scale","0.5 0.2 1");
       img1.setAttribute("material","transparent:true");
-      document.body.appendChild(img1);
+      introContainer.appendChild(img1);
 
       sequenceStep=1;
 
@@ -131,7 +112,7 @@ function initMainSequence() {
       img2.setAttribute("position","0 -0.5 0");
       img2.setAttribute("scale","0.5 0.2 1");
       img2.setAttribute("material","transparent:true");
-      document.body.appendChild(img2);
+      introContainer.appendChild(img2);
       sequenceStep=2;
 
     } else if(sequenceStep===2){
@@ -150,7 +131,7 @@ function initMainSequence() {
       img3.setAttribute("position","0 -0.4 0");
       img3.setAttribute("scale","0.5 0.2 1");
       img3.setAttribute("material","transparent:true");
-      document.body.appendChild(img3);
+      introContainer.appendChild(img3);
 
       sequenceStep=4;
 
@@ -168,7 +149,7 @@ function initMainSequence() {
       img4.setAttribute("position","0 -0.4 0");
       img4.setAttribute("scale","0.5 0.2 1");
       img4.setAttribute("material","transparent:true");
-      document.body.appendChild(img4);
+      introContainer.appendChild(img4);
 
       sequenceStep=6;
 
@@ -178,7 +159,7 @@ function initMainSequence() {
       img5.setAttribute("position","0 -0.5 0");
       img5.setAttribute("scale","0.5 0.2 1");
       img5.setAttribute("material","transparent:true");
-      document.body.appendChild(img5);
+      introContainer.appendChild(img5);
       sequenceStep=7;
 
     } else if(sequenceStep===7){
@@ -209,12 +190,9 @@ function initMainSequence() {
       outroOverlay.setAttribute("position","0 0 0");
       outroOverlay.setAttribute("scale","1 0.75 1");
       outroOverlay.setAttribute("material","transparent:true; opacity:0");
-      document.body.appendChild(outroOverlay);
+      introContainer.appendChild(outroOverlay);
 
       outroOverlay.setAttribute("animation__fadein",{ property:"material.opacity", from:0, to:1, dur:800, easing:"easeInQuad" });
     },10000);
   }
 }
-
-// --- Inizializzazione ---
-initMainSequence();
