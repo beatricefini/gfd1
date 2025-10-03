@@ -89,29 +89,30 @@ function initMainSequence() {
   clearOldTexts();
 
   // Funzione per creare un a-image con scala automatica
-  function createImage(imgId, posX = 0, posY = 0, posZ = 0) {
-    const assetImg = document.getElementById(imgId);
-    if (!assetImg) return null;
+ function createImage(imgId, posX = 0, posY = 0, posZ = 0) {
+  const assetImg = document.getElementById(imgId);
+  if (!assetImg) return null;
 
-    const aImg = document.createElement("a-image");
-    aImg.setAttribute("src", `#${imgId}`);
-    aImg.setAttribute("position", `${posX} ${posY} ${posZ}`);
+  const aImg = document.createElement("a-image");
+  aImg.setAttribute("src", `#${imgId}`);
+  aImg.setAttribute("position", `${posX} ${posY} ${posZ}`);
 
-    // Calcolo proporzioni basate sulla dimensione reale dell'immagine
-    const maxDimension = 1.5; // massima larghezza o altezza in unità A-Frame
-    let scaleX = assetImg.naturalWidth / assetImg.naturalHeight;
-    let scaleY = assetImg.naturalHeight / assetImg.naturalWidth;
+  // Calcolo proporzioni basate sulla dimensione reale dell'immagine
+  const maxDimension = 0.5; // ridotto da 1.5 a 0.5 per immagini più piccole
+  let scaleX = assetImg.naturalWidth / assetImg.naturalHeight;
+  let scaleY = assetImg.naturalHeight / assetImg.naturalWidth;
 
-    if (assetImg.naturalWidth >= assetImg.naturalHeight) {
-      aImg.setAttribute("width", maxDimension);
-      aImg.setAttribute("height", maxDimension / scaleX);
-    } else {
-      aImg.setAttribute("height", maxDimension);
-      aImg.setAttribute("width", maxDimension / scaleY);
-    }
-
-    return aImg;
+  if (assetImg.naturalWidth >= assetImg.naturalHeight) {
+    aImg.setAttribute("width", maxDimension);
+    aImg.setAttribute("height", maxDimension / scaleX);
+  } else {
+    aImg.setAttribute("height", maxDimension);
+    aImg.setAttribute("width", maxDimension / scaleY);
   }
+
+  return aImg;
+}
+
 
   // --- SEQUENZE ---
   if(sequenceStep===0){
