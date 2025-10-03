@@ -125,6 +125,21 @@ marker.addEventListener("targetFound", () => {
  let sequenceStep = 0;
 let tapText = null;
 
+document.addEventListener("DOMContentLoaded", function () {
+    // Inizializza il flusso una volta che il DOM è completamente caricato
+    initializeTapText();
+
+    // Funzione che gestisce il riconoscimento del target (modifica secondo il tuo sistema AR)
+    const targetElement = document.querySelector("#marker-target");
+    if (targetElement) {
+        targetElement.addEventListener("click", () => {
+            startMainFlow(); // Inizia il flusso quando il target viene riconosciuto
+        });
+    } else {
+        console.error("Target marker non trovato!");
+    }
+});
+
 function initializeTapText() {
     // Crea il testo "Tap to continue" se non esiste
     tapText = document.getElementById("tapText");
@@ -142,7 +157,6 @@ function initializeTapText() {
     tapText.setAttribute("visible", "false"); // Inizialmente non visibile
 }
 
-// Funzione per creare le immagini
 function createTextImage(imgId, posY) {
     const img = document.createElement("a-image");
     img.setAttribute("src", imgId);
@@ -153,7 +167,6 @@ function createTextImage(imgId, posY) {
     return img;
 }
 
-// Funzione per la sequenza delle immagini
 function handleSequences() {
     if (!tapText) initializeTapText(); // Assicuriamoci che il tapText sia inizializzato
 
@@ -213,6 +226,33 @@ function handleSequences() {
             sequenceStep = 6;
         }, 3000); // Ritardo di 3 secondi prima di proseguire
     }
+}
+
+// Funzione di reset dei modelli
+function resetAllModels(modelIndices, callback) {
+    modelIndices.forEach((index) => {
+        // Reset dei modelli (puoi personalizzare la logica di reset)
+        const model = scene.querySelector(`#model-${index}`);
+        if (model) model.setAttribute("animation", { property: "scale", to: "1 1 1", dur: 1000 });
+    });
+    if (callback) callback();
+}
+
+// Funzione per mostrare la scena finale (modifica secondo le tue esigenze)
+function showFinalCinema() {
+    // Mostra il modello finale e le animazioni
+    const finalModel = scene.querySelector("#finalModel");
+    if (finalModel) {
+        finalModel.setAttribute("animation", { property: "scale", to: "1 1 1", dur: 1000 });
+    }
+}
+
+// Funzione per avviare il flusso principale
+function startMainFlow() {
+    console.log("Main flow avviato");
+    handleSequences();  // Inizia le sequenze
+}
+
 }
 
 // Funzione di reset dei modelli
