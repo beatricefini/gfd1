@@ -86,92 +86,104 @@ function initMainSequence() {
   }
 
   function handleSequences(){
-    clearOldTexts();
+  clearOldTexts();
 
-    // --- SEQUENZE ---
-    if(sequenceStep===0){
-      frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
-      frameEntities[0].setAttribute("animation__pos_zoom",{ property:"position", to:"-0.35 0 0.1", dur:800, easing:"easeInOutQuad" });
-      frameEntities[1].setAttribute("animation__pos_zoom",{ property:"position", to:"0.05 0.12 0.4", dur:800, easing:"easeInOutQuad" });
-      frameEntities[0].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad" });
-      frameEntities[1].setAttribute("animation__scale_zoom",{ property:"scale", to:"2.1 2.1 2.1", dur:800, easing:"easeInOutQuad" });
-      camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.5", dur:800, easing:"easeInOutQuad" });
+  // --- SEQUENZE ---
+  if(sequenceStep===0){
+    // Mostro solo i primi due modelli
+    frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
 
-      const img1 = document.createElement("a-plane");
-      img1.setAttribute("src","#text1Img");
-      img1.setAttribute("position","0 -0.4 0");
-      img1.setAttribute("scale","0.5 0.2 1");
-      img1.setAttribute("material","transparent:true");
-      introContainer.appendChild(img1);
+    frameEntities[0].setAttribute("animation__pos_zoom",{ property:"position", to:"-0.35 0 0.1", dur:800, easing:"easeInOutQuad" });
+    frameEntities[1].setAttribute("animation__pos_zoom",{ property:"position", to:"0.05 0.12 0.4", dur:800, easing:"easeInOutQuad" });
+    frameEntities[0].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad" });
+    frameEntities[1].setAttribute("animation__scale_zoom",{ property:"scale", to:"2.1 2.1 2.1", dur:800, easing:"easeInOutQuad" });
+    camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.5", dur:800, easing:"easeInOutQuad" });
 
-      sequenceStep=1;
+    // Img 1
+    const img1 = document.createElement("a-image");
+    img1.setAttribute("src","#text1Img");
+    img1.setAttribute("position","0 -0.4 0");
+    img1.setAttribute("width","1");
+    img1.setAttribute("height","auto");
+    introContainer.appendChild(img1);
 
-    } else if(sequenceStep===1){
-      const img2=document.createElement("a-plane");
-      img2.setAttribute("src","#text2Img");
-      img2.setAttribute("position","0 -0.5 0");
-      img2.setAttribute("scale","0.5 0.2 1");
-      img2.setAttribute("material","transparent:true");
-      introContainer.appendChild(img2);
-      sequenceStep=2;
+    sequenceStep=1;
 
-    } else if(sequenceStep===2){
-      resetAllModels([0,1],()=>{sequenceStep=3;});
+  } else if(sequenceStep===1){
+    // Img 2
+    const img2 = document.createElement("a-image");
+    img2.setAttribute("src","#text2Img");
+    img2.setAttribute("position","0 -0.5 0");
+    img2.setAttribute("width","1");
+    img2.setAttribute("height","auto");
+    introContainer.appendChild(img2);
 
-    } else if(sequenceStep===3){
-      frameEntities.forEach((ent,i)=>{ if(i<2 || i>4) ent.setAttribute("visible","false"); });
-      [2,3,4].forEach(i=>frameEntities[i].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad" }));
-      frameEntities[2].setAttribute("animation__pos_zoom",{ property:"position", to:"-0.05 0.2 0.35", dur:800, easing:"easeInOutQuad" });
-      frameEntities[3].setAttribute("animation__pos_zoom",{ property:"position", to:"0.05 0.45 0.35", dur:800, easing:"easeInOutQuad" });
-      frameEntities[4].setAttribute("animation__pos_zoom",{ property:"position", to:"0.15 0.3 0.35", dur:800, easing:"easeInOutQuad" });
-      camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
+    sequenceStep=2;
 
-      const img3=document.createElement("a-plane");
-      img3.setAttribute("src","#text3Img");
-      img3.setAttribute("position","0 -0.4 0");
-      img3.setAttribute("scale","0.5 0.2 1");
-      img3.setAttribute("material","transparent:true");
-      introContainer.appendChild(img3);
+  } else if(sequenceStep===2){
+    resetAllModels([0,1],()=>{sequenceStep=3;});
 
-      sequenceStep=4;
+  } else if(sequenceStep===3){
+    // Mostro modelli 2,3,4
+    frameEntities.forEach((ent,i)=>{ if(i<2 || i>4) ent.setAttribute("visible","false"); });
+    [2,3,4].forEach(i=>frameEntities[i].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad" }));
+    frameEntities[2].setAttribute("animation__pos_zoom",{ property:"position", to:"-0.05 0.2 0.35", dur:800, easing:"easeInOutQuad" });
+    frameEntities[3].setAttribute("animation__pos_zoom",{ property:"position", to:"0.05 0.45 0.35", dur:800, easing:"easeInOutQuad" });
+    frameEntities[4].setAttribute("animation__pos_zoom",{ property:"position", to:"0.15 0.3 0.35", dur:800, easing:"easeInOutQuad" });
+    camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
 
-    } else if(sequenceStep===4){
-      resetAllModels([2,3,4],()=>{sequenceStep=5;});
+    // Img 3
+    const img3 = document.createElement("a-image");
+    img3.setAttribute("src","#text3Img");
+    img3.setAttribute("position","0 -0.4 0");
+    img3.setAttribute("width","1");
+    img3.setAttribute("height","auto");
+    introContainer.appendChild(img3);
 
-    } else if(sequenceStep===5){
-      frameEntities.forEach((ent,i)=>{ if(i!==5) ent.setAttribute("visible","false"); });
-      frameEntities[5].setAttribute("animation__pos_zoom",{ property:"position", to:"0.3 -0.15 0.35", dur:800, easing:"easeInOutQuad" });
-      frameEntities[5].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.7 1.7 1.7", dur:800, easing:"easeInOutQuad" });
-      camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
+    sequenceStep=4;
 
-      const img4=document.createElement("a-plane");
-      img4.setAttribute("src","#text4Img");
-      img4.setAttribute("position","0 -0.4 0");
-      img4.setAttribute("scale","0.5 0.2 1");
-      img4.setAttribute("material","transparent:true");
-      introContainer.appendChild(img4);
+  } else if(sequenceStep===4){
+    resetAllModels([2,3,4],()=>{sequenceStep=5;});
 
-      sequenceStep=6;
+  } else if(sequenceStep===5){
+    // Mostro modello 5
+    frameEntities.forEach((ent,i)=>{ if(i!==5) ent.setAttribute("visible","false"); });
+    frameEntities[5].setAttribute("animation__pos_zoom",{ property:"position", to:"0.3 -0.15 0.35", dur:800, easing:"easeInOutQuad" });
+    frameEntities[5].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.7 1.7 1.7", dur:800, easing:"easeInOutQuad" });
+    camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
 
-    } else if(sequenceStep===6){
-      const img5=document.createElement("a-plane");
-      img5.setAttribute("src","#text5Img");
-      img5.setAttribute("position","0 -0.5 0");
-      img5.setAttribute("scale","0.5 0.2 1");
-      img5.setAttribute("material","transparent:true");
-      introContainer.appendChild(img5);
-      sequenceStep=7;
+    // Img 4
+    const img4 = document.createElement("a-image");
+    img4.setAttribute("src","#text4Img");
+    img4.setAttribute("position","0 -0.4 0");
+    img4.setAttribute("width","1");
+    img4.setAttribute("height","auto");
+    introContainer.appendChild(img4);
 
-    } else if(sequenceStep===7){
-      resetAllModels([0,1,2,3,4,5],()=>{
-        setTimeout(()=>{
-          frameEntities.forEach(ent=>ent.setAttribute("animation__popout",{ property:"scale", to:"0 0 0", dur:800, easing:"easeInQuad" }));
-          setTimeout(()=>showFinalCinema(),800);
-        },3000);
-      });
-      sequenceStep=8;
-    }
+    sequenceStep=6;
+
+  } else if(sequenceStep===6){
+    // Img 5
+    const img5 = document.createElement("a-image");
+    img5.setAttribute("src","#text5Img");
+    img5.setAttribute("position","0 -0.5 0");
+    img5.setAttribute("width","1");
+    img5.setAttribute("height","auto");
+    introContainer.appendChild(img5);
+
+    sequenceStep=7;
+
+  } else if(sequenceStep===7){
+    resetAllModels([0,1,2,3,4,5],()=>{
+      setTimeout(()=>{
+        frameEntities.forEach(ent=>ent.setAttribute("animation__popout",{ property:"scale", to:"0 0 0", dur:800, easing:"easeInQuad" }));
+        setTimeout(()=>showFinalCinema(),800);
+      },3000);
+    });
+    sequenceStep=8;
   }
+}
+
 
 function showFinalCinema(){
   frameEntities.forEach(ent => ent.setAttribute("visible","false"));
