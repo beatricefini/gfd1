@@ -212,26 +212,48 @@ marker.addEventListener("targetFound", () => {
     }
   }
 
-  function showFinalCinema(){
-    frameEntities.forEach(ent=>ent.setAttribute("visible","false"));
+  function showFinalCinema() {
+    frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
     clearOldTexts();
 
-    const cinemaModel=document.createElement("a-entity");
-    cinemaModel.setAttribute("gltf-model","#pieceCinema");
-    cinemaModel.setAttribute("position",{x:0,y:-0.3,z:0.5});
-    cinemaModel.setAttribute("scale",{x:1.5,y:1.5,z:1.5});
-    cinemaModel.addEventListener("model-loaded",()=>cinemaModel.setAttribute("visible","true"));
+    const baseHeight = -0.25;
+
+    // Modello Cinema
+    const cinemaModel = document.createElement("a-entity");
+    cinemaModel.setAttribute("gltf-model", "#pieceCinema");
+    cinemaModel.setAttribute("position", "0 -0.3 0.5");
+    cinemaModel.setAttribute("scale", "1.5 1.5 1.5");
+    cinemaModel.setAttribute("visible", "true");
     modelsContainer.appendChild(cinemaModel);
 
-    setTimeout(()=>{
-      const outroOverlay=document.createElement("a-plane");
-      outroOverlay.setAttribute("src","#outroImg");
-      outroOverlay.setAttribute("position","0 0 0");
-      outroOverlay.setAttribute("scale","1 0.75 1");
-      outroOverlay.setAttribute("material","transparent:true; opacity:0");
-      introContainer.appendChild(outroOverlay);
+    // Testo 1958
+    const text1958 = document.createElement("a-text");
+    text1958.setAttribute("value", "1958");
+    text1958.setAttribute("align", "center");
+    text1958.setAttribute("anchor", "center");
+    text1958.setAttribute("color", "#000000");
+    text1958.setAttribute("font", "roboto");
+    text1958.setAttribute("position", `0 ${baseHeight + 0.5} 0.5`);
+    text1958.setAttribute("scale", "0.5 0.5 0.5");
+    text1958.setAttribute("opacity", "0");
+    text1958.setAttribute("shader", "msdf");
+    text1958.setAttribute("animation__fadein", "property: opacity; from: 0; to: 1; dur: 800; easing: easeInQuad; delay: 200");
+    introContainer.appendChild(text1958);
 
-      outroOverlay.setAttribute("animation__fadein",{ property:"material.opacity", from:0, to:1, dur:800, easing:"easeInQuad" });
-    },10000);
+    // Testo Ruins
+    const textRuins = document.createElement("a-text");
+    textRuins.setAttribute("value", "Ruins");
+    textRuins.setAttribute("align", "center");
+    textRuins.setAttribute("anchor", "center");
+    textRuins.setAttribute("color", "#000000");
+    textRuins.setAttribute("font", "roboto");
+    textRuins.setAttribute("position", `0 ${baseHeight + 0.4} 0.5`);
+    textRuins.setAttribute("scale", "0.35 0.35 0.35");
+    textRuins.setAttribute("opacity", "0");
+    textRuins.setAttribute("shader", "msdf");
+    textRuins.setAttribute("animation__fadein", "property: opacity; from: 0; to: 1; dur: 800; easing: easeInQuad; delay: 1200");
+    introContainer.appendChild(textRuins);
+}
+
   }
 }
