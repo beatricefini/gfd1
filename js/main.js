@@ -197,15 +197,15 @@ function showFinalCinema(){
   text1.setAttribute("align", "center");
   text1.setAttribute("color", "#ffffff");
   text1.setAttribute("position", "0 0.5 0.5"); // sopra il modello
-  text1.setAttribute("width", "1.2"); // più grande
+  text1.setAttribute("width", "2.2"); // più grande
   modelsContainer.appendChild(text1);
 
   const text2 = document.createElement("a-text");
   text2.setAttribute("value", "Ruins");
   text2.setAttribute("align", "center");
-  text2.setAttribute("color", "#ffffff");
-  text2.setAttribute("position", "0 0.35 0.5"); // leggermente sotto il primo testo
-  text2.setAttribute("width", "0.8"); // più piccolo
+  text2.setAttribute("color", "#000000");
+  text2.setAttribute("position", "0 0 0.5"); // leggermente sotto il primo testo
+  text2.setAttribute("width", "1.8"); // più piccolo
   modelsContainer.appendChild(text2);
 
   // Mostro overlay HTML/CSS con fade-in dopo 10s
