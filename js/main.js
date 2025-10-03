@@ -263,15 +263,22 @@ function showFinalCinema() {
     introContainer.appendChild(textRuins);
 
     // --- Overlay UI outro dopo 10 secondi ---
+    // --- Overlay UI outro dopo 10 secondi ---
+setTimeout(() => {
+    const outroOverlay = document.createElement("div");
+    outroOverlay.id = "outroOverlay";
+    outroOverlay.className = "overlay"; // inizia senza 'show' quindi opacity = 0
+    const outroImg = document.createElement("img");
+    outroImg.src = "images/outro1.png";
+    outroOverlay.appendChild(outroImg);
+    document.body.appendChild(outroOverlay);
+
+    // Forza un piccolo delay prima di aggiungere la classe show per il fade-in
     setTimeout(() => {
-        const outroOverlay = document.createElement("div");
-        outroOverlay.id = "outroOverlay";
-        outroOverlay.className = "overlay show"; // usa la stessa classe degli overlay precedenti
-        const outroImg = document.createElement("img");
-        outroImg.src = "images/outro1.png";
-        outroOverlay.appendChild(outroImg);
-        document.body.appendChild(outroOverlay);
-    }, 10000);
+        outroOverlay.classList.add("show");
+    }, 50); // 50ms è sufficiente per triggerare la transizione CSS
+}, 10000); // 10 secondi dopo comparsa cinema + testi
+
 }
 
 
