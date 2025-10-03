@@ -191,7 +191,7 @@
         setTimeout(() => instructions.remove(), 1000);
 
         // Mostra scena e avvia MindAR
-        sceneEl.style.display = "flex";
+        sceneEl.style.display = "block";
         const mindarSystem = sceneEl.systems["mindar-image-system"];
         await mindarSystem.start();
 
