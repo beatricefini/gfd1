@@ -88,43 +88,53 @@ function initMainSequence() {
   function handleSequences(){
   clearOldTexts();
 
+  // Funzione per creare un a-image con scala automatica
+  function createImage(imgId, posX = 0, posY = 0, posZ = 0) {
+    const assetImg = document.getElementById(imgId);
+    if (!assetImg) return null;
+
+    const aImg = document.createElement("a-image");
+    aImg.setAttribute("src", `#${imgId}`);
+    aImg.setAttribute("position", `${posX} ${posY} ${posZ}`);
+
+    // Calcolo proporzioni basate sulla dimensione reale dell'immagine
+    const maxDimension = 1.5; // massima larghezza o altezza in unità A-Frame
+    let scaleX = assetImg.naturalWidth / assetImg.naturalHeight;
+    let scaleY = assetImg.naturalHeight / assetImg.naturalWidth;
+
+    if (assetImg.naturalWidth >= assetImg.naturalHeight) {
+      aImg.setAttribute("width", maxDimension);
+      aImg.setAttribute("height", maxDimension / scaleX);
+    } else {
+      aImg.setAttribute("height", maxDimension);
+      aImg.setAttribute("width", maxDimension / scaleY);
+    }
+
+    return aImg;
+  }
+
   // --- SEQUENZE ---
   if(sequenceStep===0){
-    // Mostro solo i primi due modelli
     frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
-
     frameEntities[0].setAttribute("animation__pos_zoom",{ property:"position", to:"-0.35 0 0.1", dur:800, easing:"easeInOutQuad" });
     frameEntities[1].setAttribute("animation__pos_zoom",{ property:"position", to:"0.05 0.12 0.4", dur:800, easing:"easeInOutQuad" });
     frameEntities[0].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad" });
     frameEntities[1].setAttribute("animation__scale_zoom",{ property:"scale", to:"2.1 2.1 2.1", dur:800, easing:"easeInOutQuad" });
     camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.5", dur:800, easing:"easeInOutQuad" });
 
-    // Img 1
-    const img1 = document.createElement("a-image");
-    img1.setAttribute("src","#text1Img");
-    img1.setAttribute("position","0 -0.4 0");
-    img1.setAttribute("width","1");
-    img1.setAttribute("height","auto");
-    introContainer.appendChild(img1);
-
+    const img1 = createImage("text1Img",0,-0.2,0.6);
+    if(img1) introContainer.appendChild(img1);
     sequenceStep=1;
 
   } else if(sequenceStep===1){
-    // Img 2
-    const img2 = document.createElement("a-image");
-    img2.setAttribute("src","#text2Img");
-    img2.setAttribute("position","0 -0.5 0");
-    img2.setAttribute("width","1");
-    img2.setAttribute("height","auto");
-    introContainer.appendChild(img2);
-
+    const img2 = createImage("text2Img",0,-0.2,0.6);
+    if(img2) introContainer.appendChild(img2);
     sequenceStep=2;
 
   } else if(sequenceStep===2){
     resetAllModels([0,1],()=>{sequenceStep=3;});
 
   } else if(sequenceStep===3){
-    // Mostro modelli 2,3,4
     frameEntities.forEach((ent,i)=>{ if(i<2 || i>4) ent.setAttribute("visible","false"); });
     [2,3,4].forEach(i=>frameEntities[i].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad" }));
     frameEntities[2].setAttribute("animation__pos_zoom",{ property:"position", to:"-0.05 0.2 0.35", dur:800, easing:"easeInOutQuad" });
@@ -132,45 +142,26 @@ function initMainSequence() {
     frameEntities[4].setAttribute("animation__pos_zoom",{ property:"position", to:"0.15 0.3 0.35", dur:800, easing:"easeInOutQuad" });
     camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
 
-    // Img 3
-    const img3 = document.createElement("a-image");
-    img3.setAttribute("src","#text3Img");
-    img3.setAttribute("position","0 -0.4 0");
-    img3.setAttribute("width","1");
-    img3.setAttribute("height","auto");
-    introContainer.appendChild(img3);
-
+    const img3 = createImage("text3Img",0,-0.2,0.6);
+    if(img3) introContainer.appendChild(img3);
     sequenceStep=4;
 
   } else if(sequenceStep===4){
     resetAllModels([2,3,4],()=>{sequenceStep=5;});
 
   } else if(sequenceStep===5){
-    // Mostro modello 5
     frameEntities.forEach((ent,i)=>{ if(i!==5) ent.setAttribute("visible","false"); });
     frameEntities[5].setAttribute("animation__pos_zoom",{ property:"position", to:"0.3 -0.15 0.35", dur:800, easing:"easeInOutQuad" });
     frameEntities[5].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.7 1.7 1.7", dur:800, easing:"easeInOutQuad" });
     camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
 
-    // Img 4
-    const img4 = document.createElement("a-image");
-    img4.setAttribute("src","#text4Img");
-    img4.setAttribute("position","0 -0.4 0");
-    img4.setAttribute("width","1");
-    img4.setAttribute("height","auto");
-    introContainer.appendChild(img4);
-
+    const img4 = createImage("text4Img",0,-0.2,0.6);
+    if(img4) introContainer.appendChild(img4);
     sequenceStep=6;
 
   } else if(sequenceStep===6){
-    // Img 5
-    const img5 = document.createElement("a-image");
-    img5.setAttribute("src","#text5Img");
-    img5.setAttribute("position","0 -0.5 0");
-    img5.setAttribute("width","1");
-    img5.setAttribute("height","auto");
-    introContainer.appendChild(img5);
-
+    const img5 = createImage("text5Img",0,-0.2,0.6);
+    if(img5) introContainer.appendChild(img5);
     sequenceStep=7;
 
   } else if(sequenceStep===7){
@@ -183,6 +174,7 @@ function initMainSequence() {
     sequenceStep=8;
   }
 }
+
 
 
 function showFinalCinema(){
