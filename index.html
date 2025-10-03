@@ -34,14 +34,14 @@
     .overlay.show { opacity: 1; }
     .overlay.hide { opacity: 0; }
 
-    /* Testo Tap to Start */
+    /* Testo Tap */
     #tapText, #preTapText {
       position: absolute;
       bottom: 10%;
       width: 100%;
       text-align: center;
       font-size: 1.2rem;
-      color: white;
+      color: black;
       opacity: 0;
       transition: opacity 1s ease-in-out;
       cursor: pointer;
@@ -96,19 +96,19 @@
   </style>
 </head>
 <body>
-  <!-- Overlay 0: pre-intro con tap -->
+  <!-- Overlay pre-intro -->
   <div id="preIntroOverlay" class="overlay">
     <img src="images/preintro.png" alt="Pre Intro">
     <div id="preTapText">Tap to continue</div>
   </div>
 
-  <!-- Overlay 1: count1.png -->
+  <!-- Overlay count1.png -->
   <div id="introOverlay" class="overlay">
     <img src="images/count1.png" alt="Intro">
   </div>
 
-  <!-- Overlay 2: instructions.png -->
-  <div id="instructionsOverlay" class="overlay" style="display:flex; opacity:0;">
+  <!-- Overlay instructions -->
+  <div id="instructionsOverlay" class="overlay">
     <img src="images/instructions.png" alt="Instructions">
     <div id="tapText">Tap to start</div>
   </div>
@@ -138,7 +138,15 @@
       <a-asset-item id="piece5" src="models/piece5.glb"></a-asset-item>
       <a-asset-item id="piece6" src="models/piece6.glb"></a-asset-item>
       <a-asset-item id="pieceCinema" src="models/piece_cinema3.glb"></a-asset-item>
+      <!-- Outro -->
       <img id="outroImg" src="images/outro1.png">
+      <!-- Testi -->
+      <img id="introImg" src="images/intro_text.png">
+      <img id="text1Img" src="images/text1.png">
+      <img id="text2Img" src="images/text2.png">
+      <img id="text3Img" src="images/text3.png">
+      <img id="text4Img" src="images/text4.png">
+      <img id="text5Img" src="images/text5.png">
     </a-assets>
 
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -150,72 +158,71 @@
     </a-entity>
   </a-scene>
 
-  <!-- Script overlay sequence -->
+  <script src="js/main.js"></script>
   <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const sceneEl = document.querySelector("a-scene");
-    const scanningUI = document.getElementById("custom-scanning-ui");
-    const marker = document.getElementById("marker");
+    document.addEventListener("DOMContentLoaded", () => {
+      const sceneEl = document.querySelector("a-scene");
+      const scanningUI = document.getElementById("custom-scanning-ui");
+      const marker = document.getElementById("marker");
 
-    const preIntro = document.getElementById("preIntroOverlay");
-    const preTapText = document.getElementById("preTapText");
-    const intro = document.getElementById("introOverlay");
-    const instructions = document.getElementById("instructionsOverlay");
+      const preIntro = document.getElementById("preIntroOverlay");
+      const preTapText = document.getElementById("preTapText");
+      const intro = document.getElementById("introOverlay");
+      const instructions = document.getElementById("instructionsOverlay");
 
-    // Mostra subito pre-intro
-    setTimeout(() => {
-      preIntro.classList.add("show");
-      preTapText.classList.add("show");
-    }, 300);
-
-    // Primo tap → passa a count1.png
-    preIntro.addEventListener("click", () => {
-      preIntro.classList.remove("show");
-      preIntro.classList.add("hide");
-      setTimeout(() => preIntro.remove(), 1000);
-
+      // Mostra subito il pre-intro
       setTimeout(() => {
-        intro.classList.add("show");
-      }, 500);
+        preIntro.classList.add("show");
+        preTapText.classList.add("show");
+      }, 300);
 
-      setTimeout(() => {
-        intro.classList.remove("show");
-        intro.classList.add("hide");
-        setTimeout(() => intro.remove(), 1000);
+      // Primo tap → passa a count1.png
+      preIntro.addEventListener("click", () => {
+        preIntro.classList.remove("show");
+        preIntro.classList.add("hide");
+        setTimeout(() => preIntro.remove(), 1000);
 
-        // Mostra instructions dopo count1
         setTimeout(() => {
-          instructions.classList.add("show");
-          const tapText = document.getElementById("tapText");
-          if (tapText) tapText.classList.add("show");
+          intro.classList.add("show");
         }, 500);
-      }, 5000);
+        setTimeout(() => {
+          intro.classList.remove("show");
+          intro.classList.add("hide");
+          setTimeout(() => intro.remove(), 1000);
+
+          // Mostra instructions dopo count1
+          setTimeout(() => {
+            instructions.classList.add("show");
+            const tapText = document.getElementById("tapText");
+            if (tapText) tapText.classList.add("show");
+          }, 500);
+        }, 5000);
+      });
+
+      // Tap su instructions → avvia scena AR
+      instructions.addEventListener("click", async () => {
+        instructions.classList.remove("show");
+        instructions.classList.add("hide");
+        setTimeout(() => instructions.remove(), 1000);
+
+        sceneEl.style.display = "block";
+        const mindarSystem = sceneEl.systems["mindar-image-system"];
+        await mindarSystem.start();
+
+        const vrButton = document.querySelector(".a-enter-vr-button");
+        if (vrButton) vrButton.remove();
+      }, { once: true });
+
+      // Scanner UI gestito dal marker
+      marker.addEventListener("targetFound", () => {
+        scanningUI.classList.add("hidden");
+        scanningUI.classList.remove("visible");
+      });
+      marker.addEventListener("targetLost", () => {
+        scanningUI.classList.remove("hidden");
+        scanningUI.classList.add("visible");
+      });
     });
-
-    // Tap su instructions → avvia scena AR
-    instructions.addEventListener("click", async () => {
-      instructions.classList.remove("show");
-      instructions.classList.add("hide");
-      setTimeout(() => instructions.remove(), 1000);
-
-      sceneEl.style.display = "flex";
-      const mindarSystem = sceneEl.systems["mindar-image-system"];
-      await mindarSystem.start();
-
-      const vrButton = document.querySelector(".a-enter-vr-button");
-      if (vrButton) vrButton.remove();
-    }, { once: true });
-
-    // Scanner UI gestito dal marker
-    marker.addEventListener("targetFound", () => {
-      scanningUI.classList.add("hidden");
-      scanningUI.classList.remove("visible");
-    });
-    marker.addEventListener("targetLost", () => {
-      scanningUI.classList.remove("hidden");
-      scanningUI.classList.add("visible");
-    });
-  });
   </script>
 </body>
 </html>
