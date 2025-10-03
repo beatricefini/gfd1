@@ -122,105 +122,105 @@ marker.addEventListener("targetFound", () => {
     }, dur+50);
   }
 
-  function handleSequences(){
-    const tapText = document.getElementById("tapText");
-    if(tapText) tapText.setAttribute("visible","false");
-    clearOldTexts();
+  function handleSequences() {
+    // --- Crea o recupera tapText sotto le immagini ---
+    let tapText = document.getElementById("tapText");
+    if (!tapText) {
+        tapText = document.createElement("a-text");
+        tapText.setAttribute("id", "tapText");
+        tapText.setAttribute("value", "Tap to continue");
+        tapText.setAttribute("align", "center");
+        tapText.setAttribute("color", "#FFD700");
+        tapText.setAttribute("position", "0 -0.7 0");
+        tapText.setAttribute("scale", "0.2 0.2 0.2");
+        tapText.setAttribute("wrap-count", "20");
+        introContainer.appendChild(tapText);
+    }
 
-    // --- SEQUENZE ---
-    if(sequenceStep===0){
-      frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
-      frameEntities[0].setAttribute("animation__pos_zoom",{ property:"position", to:"0 0 0.1", dur:800, easing:"easeInOutQuad" });
-      frameEntities[1].setAttribute("animation__pos_zoom",{ property:"position", to:"0 0 0.1", dur:800, easing:"easeInOutQuad" });
-      frameEntities[0].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad" });
-      frameEntities[1].setAttribute("animation__scale_zoom",{ property:"scale", to:"2.1 2.1 2.1", dur:800, easing:"easeInOutQuad" });
-      camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.5", dur:800, easing:"easeInOutQuad" });
+    tapText.setAttribute("visible", "true"); // visibile all’inizio di ogni sequenza
 
-      const img1 = document.createElement("a-plane");
-      img1.setAttribute("src","#text1Img");
-      img1.setAttribute("position","0 -0.4 0");
-      img1.setAttribute("scale","1 1 1");
-      img1.setAttribute("material","transparent:true");
-      introContainer.appendChild(img1);
+    clearOldTexts(); // rimuove le immagini precedenti ma non il tapText
 
-      sequenceStep=1;
+    function createTextImage(imgId, posY) {
+        const img = document.createElement("a-image");
+        img.setAttribute("src", imgId);
+        img.setAttribute("position", `0 ${posY} 0`);
+        img.setAttribute("scale", "1 1 1");
+        img.setAttribute("material", "transparent: true");
+        return img;
+    }
 
-    } else if(sequenceStep===1){
-      const img2=document.createElement("a-plane");
-      img2.setAttribute("src","#text2Img");
-      img2.setAttribute("position","0 -0.5 0");
-      img2.setAttribute("scale","1 1 1");
-      img2.setAttribute("material","transparent:true");
-      introContainer.appendChild(img2);
-      sequenceStep=2;
+    // --- SEQ1 ---
+    if (sequenceStep === 0) {
+        frameEntities.forEach((ent, i) => { if (i > 1) ent.setAttribute("visible", "false"); });
+        frameEntities[0].setAttribute("animation__pos_zoom", { property: "position", to: "-0.35 0 0.1", dur: 800, easing: "easeInOutQuad" });
+        frameEntities[1].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.12 0.4", dur: 800, easing: "easeInOutQuad" });
+        frameEntities[0].setAttribute("animation__scale_zoom", { property: "scale", to: "1.2 1.2 1.2", dur: 800, easing: "easeInOutQuad" });
+        frameEntities[1].setAttribute("animation__scale_zoom", { property: "scale", to: "2.1 2.1 2.1", dur: 800, easing: "easeInOutQuad" });
+        camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.5", dur: 800, easing: "easeInOutQuad" });
 
-    } else if(sequenceStep===2){
-      resetAllModels([0,1],()=>{sequenceStep=3;});
+        const img1 = createTextImage("#text1Img", -0.4);
+        introContainer.appendChild(img1);
 
-    } else if(sequenceStep===3){
-      frameEntities.forEach((ent,i)=>{ if(i<2 || i>4) ent.setAttribute("visible","false"); });
-      [2,3,4].forEach(i=>frameEntities[i].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad" }));
-      frameEntities[2].setAttribute("animation__pos_zoom",{ property:"position", to:"-0.05 0.2 0.35", dur:800, easing:"easeInOutQuad" });
-      frameEntities[3].setAttribute("animation__pos_zoom",{ property:"position", to:"0.05 0.45 0.35", dur:800, easing:"easeInOutQuad" });
-      frameEntities[4].setAttribute("animation__pos_zoom",{ property:"position", to:"0.15 0.3 0.35", dur:800, easing:"easeInOutQuad" });
-      camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
+        sequenceStep = 1;
+    } 
+    else if (sequenceStep === 1) {
+        const img2 = createTextImage("#text2Img", -0.5);
+        introContainer.appendChild(img2);
+        sequenceStep = 2;
+    } 
+    else if (sequenceStep === 2) {
+        resetAllModels([0, 1], () => { sequenceStep = 3; });
+    } 
+    else if (sequenceStep === 3) {
+        frameEntities.forEach((ent, i) => { if (i < 2 || i > 4) ent.setAttribute("visible", "false"); });
+        [2,3,4].forEach(i => { frameEntities[i].setAttribute("animation__scale_zoom", { property: "scale", to: "1.2 1.2 1.2", dur: 800, easing: "easeInOutQuad" }); });
+        frameEntities[2].setAttribute("animation__pos_zoom", { property: "position", to: "-0.05 0.2 0.35", dur: 800, easing: "easeInOutQuad" });
+        frameEntities[3].setAttribute("animation__pos_zoom", { property: "position", to: "0.05 0.45 0.35", dur: 800, easing: "easeInOutQuad" });
+        frameEntities[4].setAttribute("animation__pos_zoom", { property: "position", to: "0.15 0.3 0.35", dur: 800, easing: "easeInOutQuad" });
+        camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.6", dur: 800, easing: "easeInOutQuad" });
 
-      const img3=document.createElement("a-plane");
-      img3.setAttribute("src","#text3Img");
-      img3.setAttribute("position","0 -0.4 0");
-      img3.setAttribute("scale","1 1 1");
-      img3.setAttribute("material","transparent:true");
-      introContainer.appendChild(img3);
+        const img3 = createTextImage("#text3Img", -0.4);
+        introContainer.appendChild(img3);
 
-      sequenceStep=4;
+        sequenceStep = 4;
+    } 
+    else if (sequenceStep === 4) {
+        resetAllModels([2,3,4], () => { sequenceStep = 5; });
+    } 
+    else if (sequenceStep === 5) {
+        frameEntities.forEach((ent, i) => { if (i !== 5) ent.setAttribute("visible", "false"); });
+        frameEntities[5].setAttribute("animation__pos_zoom", { property: "position", to: "0.3 -0.15 0.35", dur: 800, easing: "easeInOutQuad" });
+        frameEntities[5].setAttribute("animation__scale_zoom", { property: "scale", to: "1.7 1.7 1.7", dur: 800, easing: "easeInOutQuad" });
+        camera.setAttribute("animation__cam_zoom", { property: "position", to: "0 0 0.6", dur: 800, easing: "easeInOutQuad" });
 
-    } else if(sequenceStep===4){
-      resetAllModels([2,3,4],()=>{sequenceStep=5;});
+        const img4 = createTextImage("#text4Img", -0.4);
+        introContainer.appendChild(img4);
 
-    } else if(sequenceStep===5){
-      frameEntities.forEach((ent,i)=>{ if(i!==5) ent.setAttribute("visible","false"); });
-      frameEntities[5].setAttribute("animation__pos_zoom",{ property:"position", to:"0.3 -0.15 0.35", dur:800, easing:"easeInOutQuad" });
-      frameEntities[5].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.7 1.7 1.7", dur:800, easing:"easeInOutQuad" });
-      camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.6", dur:800, easing:"easeInOutQuad" });
+        sequenceStep = 6;
+    } 
+    else if (sequenceStep === 6) {
+        const img5 = createTextImage("#text5Img", -0.5);
+        introContainer.appendChild(img5);
+        sequenceStep = 7;
+    } 
+    else if (sequenceStep === 7) {
+        if (tapText) tapText.setAttribute("visible", "false"); // sparisce al reset finale
 
-      const img4=document.createElement("a-plane");
-      img4.setAttribute("src","#text4Img");
-      img4.setAttribute("position","0 -0.4 0");
-      img4.setAttribute("scale","1 1 1");
-      img4.setAttribute("material","transparent:true");
-      introContainer.appendChild(img4);
-
-      sequenceStep=6;
-
-    } else if(sequenceStep===6){
-      const img5=document.createElement("a-plane");
-      img5.setAttribute("src","#text5Img");
-      img5.setAttribute("position","0 -0.5 0");
-      img5.setAttribute("scale","1 1 1");
-      img5.setAttribute("material","transparent:true");
-      introContainer.appendChild(img5);
-      sequenceStep=7;
-
-    } else if (sequenceStep === 7) {
-    // Nascondi "Tap to continue"
-    const tapText = document.getElementById("tapText");
-    if (tapText) tapText.setAttribute("visible", "false");
-
-    // Ritorno alla vista completa delle cornici
-    resetAllModels([0,1,2,3,4,5], () => {
-        // Dopo 3s pop inverso
-        setTimeout(() => {
-            frameEntities.forEach((ent,i) => {
-                ent.setAttribute("animation__popout", { property: "scale", to: "0 0 0", dur: 800, easing: "easeInQuad" });
-            });
-            setTimeout(() => { showFinalCinema(); }, 800);
-        }, 3000);
-    });
-    sequenceStep = 8;
+        resetAllModels([0,1,2,3,4,5], () => {
+            setTimeout(() => {
+                frameEntities.forEach((ent,i) => {
+                    ent.setAttribute("animation__popout", { property: "scale", to: "0 0 0", dur: 800, easing: "easeInQuad" });
+                });
+                setTimeout(() => { showFinalCinema(); }, 800);
+            }, 3000);
+        });
+        sequenceStep = 8;
+    }
 }
-  }
 
-function showFinalCinema() {
+
+ function showFinalCinema() {
     frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
     clearOldTexts();
 
@@ -262,8 +262,8 @@ function showFinalCinema() {
     textRuins.setAttribute("animation__fadein", "property: opacity; from: 0; to: 1; dur: 800; easing: easeInQuad; delay: 1200");
     introContainer.appendChild(textRuins);
 
-    // --- Overlay UI outro dopo 10 secondi ---
-    // --- Overlay UI outro dopo 10 secondi ---
+    // --- Overlay outro dopo 10 secondi ---
+   // --- Overlay UI outro dopo 10 secondi ---
 setTimeout(() => {
     const outroOverlay = document.createElement("div");
     outroOverlay.id = "outroOverlay";
@@ -278,8 +278,7 @@ setTimeout(() => {
         outroOverlay.classList.add("show");
     }, 50); // 50ms è sufficiente per triggerare la transizione CSS
 }, 10000); // 10 secondi dopo comparsa cinema + testi
-
+ // 10 secondi dopo la comparsa cinema + testi
 }
-
 
 }
