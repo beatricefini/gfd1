@@ -220,7 +220,7 @@ marker.addEventListener("targetFound", () => {
 }
   }
 
-  function showFinalCinema() {
+ function showFinalCinema() {
     frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
     clearOldTexts();
 
@@ -262,5 +262,18 @@ marker.addEventListener("targetFound", () => {
     textRuins.setAttribute("animation__fadein", "property: opacity; from: 0; to: 1; dur: 800; easing: easeInQuad; delay: 1200");
     introContainer.appendChild(textRuins);
 
-  }
+    // --- Overlay outro dopo 10 secondi ---
+    setTimeout(() => {
+        const outroOverlay = document.createElement("a-plane");
+        outroOverlay.setAttribute("src", "#outroImg"); // assicurati che <img id="outroImg" src="images/outro1.png"> sia negli assets
+        outroOverlay.setAttribute("position", "0 0 0");
+        outroOverlay.setAttribute("scale", "1 0.75 1");
+        outroOverlay.setAttribute("material", "transparent: true; opacity: 0");
+        introContainer.appendChild(outroOverlay);
+
+        // Fade-in overlay
+        outroOverlay.setAttribute("animation__fadein", "property: material.opacity; from: 0; to: 1; dur: 800; easing: easeInQuad");
+    }, 10000); // 10 secondi dopo la comparsa cinema + testi
+}
+
 }
