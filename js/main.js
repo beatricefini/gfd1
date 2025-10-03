@@ -130,8 +130,8 @@ marker.addEventListener("targetFound", () => {
     // --- SEQUENZE ---
     if(sequenceStep===0){
       frameEntities.forEach((ent,i)=>{ if(i>1) ent.setAttribute("visible","false"); });
-      frameEntities[0].setAttribute("animation__pos_zoom",{ property:"position", to:"-0.35 0 0.1", dur:800, easing:"easeInOutQuad" });
-      frameEntities[1].setAttribute("animation__pos_zoom",{ property:"position", to:"0.05 0.12 0.4", dur:800, easing:"easeInOutQuad" });
+      frameEntities[0].setAttribute("animation__pos_zoom",{ property:"position", to:"0 0 0.1", dur:800, easing:"easeInOutQuad" });
+      frameEntities[1].setAttribute("animation__pos_zoom",{ property:"position", to:"0 0 0.1", dur:800, easing:"easeInOutQuad" });
       frameEntities[0].setAttribute("animation__scale_zoom",{ property:"scale", to:"1.2 1.2 1.2", dur:800, easing:"easeInOutQuad" });
       frameEntities[1].setAttribute("animation__scale_zoom",{ property:"scale", to:"2.1 2.1 2.1", dur:800, easing:"easeInOutQuad" });
       camera.setAttribute("animation__cam_zoom",{ property:"position", to:"0 0 0.5", dur:800, easing:"easeInOutQuad" });
@@ -139,7 +139,7 @@ marker.addEventListener("targetFound", () => {
       const img1 = document.createElement("a-plane");
       img1.setAttribute("src","#text1Img");
       img1.setAttribute("position","0 -0.4 0");
-      img1.setAttribute("scale","0.5 0.2 1");
+      img1.setAttribute("scale","1 1 1");
       img1.setAttribute("material","transparent:true");
       introContainer.appendChild(img1);
 
@@ -149,7 +149,7 @@ marker.addEventListener("targetFound", () => {
       const img2=document.createElement("a-plane");
       img2.setAttribute("src","#text2Img");
       img2.setAttribute("position","0 -0.5 0");
-      img2.setAttribute("scale","0.5 0.2 1");
+      img2.setAttribute("scale","1 1 1");
       img2.setAttribute("material","transparent:true");
       introContainer.appendChild(img2);
       sequenceStep=2;
@@ -168,7 +168,7 @@ marker.addEventListener("targetFound", () => {
       const img3=document.createElement("a-plane");
       img3.setAttribute("src","#text3Img");
       img3.setAttribute("position","0 -0.4 0");
-      img3.setAttribute("scale","0.5 0.2 1");
+      img3.setAttribute("scale","1 1 1");
       img3.setAttribute("material","transparent:true");
       introContainer.appendChild(img3);
 
@@ -186,7 +186,7 @@ marker.addEventListener("targetFound", () => {
       const img4=document.createElement("a-plane");
       img4.setAttribute("src","#text4Img");
       img4.setAttribute("position","0 -0.4 0");
-      img4.setAttribute("scale","0.5 0.2 1");
+      img4.setAttribute("scale","1 1 1");
       img4.setAttribute("material","transparent:true");
       introContainer.appendChild(img4);
 
@@ -196,7 +196,7 @@ marker.addEventListener("targetFound", () => {
       const img5=document.createElement("a-plane");
       img5.setAttribute("src","#text5Img");
       img5.setAttribute("position","0 -0.5 0");
-      img5.setAttribute("scale","0.5 0.2 1");
+      img5.setAttribute("scale","1 1 1");
       img5.setAttribute("material","transparent:true");
       introContainer.appendChild(img5);
       sequenceStep=7;
