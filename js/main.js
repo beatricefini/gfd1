@@ -1,7 +1,6 @@
 
 function initMainSequence() {
   const marker = document.getElementById("marker");
-  const introContainer = document.getElementById("introTexts");
   const modelsContainer = document.getElementById("modelsContainer");
   const camera = document.querySelector("a-camera");
 
@@ -20,59 +19,19 @@ function initMainSequence() {
 
   // --- Marker found: mostra intro ---
   marker.addEventListener("targetFound", () => {
-    if (started) return;
+  if (started) return;
+  started = true;
+  showAllModelsSequentially();
+});
 
-    const introImg = document.createElement("a-plane");
-    introImg.setAttribute("src", "#introImg");
-    introImg.setAttribute("position", "0 0.3 0");
-    introImg.setAttribute("scale", "0.8 0.6 1");
-    introImg.setAttribute("material", "transparent: true");
-    introContainer.appendChild(introImg);
-
-    setTimeout(() => {
-      const startText = document.createElement("a-text");
-      startText.setAttribute("value", "Tap to start");
-      startText.setAttribute("align", "center");
-      startText.setAttribute("color", "#FFD700");
-      startText.setAttribute("position", "0 -0.2 0");
-      startText.setAttribute("scale", "0.2 0.2 0.2");
-      startText.setAttribute("wrap-count", "20");
-      startText.setAttribute("id", "startText");
-      introContainer.appendChild(startText);
-    }, 3000);
-  });
 
   // --- Click globale ---
-  window.addEventListener("click", () => {
-    if (!started) {
-      const startText = document.getElementById("startText");
-      if (!startText) return;
+ window.addEventListener("click", () => {
+  if (allModelsDisplayed) {
+    handleSequences();
+  }
+});
 
-      const introPlane = introContainer.querySelector("a-plane");
-
-      startText.setAttribute("animation__fadeout", {
-        property: "opacity",
-        from: 1, to: 0, dur: 600, easing: "easeInQuad"
-      });
-      if (introPlane) introPlane.setAttribute("animation__fadeout", {
-        property: "opacity",
-        from: 1, to: 0, dur: 600, easing: "easeInQuad"
-      });
-
-      setTimeout(() => {
-        startText.setAttribute("visible","false");
-        if(introPlane) introPlane.setAttribute("visible","false");
-
-        started = true;
-        showAllModelsSequentially();
-      }, 650);
-      return;
-    }
-
-    if (allModelsDisplayed) {
-      handleSequences();
-    }
-  });
 
   function showAllModelsSequentially() {
     if (currentIndex >= models.length) {
