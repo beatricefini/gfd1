@@ -58,7 +58,7 @@
     </div>
   </div>
 
-  <!-- Overlay iniziale count1.png -->
+  <!-- Overlay count1 originale -->
   <div id="introOverlay" class="overlay">
     <img src="images/count1.png" alt="Intro">
   </div>
@@ -125,45 +125,46 @@
         preIntro.classList.add("hide");
         setTimeout(() => preIntro.remove(), 1000);
 
-        // Mostra l'overlay count1 dopo 1s
+        // Mostra overlay count1
         setTimeout(() => {
           intro.classList.add("show");
-          setTimeout(() => { 
-            intro.classList.remove("show"); 
-            intro.classList.add("hide"); 
-            setTimeout(()=>intro.remove(),1000); 
-          }, 5000);
+          setTimeout(() => {
+            intro.classList.remove("show");
+            intro.classList.add("hide");
+            setTimeout(()=>intro.remove(), 1000);
+
+            // Overlay istruzioni (identico a prima)
+            const instructions = document.createElement("div");
+            instructions.id = "instructionsOverlay";
+            instructions.className = "overlay";
+            const instrImg = document.createElement("img");
+            instrImg.src = "images/instructions.png";
+            instructions.appendChild(instrImg);
+            const tapText = document.createElement("div");
+            tapText.id = "tapText";
+            tapText.innerText = "Tap to start";
+            instructions.appendChild(tapText);
+            document.body.appendChild(instructions);
+            setTimeout(()=>{ instructions.classList.add("show"); tapText.classList.add("show"); },100);
+
+            // Click istruzioni: avvia scena e main
+            instructions.addEventListener("click", async () => {
+              instructions.classList.remove("show");
+              instructions.classList.add("hide");
+              setTimeout(()=>instructions.remove(),1000);
+
+              sceneEl.style.display = "flex";
+              const mindarSystem = sceneEl.systems["mindar-image-system"];
+              await mindarSystem.start();
+
+              const vrButton = document.querySelector(".a-enter-vr-button");
+              if(vrButton) vrButton.remove();
+
+              if (typeof initMainSequence === "function") initMainSequence();
+            }, { once:true });
+
+          }, 5000); // durata overlay count1
         }, 1000);
-      }, { once: true });
-
-      // Overlay istruzioni via JS
-      const instructions = document.createElement("div");
-      instructions.id = "instructionsOverlay";
-      instructions.className = "overlay";
-      const instrImg = document.createElement("img");
-      instrImg.src = "images/instructions.png";
-      instructions.appendChild(instrImg);
-      const tapText = document.createElement("div");
-      tapText.id = "tapText";
-      tapText.innerText = "Tap to start";
-      instructions.appendChild(tapText);
-      document.body.appendChild(instructions);
-      setTimeout(()=>{ instructions.classList.add("show"); tapText.classList.add("show"); },6000);
-
-      // Click istruzioni: avvia scena e main
-      instructions.addEventListener("click", async () => {
-        instructions.classList.remove("show");
-        instructions.classList.add("hide");
-        setTimeout(()=>instructions.remove(),1000);
-
-        sceneEl.style.display = "flex";
-        const mindarSystem = sceneEl.systems["mindar-image-system"];
-        await mindarSystem.start();
-
-        const vrButton = document.querySelector(".a-enter-vr-button");
-        if(vrButton) vrButton.remove();
-
-        if (typeof initMainSequence === "function") initMainSequence();
       }, { once:true });
 
       // Scanner UI visibile finché marker non trovato
