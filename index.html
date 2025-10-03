@@ -20,12 +20,12 @@
     .overlay.hide { opacity:0; }
     .overlay img { max-width: var(--instructions-scale); max-height: var(--instructions-scale); width:auto; height:auto; }
 
-    #tapText, #preIntroTapText {
-      position:absolute; bottom:10%; width:100%; text-align:center;
-      font-size:1.2rem; color:black; opacity:0; transition:opacity 1s ease-in-out;
+    #tapText, #preTapText {
+      position:absolute;
+      bottom:10%; width:100%; text-align:center;
+      font-size:1.2rem; color:white; opacity:1;
       cursor:pointer; z-index:10; font-family:Arial, sans-serif;
     }
-    #tapText.show, #preIntroTapText.show { opacity:1; }
 
     #custom-scanning-ui {
       position:fixed; top:0; left:0; width:100vw; height:100vh;
@@ -50,13 +50,13 @@
 </head>
 <body>
 
-  <!-- Overlay iniziale pre_intro -->
+  <!-- Overlay 1: pre_intro -->
   <div id="preIntroOverlay" class="overlay">
     <img src="images/pre_intro.png" alt="Pre Intro">
-    <div id="preIntroTapText">Tap to continue</div>
+    <div id="preTapText">Tap to continue</div>
   </div>
 
-  <!-- Overlay count1 originale -->
+  <!-- Overlay 2: count1 -->
   <div id="introOverlay" class="overlay">
     <img src="images/count1.png" alt="Intro">
   </div>
@@ -103,14 +103,12 @@
 
   </a-scene>
 
-  <script src="js/main.js"></script>
-<script>
+  <script>
 document.addEventListener("DOMContentLoaded", () => {
   const sceneEl = document.querySelector("a-scene");
   const scanningUI = document.getElementById("custom-scanning-ui");
   const marker = document.getElementById("marker");
 
-  // --- Overlay 1: pre_intro ---
   const preIntro = document.getElementById("preIntroOverlay");
   const intro = document.getElementById("introOverlay");
 
@@ -146,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         instructions.classList.add("show");
         tapText.classList.add("show");
-      }, 500); // piccolo delay per fade-in
+      }, 500);
 
       // Click istruzioni → avvia scena AR
       instructions.addEventListener("click", async () => {
@@ -164,10 +162,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typeof initMainSequence === "function") initMainSequence();
       }, { once: true });
 
-    }, 500); // fine count1 fade-out
+    }, 500);
   }, { once: true });
 
-  // --- Scanner UI visibile finché marker non trovato ---
+  // Scanner UI visibile finché marker non trovato
   marker.addEventListener('targetFound', () => {
     scanningUI.classList.add("hidden");
     scanningUI.classList.remove("visible");
@@ -177,6 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
     scanningUI.classList.add("visible");
   });
 });
-</script>
+  </script>
+
+  <script src="js/main.js"></script> <!-- il main rimane identico -->
 </body>
 </html>
