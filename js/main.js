@@ -57,8 +57,9 @@ function initMainSequence() {
   }
 
   function clearOldTexts() {
-    const oldTexts = introContainer.querySelectorAll("a-text, a-plane");
-    oldTexts.forEach(t => t.remove());
+  const oldTexts = introContainer.querySelectorAll("a-text, a-plane, a-image");
+  oldTexts.forEach(t => t.remove());
+
   }
 
   function resetAllModels(activeIndices=[], callback) {
