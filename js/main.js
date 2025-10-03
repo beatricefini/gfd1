@@ -122,8 +122,10 @@ marker.addEventListener("targetFound", () => {
     }, dur+50);
   }
 
-  function handleSequences() {
-    // --- Crea o recupera tapText sotto le immagini ---
+ let sequenceStep = 0;
+
+function handleSequences() {
+    // --- Recupero o creazione del "tapText" ---
     let tapText = document.getElementById("tapText");
     if (!tapText) {
         tapText = document.createElement("a-text");
@@ -136,65 +138,77 @@ marker.addEventListener("targetFound", () => {
         tapText.setAttribute("wrap-count", "20");
         introContainer.appendChild(tapText);
     }
-    tapText.setAttribute("visible", "true");
+    tapText.setAttribute("visible", "false"); // inizialmente non visibile
 
-    // --- Funzione helper per creare immagini ---
+    // --- Funzione per creare le immagini delle sequenze ---
     function createTextImage(imgId, posY) {
         const img = document.createElement("a-image");
         img.setAttribute("src", imgId);
         img.setAttribute("position", `0 ${posY} 0`);
         img.setAttribute("scale", "1 1 1");
         img.setAttribute("material", "transparent: true");
-        img.classList.add("sequence-img"); // aggiungiamo una classe per gestire rimozione
+        img.classList.add("sequence-img");
         return img;
     }
 
-    // --- Prima di aggiungere nuove immagini, rimuoviamo le vecchie ---
+    // --- Rimozione delle immagini precedenti ---
     const oldImgs = introContainer.querySelectorAll(".sequence-img");
     oldImgs.forEach(img => img.remove());
 
-    // --- SEQUENCES ---
+    // --- SEQUENZE --- 
     if (sequenceStep === 0) {
-        // gestione frameEntities e zoom come prima...
+        // Prima sequenza di zoom (text1)
         const img1 = createTextImage("#text1Img", -0.4);
         introContainer.appendChild(img1);
+        tapText.setAttribute("visible", "true");  // Mostra "Tap to continue"
         sequenceStep = 1;
     } 
     else if (sequenceStep === 1) {
+        // Seconda sequenza di zoom (text2)
         const img2 = createTextImage("#text2Img", -0.5);
         introContainer.appendChild(img2);
+        tapText.setAttribute("visible", "true");
         sequenceStep = 2;
     }
-    else if (sequenceStep === 3) {
+    else if (sequenceStep === 2) {
+        // Terza sequenza di zoom (text3)
         const img3 = createTextImage("#text3Img", -0.4);
         introContainer.appendChild(img3);
-        sequenceStep = 4;
+        tapText.setAttribute("visible", "true");
+        sequenceStep = 3;
     }
-    else if (sequenceStep === 5) {
+    else if (sequenceStep === 3) {
+        // Quarta sequenza di zoom (text4)
         const img4 = createTextImage("#text4Img", -0.4);
         introContainer.appendChild(img4);
-        sequenceStep = 6;
+        tapText.setAttribute("visible", "true");
+        sequenceStep = 4;
     }
-    else if (sequenceStep === 6) {
+    else if (sequenceStep === 4) {
+        // Quinta sequenza di zoom (text5)
         const img5 = createTextImage("#text5Img", -0.5);
         introContainer.appendChild(img5);
-        sequenceStep = 7;
+        tapText.setAttribute("visible", "true");
+        sequenceStep = 5;
     }
 
-    // TapText scompare solo alla fine
-    if (sequenceStep === 7) {
-        if (tapText) tapText.setAttribute("visible", "false");
-        resetAllModels([0,1,2,3,4,5], () => {
-            setTimeout(() => {
-                frameEntities.forEach((ent,i) => {
-                    ent.setAttribute("animation__popout", { property: "scale", to: "0 0 0", dur: 800, easing: "easeInQuad" });
-                });
-                setTimeout(() => { showFinalCinema(); }, 800);
-            }, 3000);
-        });
-        sequenceStep = 8;
+    // --- Fine delle sequenze: nascondi "tapText" e continua ---
+    if (sequenceStep === 5) {
+        setTimeout(() => {
+            tapText.setAttribute("visible", "false");
+            resetAllModels([0,1,2,3,4,5], () => {
+                setTimeout(() => {
+                    frameEntities.forEach((ent,i) => {
+                        ent.setAttribute("animation__popout", { property: "scale", to: "0 0 0", dur: 800, easing: "easeInQuad" });
+                    });
+                    setTimeout(() => { showFinalCinema(); }, 800);
+                }, 3000);
+            });
+            sequenceStep = 6;
+        }, 3000); // delay di 3 secondi prima di proseguire
     }
 }
+
 
 
 
