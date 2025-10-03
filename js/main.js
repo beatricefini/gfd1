@@ -185,14 +185,22 @@ function initMainSequence() {
     modelsContainer.appendChild(cinemaModel);
 
     setTimeout(()=>{
-      const outroOverlay=document.createElement("a-plane");
+      if (!introContainer) return;
+
+      const outroOverlay = document.createElement("a-plane");
       outroOverlay.setAttribute("src","#outroImg");
       outroOverlay.setAttribute("position","0 0 0");
       outroOverlay.setAttribute("scale","1 0.75 1");
-      outroOverlay.setAttribute("material","transparent:true; opacity:0");
+      outroOverlay.setAttribute("material", {transparent:true, opacity:0});
       introContainer.appendChild(outroOverlay);
 
-      outroOverlay.setAttribute("animation__fadein",{ property:"material.opacity", from:0, to:1, dur:800, easing:"easeInQuad" });
-    },10000);
+      outroOverlay.setAttribute("animation__fadein", {
+        property:"material.opacity",
+        from:0,
+        to:1,
+        dur:800,
+        easing:"easeInQuad"
+      });
+    }, 10000);
   }
 }
