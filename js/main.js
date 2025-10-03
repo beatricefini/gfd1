@@ -1,4 +1,3 @@
-
 function initMainSequence() {
   const marker = document.getElementById("marker");
   const introContainer = document.getElementById("introTexts");
@@ -18,12 +17,11 @@ function initMainSequence() {
 
   const originalTransforms = {};
 
-marker.addEventListener("targetFound", () => {
+  marker.addEventListener("targetFound", () => {
     if (started) return;
     started = true; // segna che la sequenza è iniziata
     showAllModelsSequentially(); // parte subito la sequenza di cornici
-});
-
+  });
 
   // --- Click globale ---
   window.addEventListener("click", () => {
@@ -43,8 +41,8 @@ marker.addEventListener("targetFound", () => {
       });
 
       setTimeout(() => {
-        startText.setAttribute("visible","false");
-        if(introPlane) introPlane.setAttribute("visible","false");
+        startText.setAttribute("visible", "false");
+        if (introPlane) introPlane.setAttribute("visible", "false");
 
         started = true;
         showAllModelsSequentially();
@@ -75,14 +73,14 @@ marker.addEventListener("targetFound", () => {
     const idx = currentIndex;
     const piece = document.createElement("a-entity");
     piece.setAttribute("gltf-model", models[idx]);
-    piece.setAttribute("visible","false");
+    piece.setAttribute("visible", "false");
 
-    piece.addEventListener("model-loaded", ()=>{
+    piece.addEventListener("model-loaded", () => {
       const pos = piece.getAttribute("position");
       const scale = piece.getAttribute("scale");
-      originalTransforms[idx] = { position: {...pos}, scale: {...scale} };
-      piece.setAttribute("animation__pop", { property:"scale", from:"0 0 0", to:`${scale.x} ${scale.y} ${scale.z}`, dur:500, easing:"easeOutElastic" });
-      piece.setAttribute("visible","true");
+      originalTransforms[idx] = { position: { ...pos }, scale: { ...scale } };
+      piece.setAttribute("animation__pop", { property: "scale", from: "0 0 0", to: `${scale.x} ${scale.y} ${scale.z}`, dur: 500, easing: "easeOutElastic" });
+      piece.setAttribute("visible", "true");
     });
 
     modelsContainer.appendChild(piece);
@@ -93,192 +91,103 @@ marker.addEventListener("targetFound", () => {
 
   function clearOldTexts() {
     const oldTexts = introContainer.querySelectorAll("a-text, a-plane");
-    oldTexts.forEach(t => { if(t.id !== "tapText") t.remove(); });
+    oldTexts.forEach(t => { if (t.id !== "tapText") t.remove(); });
   }
 
-  function resetAllModels(activeIndices=[], callback) {
+  function resetAllModels(activeIndices = [], callback) {
     const dur = 800;
-    frameEntities.forEach((ent,i)=>{ if(!activeIndices.includes(i)) ent.setAttribute("visible","false"); });
-    activeIndices.forEach(i=>{
+    frameEntities.forEach((ent, i) => { if (!activeIndices.includes(i)) ent.setAttribute("visible", "false"); });
+    activeIndices.forEach(i => {
       const ent = frameEntities[i];
       const orig = originalTransforms[i];
-      if(!ent || !orig) return;
-      ent.setAttribute("animation__backpos",{ property:"position", to:`${orig.position.x} ${orig.position.y} ${orig.position.z}`, dur:dur, easing:"easeInOutQuad" });
-      ent.setAttribute("animation__backscale",{ property:"scale", to:`${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`, dur:dur, easing:"easeInOutQuad" });
+      if (!ent || !orig) return;
+      ent.setAttribute("animation__backpos", { property: "position", to: `${orig.position.x} ${orig.position.y} ${orig.position.z}`, dur: dur, easing: "easeInOutQuad" });
+      ent.setAttribute("animation__backscale", { property: "scale", to: `${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`, dur: dur, easing: "easeInOutQuad" });
     });
-    setTimeout(()=>{
-      frameEntities.forEach((ent,i)=>{
+    setTimeout(() => {
+      frameEntities.forEach((ent, i) => {
         const orig = originalTransforms[i];
-        if(orig){
-          ent.setAttribute("position",`${orig.position.x} ${orig.position.y} ${orig.position.z}`);
-          ent.setAttribute("scale",`${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`);
+        if (orig) {
+          ent.setAttribute("position", `${orig.position.x} ${orig.position.y} ${orig.position.z}`);
+          ent.setAttribute("scale", `${orig.scale.x} ${orig.scale.y} ${orig.scale.z}`);
         }
-        ent.setAttribute("visible","true");
+        ent.setAttribute("visible", "true");
       });
-      camera.setAttribute("animation__camreset",{ property:"position", to:"0 0 0", dur:dur, easing:"easeInOutQuad" });
+      camera.setAttribute("animation__camreset", { property: "position", to: "0 0 0", dur: dur, easing: "easeInOutQuad" });
       const tapText = document.getElementById("tapText");
-      if(tapText) tapText.setAttribute("visible","true");
-      if(typeof callback==="function") callback();
-    }, dur+50);
+      if (tapText) tapText.setAttribute("visible", "true");
+      if (typeof callback === "function") callback();
+    }, dur + 50);
   }
 
- let sequenceStep = 0;
-let tapText = null;
-
-document.addEventListener("DOMContentLoaded", function () {
-    // Inizializza il flusso una volta che il DOM è completamente caricato
-    initializeTapText();
-
-    // Funzione che gestisce il riconoscimento del target (modifica secondo il tuo sistema AR)
-    const targetElement = document.querySelector("#marker-target");
-    if (targetElement) {
-        targetElement.addEventListener("click", () => {
-            startMainFlow(); // Inizia il flusso quando il target viene riconosciuto
-        });
-    } else {
-        console.error("Target marker non trovato!");
-    }
-});
-
-function initializeTapText() {
-    // Crea il testo "Tap to continue" se non esiste
-    tapText = document.getElementById("tapText");
-    if (!tapText) {
-        tapText = document.createElement("a-text");
-        tapText.setAttribute("id", "tapText");
-        tapText.setAttribute("value", "Tap to continue");
-        tapText.setAttribute("align", "center");
-        tapText.setAttribute("color", "#FFD700");
-        tapText.setAttribute("position", "0 -0.7 0");
-        tapText.setAttribute("scale", "0.2 0.2 0.2");
-        tapText.setAttribute("wrap-count", "20");
-        introContainer.appendChild(tapText);
-    }
-    tapText.setAttribute("visible", "false"); // Inizialmente non visibile
-}
-
-function createTextImage(imgId, posY) {
+  function createTextImage(imgId, posY) {
     const img = document.createElement("a-image");
     img.setAttribute("src", imgId);
     img.setAttribute("position", `0 ${posY} 0`);
-    img.setAttribute("scale", "1 1 1");  // Manteniamo la scala originale
+    img.setAttribute("scale", "1 1 1"); // Manteniamo la scala originale
     img.setAttribute("material", "transparent: true");
     img.classList.add("sequence-img");
     return img;
-}
+  }
 
-function handleSequences() {
-    if (!tapText) initializeTapText(); // Assicuriamoci che il tapText sia inizializzato
-
-    // Rimuovi le immagini precedenti
-    const oldImgs = introContainer.querySelectorAll(".sequence-img");
-    oldImgs.forEach(img => img.remove());
-
+  function handleSequences() {
     // --- SEQUENZE DI ZOOM ---
     if (sequenceStep === 0) {
-        // Prima sequenza: text1
-        const img1 = createTextImage("#text1Img", -0.4);
-        introContainer.appendChild(img1);
-        tapText.setAttribute("visible", "true");  // Mostra il testo "Tap to continue"
-        sequenceStep = 1;
-    } 
-    else if (sequenceStep === 1) {
-        // Seconda sequenza: text2
-        const img2 = createTextImage("#text2Img", -0.5);
-        introContainer.appendChild(img2);
-        tapText.setAttribute("visible", "true");
-        sequenceStep = 2;
-    }
-    else if (sequenceStep === 2) {
-        // Terza sequenza: text3
-        const img3 = createTextImage("#text3Img", -0.4);
-        introContainer.appendChild(img3);
-        tapText.setAttribute("visible", "true");
-        sequenceStep = 3;
-    }
-    else if (sequenceStep === 3) {
-        // Quarta sequenza: text4
-        const img4 = createTextImage("#text4Img", -0.4);
-        introContainer.appendChild(img4);
-        tapText.setAttribute("visible", "true");
-        sequenceStep = 4;
-    }
-    else if (sequenceStep === 4) {
-        // Quinta sequenza: text5
-        const img5 = createTextImage("#text5Img", -0.5);
-        introContainer.appendChild(img5);
-        tapText.setAttribute("visible", "true");
-        sequenceStep = 5;
+      // Prima sequenza: text1
+      const img1 = createTextImage("#text1Img", -0.4);
+      introContainer.appendChild(img1);
+      const tapText = document.getElementById("tapText");
+      if (tapText) tapText.setAttribute("visible", "true"); // Mostra il testo "Tap to continue"
+      sequenceStep = 1;
+    } else if (sequenceStep === 1) {
+      // Seconda sequenza: text2
+      const img2 = createTextImage("#text2Img", -0.5);
+      introContainer.appendChild(img2);
+      const tapText = document.getElementById("tapText");
+      if (tapText) tapText.setAttribute("visible", "true");
+      sequenceStep = 2;
+    } else if (sequenceStep === 2) {
+      // Terza sequenza: text3
+      const img3 = createTextImage("#text3Img", -0.4);
+      introContainer.appendChild(img3);
+      const tapText = document.getElementById("tapText");
+      if (tapText) tapText.setAttribute("visible", "true");
+      sequenceStep = 3;
+    } else if (sequenceStep === 3) {
+      // Quarta sequenza: text4
+      const img4 = createTextImage("#text4Img", -0.4);
+      introContainer.appendChild(img4);
+      const tapText = document.getElementById("tapText");
+      if (tapText) tapText.setAttribute("visible", "true");
+      sequenceStep = 4;
+    } else if (sequenceStep === 4) {
+      // Quinta sequenza: text5
+      const img5 = createTextImage("#text5Img", -0.5);
+      introContainer.appendChild(img5);
+      const tapText = document.getElementById("tapText");
+      if (tapText) tapText.setAttribute("visible", "true");
+      sequenceStep = 5;
     }
 
     // --- Fine delle sequenze: nascondi "Tap to continue" e continua ---
     if (sequenceStep === 5) {
-        setTimeout(() => {
-            tapText.setAttribute("visible", "false");  // Nascondi il testo "Tap to continue"
-            resetAllModels([0,1,2,3,4,5], () => {
-                setTimeout(() => {
-                    frameEntities.forEach((ent, i) => {
-                        ent.setAttribute("animation__popout", { property: "scale", to: "0 0 0", dur: 800, easing: "easeInQuad" });
-                    });
-                    setTimeout(() => { showFinalCinema(); }, 800);  // Mostra la scena finale
-                }, 3000);
+      setTimeout(() => {
+        const tapText = document.getElementById("tapText");
+        if (tapText) tapText.setAttribute("visible", "false");  // Nascondi il testo "Tap to continue"
+        resetAllModels([0, 1, 2, 3, 4, 5], () => {
+          setTimeout(() => {
+            frameEntities.forEach((ent, i) => {
+              ent.setAttribute("animation__popout", { property: "scale", to: "0 0 0", dur: 800, easing: "easeInQuad" });
             });
-            sequenceStep = 6;
-        }, 3000); // Ritardo di 3 secondi prima di proseguire
+            setTimeout(() => { showFinalCinema(); }, 800);  // Mostra la scena finale
+          }, 3000);
+        });
+        sequenceStep = 6;
+      }, 3000); // Ritardo di 3 secondi prima di proseguire
     }
-}
+  }
 
-// Funzione di reset dei modelli
-function resetAllModels(modelIndices, callback) {
-    modelIndices.forEach((index) => {
-        // Reset dei modelli (puoi personalizzare la logica di reset)
-        const model = scene.querySelector(`#model-${index}`);
-        if (model) model.setAttribute("animation", { property: "scale", to: "1 1 1", dur: 1000 });
-    });
-    if (callback) callback();
-}
-
-// Funzione per mostrare la scena finale (modifica secondo le tue esigenze)
-function showFinalCinema() {
-    // Mostra il modello finale e le animazioni
-    const finalModel = scene.querySelector("#finalModel");
-    if (finalModel) {
-        finalModel.setAttribute("animation", { property: "scale", to: "1 1 1", dur: 1000 });
-    }
-}
-
-// Funzione per avviare il flusso principale
-function startMainFlow() {
-    console.log("Main flow avviato");
-    handleSequences();  // Inizia le sequenze
-}
-
-}
-
-// Funzione di reset dei modelli
-function resetAllModels(modelIndices, callback) {
-    modelIndices.forEach((index) => {
-        // Reset dei modelli (puoi personalizzare la logica di reset)
-        const model = scene.querySelector(`#model-${index}`);
-        if (model) model.setAttribute("animation", { property: "scale", to: "1 1 1", dur: 1000 });
-    });
-    if (callback) callback();
-}
-
-// Funzione per mostrare la scena finale (modifica secondo le tue esigenze)
-function showFinalCinema() {
-    // Mostra il modello finale e le animazioni
-    const finalModel = scene.querySelector("#finalModel");
-    if (finalModel) {
-        finalModel.setAttribute("animation", { property: "scale", to: "1 1 1", dur: 1000 });
-    }
-}
-
-
-
-
-
- function showFinalCinema() {
+  function showFinalCinema() {
     frameEntities.forEach(ent => ent.setAttribute("visible", "false"));
     clearOldTexts();
 
@@ -321,22 +230,37 @@ function showFinalCinema() {
     introContainer.appendChild(textRuins);
 
     // --- Overlay outro dopo 10 secondi ---
-   // --- Overlay UI outro dopo 10 secondi ---
-setTimeout(() => {
-    const outroOverlay = document.createElement("div");
-    outroOverlay.id = "outroOverlay";
-    outroOverlay.className = "overlay"; // inizia senza 'show' quindi opacity = 0
-    const outroImg = document.createElement("img");
-    outroImg.src = "images/outro1.png";
-    outroOverlay.appendChild(outroImg);
-    document.body.appendChild(outroOverlay);
-
-    // Forza un piccolo delay prima di aggiungere la classe show per il fade-in
     setTimeout(() => {
+      const outroOverlay = document.createElement("div");
+      outroOverlay.id = "outroOverlay";
+      outroOverlay.className = "overlay"; // inizia senza 'show' quindi opacity = 0
+      const outroImg = document.createElement("img");
+      outroImg.src = "images/outro1.png";
+      outroOverlay.appendChild(outroImg);
+      document.body.appendChild(outroOverlay);
+
+      // Forza un piccolo delay prima di aggiungere la classe show per il fade-in
+      setTimeout(() => {
         outroOverlay.classList.add("show");
-    }, 50); // 50ms è sufficiente per triggerare la transizione CSS
-}, 10000); // 10 secondi dopo comparsa cinema + testi
- // 10 secondi dopo la comparsa cinema + testi
+      }, 50); // 50ms è sufficiente per triggerare la transizione CSS
+    }, 10000); // 10 secondi dopo comparsa cinema + testi
+  }
 }
 
+// Assicurati che il flusso principale parta al riconoscimento del target
+document.addEventListener("DOMContentLoaded", function () {
+  // Inizializza il flusso una volta che il DOM è completamente caricato
+  const targetElement = document.querySelector("#marker-target");
+  if (targetElement) {
+    targetElement.addEventListener("click", () => {
+      startMainFlow(); // Inizia il flusso quando il target viene riconosciuto
+    });
+  } else {
+    console.error("Target marker non trovato!");
+  }
+});
+
+function startMainFlow() {
+  console.log("Main flow avviato");
+  handleSequences();  // Inizia le sequenze
 }
