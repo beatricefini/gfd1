@@ -20,21 +20,22 @@
       opacity:0;
       transition: opacity 0.6s ease;
       z-index:9999;
-      pointer-events: auto; /* cattura i click */
+      pointer-events: auto;
     }
     .overlay.show { opacity: 1; }
     .overlay.hide { opacity: 0; }
 
-    /* immagine centrata, non troppo grande */
+    /* immagini fullscreen */
     .overlay img {
-      max-width: 90%;
-      max-height: 78%;
-      display:block;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      display: block;
       user-select: none;
       -webkit-user-drag: none;
     }
 
-    /* Testo dei tap: sempre sopra l'immagine */
+    /* Testo dei tap sopra l'immagine */
     .tapText {
       position: absolute;
       left: 50%;
@@ -48,7 +49,7 @@
       opacity: 0;
       transition: opacity 0.5s ease;
       z-index:10001;
-      pointer-events: none; /* click gestiti dall'overlay */
+      pointer-events: none;
       font-family: Arial, sans-serif;
       white-space: nowrap;
     }
@@ -73,18 +74,17 @@
 
     a-scene { display:none; }
     .a-enter-vr-button { display:none !important; }
-    /* piccolo reset per evitare selezione immagine */
-    img { -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    img { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
   </style>
 </head>
 <body>
 
-  <!-- count1 (esistente in markup) -->
+  <!-- count1 overlay (auto) -->
   <div id="introOverlay" class="overlay" aria-hidden="true">
     <img src="images/count1.png" alt="count" />
   </div>
 
-  <!-- UI di scanning personalizzata -->
+  <!-- UI di scanning -->
   <div id="custom-scanning-ui" class="visible">
     <div class="corner top-left"></div>
     <div class="corner top-right"></div>
@@ -98,7 +98,6 @@
            color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
 
     <a-assets>
-      <!-- assets esistenti -->
       <a-asset-item id="piece1" src="models/piece1.glb"></a-asset-item>
       <a-asset-item id="piece2" src="models/piece2.glb"></a-asset-item>
       <a-asset-item id="piece3" src="models/piece3.glb"></a-asset-item>
@@ -129,69 +128,41 @@
 
   <script src="js/main.js"></script>
   <script>
-/* Sequenza precisa: pre_intro -> show "Tap to continue" -> tap -> count1 -> instructions -> show "Tap to start" -> tap -> start scanner */
 document.addEventListener("DOMContentLoaded", () => {
   const sceneEl = document.querySelector("a-scene");
   const scanningUI = document.getElementById("custom-scanning-ui");
   const marker = document.getElementById("marker");
 
-  /* crea overlay (immagine + testo opzionale). 
-     L'overlay farà .show SOLO quando l'immagine è completamente caricata.
-     Il testo viene mostrato separatamente (dopo un breve delay) per garantire
-     che l'immagine sia già renderizzata sotto il testo. */
-  function createOverlayWithDelayedText(id, imgSrc, tapTextStr = null, textDelay = 350) {
+  function createOverlayWithText(id, imgSrc, tapTextStr = null, textDelay = 350) {
     const overlay = document.createElement('div');
     overlay.id = id;
     overlay.className = 'overlay';
     overlay.setAttribute('aria-hidden', 'true');
 
     const img = document.createElement('img');
-    // non impostiamo src prima di aver collegato onload
-    let imgLoaded = false;
-
     const tapText = tapTextStr ? document.createElement('div') : null;
     if (tapText) {
       tapText.className = 'tapText';
       tapText.innerText = tapTextStr;
+      overlay.appendChild(tapText);
     }
-
-    overlay.appendChild(img);
-    if (tapText) overlay.appendChild(tapText);
+    overlay.insertBefore(img, overlay.firstChild);
     document.body.appendChild(overlay);
 
     const readyPromise = new Promise((resolve) => {
       const onImgLoad = () => {
-        imgLoaded = true;
-        // mostra overlay (immagine + sfondo)
         overlay.classList.add('show');
         overlay.removeAttribute('aria-hidden');
-
-        // mostriamo il testo SOLO dopo un piccolo delay (così l'immagine è visibile)
-        if (tapText) {
-          setTimeout(() => {
-            tapText.classList.add('show');
-            resolve(); // "pronto" quando testo è visibile
-          }, textDelay);
-        } else {
-          // se non c'è testo, consideriamo pronto subito
-          resolve();
-        }
+        if (tapText) setTimeout(() => { tapText.classList.add('show'); resolve(); }, textDelay);
+        else resolve();
       };
-
       img.onload = onImgLoad;
       img.src = imgSrc;
-      // se è già in cache e completo, chiamare subito
-      if (img.complete) {
-        // tiny timeout per permettere il browser ad aggiornare il layout
-        setTimeout(onImgLoad, 20);
-      }
+      if (img.complete) setTimeout(onImgLoad, 20);
     });
-
     return { overlay, img, tapText, readyPromise };
   }
 
-  /* mostra un overlay già presente in DOM (es. #introOverlay). 
-     attende che l'immagine sia caricata, poi lo fa apparire per `duration` ms e lo rimuove */
   function showExistingOverlay(id, duration = 4000) {
     return new Promise((resolve) => {
       const overlay = document.getElementById(id);
@@ -206,27 +177,20 @@ document.addEventListener("DOMContentLoaded", () => {
           setTimeout(() => { overlay.remove(); resolve(); }, 600);
         }, duration);
       };
-      if (img.complete) {
-        setTimeout(start, 20);
-      } else {
-        img.onload = start;
-      }
+      if (img.complete) setTimeout(start, 20);
+      else img.onload = start;
     });
   }
 
-  /* Sequenza controllata con flag per evitare tap prematuri */
   (async function runSequence() {
-    // 1) pre_intro: immagine -> poi testo "Tap to continue"
-    const pre = createOverlayWithDelayedText('preIntroOverlay', 'images/pre_intro.png', 'Tap to continue', 350);
+    const pre = createOverlayWithText('preIntroOverlay', 'images/pre_intro.png', 'Tap to continue', 350);
     let preReady = false;
-    pre.readyPromise.then(()=> { preReady = true; });
+    pre.readyPromise.then(()=> preReady = true);
 
-    // aspettiamo il tap (ma ignori i tap prima che preReady sia true)
     await new Promise((resolve) => {
       pre.overlay.addEventListener('click', function onPreClick() {
-        if (!preReady) return; // ignora tap precoce
+        if (!preReady) return;
         pre.overlay.removeEventListener('click', onPreClick);
-        // rimuoviamo overlay pre con fade
         if (pre.tapText) pre.tapText.classList.remove('show');
         pre.overlay.classList.remove('show');
         pre.overlay.classList.add('hide');
@@ -234,18 +198,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }, { once: false });
     });
 
-    // 2) show count1 (overlay già nel markup)
     await showExistingOverlay('introOverlay', 4000);
 
-    // 3) instructions: immagine -> poi testo "Tap to start"
-    const inst = createOverlayWithDelayedText('instructionsOverlay', 'images/instructions.png', 'Tap to start', 350);
+    const inst = createOverlayWithText('instructionsOverlay', 'images/instructions.png', 'Tap to start', 350);
     let instReady = false;
-    inst.readyPromise.then(()=> { instReady = true; });
+    inst.readyPromise.then(()=> instReady = true);
 
-    // aspettiamo tap su instructions (ignora tap prima che testo sia visibile)
     await new Promise((resolve) => {
-      inst.overlay.addEventListener('click', async function onInstClick() {
-        if (!instReady) return; // ignora tap precoce
+      inst.overlay.addEventListener('click', function onInstClick() {
+        if (!instReady) return;
         inst.overlay.removeEventListener('click', onInstClick);
         if (inst.tapText) inst.tapText.classList.remove('show');
         inst.overlay.classList.remove('show');
@@ -254,32 +215,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }, { once: false });
     });
 
-    // 4) avvio scena AR (scanner attivo)
-    try {
-      sceneEl.style.display = 'flex';
-      // assicurati che la UI di scanning sia visibile (prima che il marker venga trovato)
-      scanningUI.classList.remove('hidden');
-      scanningUI.classList.add('visible');
+    sceneEl.style.display = 'flex';
+    scanningUI.classList.remove('hidden');
+    scanningUI.classList.add('visible');
 
-      const mindarSystem = sceneEl.systems['mindar-image-system'];
-      if (mindarSystem && typeof mindarSystem.start === 'function') {
-        await mindarSystem.start();
-      } else {
-        console.warn('mindar-image-system non trovato o start non disponibile');
-      }
+    const mindarSystem = sceneEl.systems['mindar-image-system'];
+    if (mindarSystem && typeof mindarSystem.start === 'function') await mindarSystem.start();
 
-      // rimuoviamo eventuale bottone VR
-      const vrBtn = document.querySelector('.a-enter-vr-button');
-      if (vrBtn) vrBtn.remove();
+    const vrBtn = document.querySelector('.a-enter-vr-button');
+    if (vrBtn) vrBtn.remove();
 
-      // ora entra la logica principale (se definita)
-      if (typeof initMainSequence === 'function') initMainSequence();
-    } catch (err) {
-      console.error('Errore avviando la scena AR:', err);
-    }
+    if (typeof initMainSequence === 'function') initMainSequence();
   })();
 
-  // Scanner UI visibile/nascosta automaticamente al targetFound/targetLost
   marker.addEventListener('targetFound', () => {
     scanningUI.classList.add('hidden');
     scanningUI.classList.remove('visible');
