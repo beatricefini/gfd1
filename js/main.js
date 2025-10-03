@@ -174,19 +174,19 @@ function initMainSequence() {
   }
 
   function showFinalCinema(){
-  frameEntities.forEach(ent => ent.setAttribute("visible","false"));
+  frameEntities.forEach(ent=>ent.setAttribute("visible","false"));
   clearOldTexts();
 
-  const cinemaModel = document.createElement("a-entity");
+  const cinemaModel=document.createElement("a-entity");
   cinemaModel.setAttribute("gltf-model","#pieceCinema");
-  cinemaModel.setAttribute("position",{x:0,y:-0.3,z:0.5});
-  cinemaModel.setAttribute("scale",{x:1.5,y:1.5,z:1.5});
+  cinemaModel.setAttribute("position","0 -0.3 0.5");
+  cinemaModel.setAttribute("scale","1.5 1.5 1.5");
   cinemaModel.addEventListener("model-loaded",()=>cinemaModel.setAttribute("visible","true"));
   modelsContainer.appendChild(cinemaModel);
 
-  setTimeout(()=>{
+  setTimeout(()=> {
     // Overlay esistente
-    const outroOverlay = document.createElement("a-plane");
+    const outroOverlay=document.createElement("a-plane");
     outroOverlay.setAttribute("src","#outroImg");
     outroOverlay.setAttribute("position","0 0 0");
     outroOverlay.setAttribute("scale","1 0.75 1");
@@ -194,11 +194,11 @@ function initMainSequence() {
     introContainer.appendChild(outroOverlay);
     outroOverlay.setAttribute("animation__fadein",{ property:"material.opacity", from:0, to:1, dur:800, easing:"easeInQuad" });
 
-    // Nuovo overlay UI a tutta scala
+    // Nuovo overlay outro1 a tutta scala
     const fullScreenOverlay = document.createElement("a-plane");
     fullScreenOverlay.setAttribute("src","#outro1"); // il tuo asset
-    fullScreenOverlay.setAttribute("position","0 0 0.01"); // leggermente davanti al cinema
-    fullScreenOverlay.setAttribute("scale","1 1 1"); // 100% dello schermo
+    fullScreenOverlay.setAttribute("position","0 0 0.01"); // leggermente davanti
+    fullScreenOverlay.setAttribute("scale","2 2 1"); // copre tutto lo schermo
     fullScreenOverlay.setAttribute("material","transparent:true; opacity:0");
     introContainer.appendChild(fullScreenOverlay);
     fullScreenOverlay.setAttribute("animation__fadein",{ property:"material.opacity", from:0, to:1, dur:800, easing:"easeInQuad" });
